@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
+from app.dependencies.auth import require_admin
+from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
 from app.services.user_service import create_user, list_users
 
@@ -20,6 +22,7 @@ router = APIRouter(
 async def create_user_endpoint(
     data: UserCreate,
     db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
 ):
     try:
         return await create_user(db, data)
@@ -37,6 +40,7 @@ async def create_user_endpoint(
 )
 async def list_users_endpoint(
     db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
 ):
     return await list_users(db)
     

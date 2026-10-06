@@ -10,6 +10,7 @@ from app.routers.lot import router as lot_router
 from app.routers.movement import router as movement_router
 from app.routers.user import router as user_router
 from app.routers.alert import router as alert_router
+from app.routers.auth import router as auth_router
 
 
 app = FastAPI(
@@ -26,6 +27,7 @@ app.include_router(lot_router)
 app.include_router(movement_router)
 app.include_router(user_router)
 app.include_router(alert_router)
+app.include_router(auth_router)
 
 
 @app.get("/")
@@ -44,6 +46,7 @@ async def database_health(
         "database": "connected",
         "result": value,
     }
+    
     
     
     
