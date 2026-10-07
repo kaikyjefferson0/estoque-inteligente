@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     Boolean,
@@ -15,7 +15,9 @@ from app.models.base import Base
 class Alert(Base):
     __tablename__ = "alertas"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
 
     product_id: Mapped[int] = mapped_column(
         ForeignKey("produtos.id"),
@@ -43,7 +45,7 @@ class Alert(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
     )
 
     __table_args__ = (
@@ -54,6 +56,9 @@ class Alert(Base):
             name="uq_alerta_produto_lote_tipo",
         ),
     )
+
+
+
     
     
     

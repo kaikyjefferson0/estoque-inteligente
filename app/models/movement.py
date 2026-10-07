@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
@@ -9,7 +9,9 @@ from app.models.base import Base
 class Movement(Base):
     __tablename__ = "movimentacoes"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(
+        primary_key=True
+    )
 
     product_id: Mapped[int] = mapped_column(
         ForeignKey("produtos.id"),
@@ -47,8 +49,10 @@ class Movement(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False,
-        default=datetime.utcnow,
+        default=lambda: datetime.now(timezone.utc),
     )
     
+
+
 
     
