@@ -13,19 +13,51 @@ async def create_movement(
     user_id: int,
 ) -> Movement:
 
-    product = await db.get(Product, data.product_id)
+    # BUSCAR PRODUTO
+    if data.barcode:
+        result = await db.execute(
+            select(Product).where(Product.barcode == data.barcode)
+        )
 
-    if product is None:
-        raise ValueError("Produto não encontrado.")
+        product = result.scalar_one_or_none()
 
-    if data.movement_type not in {"entrada", "saida", "ajuste"}:
-        raise ValueError("Tipo de movimentação inválido.")
+        if product is None:
+            raise ValueError(
+                "Produto não encontrado pelo código de barras."
+            )
 
+    else:
+        product = await db.get(
+            Product,
+            data.product_id,
+        )
+
+        if product is None:
+            raise ValueError("Produto não encontrado.")
+
+    # VALIDAR TIPO DE MOVIMENTAÇÃO
+    if data.movement_type not in {
+        "entrada",
+        "saida",
+        "ajuste",
+    }:
+        raise ValueError(
+            "Tipo de movimentação inválido."
+        )
+
+    # VALIDAR QUANTIDADE
     if data.quantity < 0:
-        raise ValueError("A quantidade não pode ser negativa.")
+        raise ValueError(
+            "A quantidade não pode ser negativa."
+        )
 
-    if data.movement_type in {"entrada", "saida"} and data.quantity == 0:
-        raise ValueError("A quantidade deve ser maior que zero.")
+    if (
+        data.movement_type in {"entrada", "saida"}
+        and data.quantity == 0
+    ):
+        raise ValueError(
+            "A quantidade deve ser maior que zero."
+        )
 
     # ENTRADA
     if data.movement_type == "entrada":
@@ -35,12 +67,17 @@ async def create_movement(
                 "Entrada de estoque precisa informar um lote."
             )
 
-        lot = await db.get(Lot, data.lot_id)
+        lot = await db.get(
+            Lot,
+            data.lot_id,
+        )
 
         if lot is None:
-            raise ValueError("Lote não encontrado.")
+            raise ValueError(
+                "Lote não encontrado."
+            )
 
-        if lot.product_id != data.product_id:
+        if lot.product_id != product.id:
             raise ValueError(
                 "O lote não pertence ao produto informado."
             )
@@ -48,7 +85,7 @@ async def create_movement(
         lot.quantity += data.quantity
 
         movement = Movement(
-            product_id=data.product_id,
+            product_id=product.id,
             lot_id=lot.id,
             user_id=user_id,
             movement_type="entrada",
@@ -72,7 +109,7 @@ async def create_movement(
         result = await db.execute(
             select(Lot)
             .where(
-                Lot.product_id == data.product_id,
+                Lot.product_id == product.id,
                 Lot.quantity > 0,
             )
             .order_by(
@@ -83,12 +120,19 @@ async def create_movement(
             .with_for_update()
         )
 
-        lots = list(result.scalars().all())
+        lots = list(
+            result.scalars().all()
+        )
 
-        total_stock = sum(lot.quantity for lot in lots)
+        total_stock = sum(
+            lot.quantity
+            for lot in lots
+        )
 
         if total_stock < data.quantity:
-            raise ValueError("Estoque insuficiente.")
+            raise ValueError(
+                "Estoque insuficiente."
+            )
 
         for lot in lots:
 
@@ -104,7 +148,7 @@ async def create_movement(
             remaining_quantity -= quantity_from_lot
 
             movement = Movement(
-                product_id=data.product_id,
+                product_id=product.id,
                 lot_id=lot.id,
                 user_id=user_id,
                 movement_type="saida",
@@ -118,7 +162,6 @@ async def create_movement(
                 first_movement = movement
 
         await db.commit()
-
         await db.refresh(first_movement)
 
         return first_movement
@@ -136,12 +179,17 @@ async def create_movement(
                 "Ajuste de estoque precisa informar um motivo."
             )
 
-        lot = await db.get(Lot, data.lot_id)
+        lot = await db.get(
+            Lot,
+            data.lot_id,
+        )
 
         if lot is None:
-            raise ValueError("Lote não encontrado.")
+            raise ValueError(
+                "Lote não encontrado."
+            )
 
-        if lot.product_id != data.product_id:
+        if lot.product_id != product.id:
             raise ValueError(
                 "O lote não pertence ao produto informado."
             )
@@ -149,7 +197,7 @@ async def create_movement(
         lot.quantity = data.quantity
 
         movement = Movement(
-            product_id=data.product_id,
+            product_id=product.id,
             lot_id=lot.id,
             user_id=user_id,
             movement_type="ajuste",
@@ -170,10 +218,16 @@ async def list_movements(
 ) -> list[Movement]:
 
     result = await db.execute(
-        select(Movement).order_by(Movement.id)
+        select(Movement).order_by(
+            Movement.id
+        )
     )
 
-    return list(result.scalars().all())
+    return list(
+        result.scalars().all()
+    )
+    
+    
     
 
     
