@@ -8,7 +8,9 @@ class AlertResponse(BaseModel):
     product_id: int
     lot_id: int | None
     alert_type: str
+    active: bool
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+    
     

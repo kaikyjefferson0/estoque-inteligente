@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class MovementCreate(BaseModel):
-    product_id: int
+    product_id: int | None = None
     barcode: str | None = None
     lot_id: int | None = None
     movement_type: str
@@ -21,8 +21,8 @@ class MovementResponse(BaseModel):
     quantity: int
     reason: str | None
     created_at: datetime
-
     model_config = ConfigDict(from_attributes=True)
+    
     
     
     

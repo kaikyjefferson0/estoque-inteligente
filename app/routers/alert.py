@@ -7,6 +7,7 @@ from app.models.alert import Alert
 from app.schemas.alert import AlertResponse
 from app.services.alert_service import generate_alerts
 
+
 router = APIRouter(
     prefix="/alerts",
     tags=["Alerts"],
@@ -31,7 +32,9 @@ async def list_alerts_endpoint(
     db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
-        select(Alert).order_by(Alert.id)
+        select(Alert)
+        .where(Alert.active.is_(True))
+        .order_by(Alert.id)
     )
 
     return list(result.scalars().all())

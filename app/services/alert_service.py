@@ -13,99 +13,230 @@ async def generate_alerts(
     expiration_lead_days: int = 30,
 ) -> list[Alert]:
 
-    alerts_created = []
+    alerts_changed = []
 
-    # Busca todos os produtos ativos
+    today = date.today()
+    expiration_limit = today + timedelta(
+        days=expiration_lead_days
+    )
+
+    # Buscar produtos ativos
     result = await db.execute(
-        select(Product).where(Product.active.is_(True))
+        select(Product).where(
+            Product.active.is_(True)
+        )
     )
 
     products = list(result.scalars().all())
 
     for product in products:
 
-        # =========================
-        # ALERTA DE ESTOQUE BAIXO
-        # =========================
-
+        # Buscar todos os lotes do produto
         result = await db.execute(
             select(Lot).where(
-                Lot.product_id == product.id,
-                Lot.quantity > 0,
+                Lot.product_id == product.id
             )
         )
 
         lots = list(result.scalars().all())
 
-        total_stock = sum(lot.quantity for lot in lots)
+        # =========================================================
+        # ALERTA DE ESTOQUE BAIXO
+        # =========================================================
+
+        total_stock = sum(
+            lot.quantity
+            for lot in lots
+            if lot.quantity > 0
+        )
+
+        result = await db.execute(
+            select(Alert).where(
+                Alert.product_id == product.id,
+                Alert.lot_id.is_(None),
+                Alert.alert_type == "estoque_baixo",
+            )
+        )
+
+        low_stock_alert = result.scalar_one_or_none()
 
         if total_stock <= product.minimum_stock:
 
-            existing_alert = await db.execute(
-                select(Alert).where(
-                    Alert.product_id == product.id,
-                    Alert.lot_id.is_(None),
-                    Alert.alert_type == "estoque_baixo",
-                )
-            )
-
-            if existing_alert.scalar_one_or_none() is None:
+            if low_stock_alert is None:
 
                 alert = Alert(
                     product_id=product.id,
                     lot_id=None,
                     alert_type="estoque_baixo",
+                    active=True,
                 )
 
                 db.add(alert)
-                alerts_created.append(alert)
+                alerts_changed.append(alert)
 
-        # =========================
+            elif not low_stock_alert.active:
+
+                low_stock_alert.active = True
+                alerts_changed.append(low_stock_alert)
+
+        else:
+
+            if (
+                low_stock_alert is not None
+                and low_stock_alert.active
+            ):
+                low_stock_alert.active = False
+
+        # =========================================================
         # ALERTAS DE VALIDADE
-        # =========================
+        # =========================================================
 
         for lot in lots:
 
-            if lot.expiration_date is None:
-                continue
-
-            today = date.today()
-            expiration_limit = today + timedelta(
-                days=expiration_lead_days
-            )
-
-            if lot.expiration_date < today:
-                alert_type = "vencido"
-
-            elif lot.expiration_date <= expiration_limit:
-                alert_type = "proximo_vencimento"
-
-            else:
-                continue
-
-            existing_alert = await db.execute(
+            # Buscar alerta de próximo vencimento
+            result = await db.execute(
                 select(Alert).where(
                     Alert.product_id == product.id,
                     Alert.lot_id == lot.id,
-                    Alert.alert_type == alert_type,
+                    Alert.alert_type == "proximo_vencimento",
                 )
             )
 
-            if existing_alert.scalar_one_or_none() is None:
+            near_expiration_alert = (
+                result.scalar_one_or_none()
+            )
 
-                alert = Alert(
-                    product_id=product.id,
-                    lot_id=lot.id,
-                    alert_type=alert_type,
+            # Buscar alerta de vencido
+            result = await db.execute(
+                select(Alert).where(
+                    Alert.product_id == product.id,
+                    Alert.lot_id == lot.id,
+                    Alert.alert_type == "vencido",
                 )
+            )
 
-                db.add(alert)
-                alerts_created.append(alert)
+            expired_alert = (
+                result.scalar_one_or_none()
+            )
+
+            # Lote sem estoque não deve gerar alerta ativo
+            if lot.quantity <= 0:
+
+                if (
+                    near_expiration_alert is not None
+                    and near_expiration_alert.active
+                ):
+                    near_expiration_alert.active = False
+
+                if (
+                    expired_alert is not None
+                    and expired_alert.active
+                ):
+                    expired_alert.active = False
+
+                continue
+
+            # Lote sem validade
+            if lot.expiration_date is None:
+
+                if (
+                    near_expiration_alert is not None
+                    and near_expiration_alert.active
+                ):
+                    near_expiration_alert.active = False
+
+                if (
+                    expired_alert is not None
+                    and expired_alert.active
+                ):
+                    expired_alert.active = False
+
+                continue
+
+            # =====================================================
+            # LOTE VENCIDO
+            # =====================================================
+
+            if lot.expiration_date < today:
+
+                # Desativar possível alerta de próximo vencimento
+                if (
+                    near_expiration_alert is not None
+                    and near_expiration_alert.active
+                ):
+                    near_expiration_alert.active = False
+
+                if expired_alert is None:
+
+                    alert = Alert(
+                        product_id=product.id,
+                        lot_id=lot.id,
+                        alert_type="vencido",
+                        active=True,
+                    )
+
+                    db.add(alert)
+                    alerts_changed.append(alert)
+
+                elif not expired_alert.active:
+
+                    expired_alert.active = True
+                    alerts_changed.append(expired_alert)
+
+            # =====================================================
+            # PRÓXIMO DO VENCIMENTO
+            # =====================================================
+
+            elif lot.expiration_date <= expiration_limit:
+
+                # Desativar possível alerta de vencido
+                if (
+                    expired_alert is not None
+                    and expired_alert.active
+                ):
+                    expired_alert.active = False
+
+                if near_expiration_alert is None:
+
+                    alert = Alert(
+                        product_id=product.id,
+                        lot_id=lot.id,
+                        alert_type="proximo_vencimento",
+                        active=True,
+                    )
+
+                    db.add(alert)
+                    alerts_changed.append(alert)
+
+                elif not near_expiration_alert.active:
+
+                    near_expiration_alert.active = True
+                    alerts_changed.append(
+                        near_expiration_alert
+                    )
+
+            # =====================================================
+            # LOTE FORA DA JANELA DE ALERTA
+            # =====================================================
+
+            else:
+
+                if (
+                    near_expiration_alert is not None
+                    and near_expiration_alert.active
+                ):
+                    near_expiration_alert.active = False
+
+                if (
+                    expired_alert is not None
+                    and expired_alert.active
+                ):
+                    expired_alert.active = False
 
     await db.commit()
 
-    for alert in alerts_created:
+    for alert in alerts_changed:
         await db.refresh(alert)
 
-    return alerts_created
+    return alerts_changed
     

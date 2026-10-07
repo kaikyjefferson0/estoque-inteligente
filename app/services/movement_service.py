@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,8 +17,11 @@ async def create_movement(
 
     # BUSCAR PRODUTO
     if data.barcode:
+
         result = await db.execute(
-            select(Product).where(Product.barcode == data.barcode)
+            select(Product).where(
+                Product.barcode == data.barcode
+            )
         )
 
         product = result.scalar_one_or_none()
@@ -26,14 +31,23 @@ async def create_movement(
                 "Produto não encontrado pelo código de barras."
             )
 
-    else:
+    elif data.product_id is not None:
+
         product = await db.get(
             Product,
             data.product_id,
         )
 
         if product is None:
-            raise ValueError("Produto não encontrado.")
+            raise ValueError(
+                "Produto não encontrado."
+            )
+
+    else:
+
+        raise ValueError(
+            "Informe o código de barras ou o ID do produto."
+        )
 
     # VALIDAR TIPO DE MOVIMENTAÇÃO
     if data.movement_type not in {
@@ -82,6 +96,15 @@ async def create_movement(
                 "O lote não pertence ao produto informado."
             )
 
+        # NÃO PERMITIR ENTRADA EM LOTE VENCIDO
+        if (
+            lot.expiration_date is not None
+            and lot.expiration_date < date.today()
+        ):
+            raise ValueError(
+                "Não é permitido realizar entrada em lote vencido."
+            )
+
         lot.quantity += data.quantity
 
         movement = Movement(
@@ -111,6 +134,13 @@ async def create_movement(
             .where(
                 Lot.product_id == product.id,
                 Lot.quantity > 0,
+                (
+                    Lot.expiration_date.is_(None)
+                    | (
+                        Lot.expiration_date
+                        >= date.today()
+                    )
+                ),
             )
             .order_by(
                 Lot.expiration_date.asc().nulls_last(),
@@ -226,6 +256,7 @@ async def list_movements(
     return list(
         result.scalars().all()
     )
+    
     
     
     
