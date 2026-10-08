@@ -1,4 +1,5 @@
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,13 +13,22 @@ from app.routers.user import router as user_router
 from app.routers.alert import router as alert_router
 from app.routers.auth import router as auth_router
 
-
 app = FastAPI(
     title="Estoque Inteligente API",
     description="API para gerenciamento inteligente de estoque",
     version="1.0.0",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(supplier_router)
 app.include_router(product_router)

@@ -17,11 +17,14 @@ class MovementResponse(BaseModel):
     product_id: int
     lot_id: int | None
     user_id: int
+    user_name: str
     movement_type: str
     quantity: int
     reason: str | None
     created_at: datetime
+
     model_config = ConfigDict(from_attributes=True)
+    
     
     
     
