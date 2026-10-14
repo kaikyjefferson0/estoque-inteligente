@@ -27,6 +27,11 @@ cors_origins = [
     if origin.strip()
 ]
 
+frontend_origin = "https://estoque-inteligente-web.onrender.com"
+
+if frontend_origin not in cors_origins:
+    cors_origins.append(frontend_origin)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
