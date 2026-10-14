@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.routers.category import router as category_router
 from app.routers.product import router as product_router
@@ -13,18 +14,22 @@ from app.routers.user import router as user_router
 from app.routers.alert import router as alert_router
 from app.routers.auth import router as auth_router
 
+
 app = FastAPI(
     title="Estoque Inteligente API",
     description="API para gerenciamento inteligente de estoque",
     version="1.0.0",
 )
 
+cors_origins = [
+    origin.strip()
+    for origin in settings.cors_origins.split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5174",
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -56,9 +61,3 @@ async def database_health(
         "database": "connected",
         "result": value,
     }
-    
-    
-    
-    
-    
-    
