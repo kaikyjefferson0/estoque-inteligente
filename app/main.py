@@ -4,6 +4,7 @@ import secrets
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -19,8 +20,6 @@ from app.routers.movement import router as movement_router
 from app.routers.user import router as user_router
 from app.routers.alert import router as alert_router
 from app.routers.auth import router as auth_router
-
-from pydantic import BaseModel, EmailStr, Field
 
 
 app = FastAPI(
@@ -78,7 +77,7 @@ async def database_health(
 
 class AdminBootstrapRequest(BaseModel):
     name: str = Field(min_length=1, max_length=150)
-    email: EmailStr
+    email: str = Field(min_length=5, max_length=255)
     password: str = Field(min_length=12, max_length=128)
 
 
@@ -94,7 +93,13 @@ async def admin_bootstrap(
     if not token or not secrets.compare_digest(supplied_token, token):
         raise HTTPException(status_code=404, detail="Not found")
 
-    email = str(data.email).strip().lower()
+    email = data.email.strip().lower()
+
+    if "@" not in email or "." not in email.rsplit("@", 1)[-1]:
+        raise HTTPException(
+            status_code=400,
+            detail="Informe um e-mail válido.",
+        )
 
     result = await db.execute(
         select(User).where(User.email == email)
