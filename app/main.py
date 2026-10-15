@@ -1,10 +1,16 @@
-from fastapi import Depends, FastAPI
+
+import os
+import secrets
+
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.security import password_hash
+from app.models.user import User
 from app.routers.category import router as category_router
 from app.routers.product import router as product_router
 from app.routers.supplier import router as supplier_router
@@ -13,6 +19,8 @@ from app.routers.movement import router as movement_router
 from app.routers.user import router as user_router
 from app.routers.alert import router as alert_router
 from app.routers.auth import router as auth_router
+
+from pydantic import BaseModel, EmailStr, Field
 
 
 app = FastAPI(
@@ -66,3 +74,56 @@ async def database_health(
         "database": "connected",
         "result": value,
     }
+
+
+class AdminBootstrapRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=150)
+    email: EmailStr
+    password: str = Field(min_length=12, max_length=128)
+
+
+@app.post("/_internal/admin-bootstrap")
+async def admin_bootstrap(
+    data: AdminBootstrapRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    token = os.getenv("ADMIN_BOOTSTRAP_TOKEN")
+    supplied_token = request.headers.get("X-Bootstrap-Token", "")
+
+    if not token or not secrets.compare_digest(supplied_token, token):
+        raise HTTPException(status_code=404, detail="Not found")
+
+    email = str(data.email).strip().lower()
+
+    result = await db.execute(
+        select(User).where(User.email == email)
+    )
+    user = result.scalar_one_or_none()
+
+    hashed_password = password_hash.hash(data.password)
+
+    if user is None:
+        user = User(
+            name=data.name.strip(),
+            email=email,
+            password_hash=hashed_password,
+            role="admin",
+            active=True,
+        )
+        db.add(user)
+    else:
+        user.name = data.name.strip()
+        user.password_hash = hashed_password
+        user.role = "admin"
+        user.active = True
+
+    await db.commit()
+
+    return {
+        "ok": True,
+        "email": user.email,
+        "role": user.role,
+        "active": user.active,
+    }
+
