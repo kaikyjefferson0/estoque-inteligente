@@ -13,7 +13,11 @@
 - RN-04: o código de barras do produto é único.
 - RN-05: o produto tem estoque mínimo, indica se controla validade e, se controlar, quantos dias de antecedência para o alerta.
 - RN-06: no fornecedor só o nome é obrigatório; CNPJ é opcional.
-- RN-19: admin e operador podem cadastrar produtos e fornecedores.
+- RN-19: Admin e operador podem cadastrar produtos e fornecedores. Só o admin edita produtos e fornecedores já cadastrados.
+- RN-23: produtos e fornecedores nunca são apagados (não existe exclusão).
+- RN-24: cada produto pode ter um fornecedor (opcional), e esse fornecedor precisa existir.
+- RN-25: o CNPJ, quando informado, tem 14 dígitos e é único.
+- RN-26: se o produto controla validade, os dias de alerta são obrigatórios e maiores que zero; se não controla, ficam vazios.
 
 ## Movimentações
 - RN-07: entrada e saída exigem quantidade maior que zero.
@@ -33,6 +37,5 @@
 - RN-17: os números do dashboard devem ser iguais aos dados reais do estoque.
 
 ## Pontos a confirmar
-- O operador pode editar produtos e fornecedores já cadastrados, ou só cadastrar?
 - Produto sem controle de validade tem um lote único ou só um saldo total?
 - Como a saída escolhe entre lotes sem validade?
