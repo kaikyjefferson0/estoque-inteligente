@@ -249,8 +249,15 @@
   border-radius: var(--raio-p);
 }
 
-.campo--erro .campo__caixa {
+/* Campo com erro fica na cor crítica em todos os estados, inclusive hover e foco */
+.campo--erro .campo__caixa,
+.campo--erro .campo__caixa:hover {
   border-color: var(--cor-critico);
+}
+
+.campo--erro .campo__caixa:has(.campo__entrada:focus) {
+  border-color: var(--cor-critico);
+  outline-color: var(--cor-critico);
 }
 
 .campo__dica {

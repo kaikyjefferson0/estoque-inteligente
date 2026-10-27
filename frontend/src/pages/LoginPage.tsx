@@ -5,18 +5,19 @@ import { ApiError, mensagemDeErro } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
 import { Botao } from '../components/Botao'
+import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Campo } from '../components/Campo'
+import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
 import './LoginPage.css'
 
-interface Erros {
-  email?: string
-  senha?: string
-}
+// Ordem dos campos na tela: o foco vai para o primeiro inválido
+const CAMPOS = ['email', 'senha'] as const
+type CampoLogin = (typeof CAMPOS)[number]
 
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function validar(email: string, senha: string): Erros {
-  const erros: Erros = {}
+function validar(email: string, senha: string): ErrosDeCampo<CampoLogin> {
+  const erros: ErrosDeCampo<CampoLogin> = {}
   if (!email.trim()) erros.email = 'Informe o e-mail.'
   else if (!EMAIL_VALIDO.test(email.trim())) erros.email = 'Informe um e-mail válido, como nome@empresa.com.'
   if (!senha) erros.senha = 'Informe a senha.'
@@ -32,7 +33,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [mostrarSenha, setMostrarSenha] = useState(false)
-  const [erros, setErros] = useState<Erros>({})
+  const { erros, anuncio, limpar, mostrar } = useErrosDoFormulario(CAMPOS)
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
 
@@ -40,10 +41,9 @@ export function LoginPage() {
 
   async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault()
-    const encontrados = validar(email, senha)
-    setErros(encontrados)
+    const form = evento.currentTarget
     setErroGeral(null)
-    if (encontrados.email || encontrados.senha) return
+    if (!mostrar(form, validar(email, senha))) return
 
     setEnviando(true)
     try {
@@ -53,6 +53,10 @@ export function LoginPage() {
       // RN-03: a API devolve a mesma mensagem genérica para qualquer falha de login
       if (erro instanceof ApiError && erro.status === 401) {
         setErroGeral(`${erro.message}. Confira os dados e tente de novo.`)
+      } else if (erro instanceof ApiError && Object.keys(erro.campos).length > 0) {
+        // 422: o formulário OAuth2 chama os campos de username e password
+        mostrar(form, { email: erro.campos.username, senha: erro.campos.password })
+        setErroGeral(erro.message)
       } else {
         setErroGeral(mensagemDeErro(erro))
       }
@@ -84,6 +88,7 @@ export function LoginPage() {
         )}
 
         <form className="login__form" onSubmit={aoEnviar} noValidate>
+          <AnuncioDeErros mensagem={anuncio} />
           <Campo
             rotulo="E-mail"
             type="email"
@@ -92,7 +97,10 @@ export function LoginPage() {
             inputMode="email"
             autoFocus
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value)
+              limpar('email')
+            }}
             erro={erros.email}
           />
           <Campo
@@ -101,7 +109,10 @@ export function LoginPage() {
             name="senha"
             autoComplete="current-password"
             value={senha}
-            onChange={(e) => setSenha(e.target.value)}
+            onChange={(e) => {
+              setSenha(e.target.value)
+              limpar('senha')
+            }}
             erro={erros.senha}
             acessorio={
               <button

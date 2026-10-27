@@ -9,8 +9,8 @@ export function EmConstrucao({ titulo }: { titulo: string }) {
         <h1>{titulo}</h1>
       </header>
       <div className="painel">
-        <Vazio icone={IconTool} titulo="Esta página está em construção" acao={<BotaoLink to="/">Voltar ao dashboard</BotaoLink>}>
-          Ela chega nas próximas etapas. Por enquanto, acompanhe o estoque pelo dashboard.
+        <Vazio icone={IconTool} titulo="Esta página está em construção" acao={<BotaoLink to="/">Voltar ao painel</BotaoLink>}>
+          Ela chega nas próximas etapas. Por enquanto, acompanhe o estoque pelo painel.
         </Vazio>
       </div>
     </div>

@@ -87,6 +87,27 @@ try {
 
     await page.getByRole('button', { name: 'Entrar' }).click()
     await capturar(page, `${rotulo}-login-validacao`, largura, { verificarPagina: false })
+    // Padrão de formulário: foco no primeiro inválido, erro ligado ao campo, anúncio na região viva
+    relatorio.verificacoes[`${rotulo}-login-validacao-acessibilidade`] = await page.evaluate(() => {
+      const ativo = document.activeElement
+      const descricao = (ativo?.getAttribute('aria-describedby') ?? '')
+        .split(' ')
+        .map((id) => document.getElementById(id)?.textContent)
+        .filter(Boolean)
+      return {
+        focoNoCampo: ativo?.getAttribute('name') ?? ativo?.tagName,
+        ariaInvalid: ativo?.getAttribute('aria-invalid'),
+        descricaoLida: descricao,
+        regiaoViva: document.querySelector('[aria-live]')?.textContent ?? null,
+      }
+    })
+    // Editar o campo apaga o erro só dele
+    await page.getByLabel('E-mail').fill('a')
+    relatorio.verificacoes[`${rotulo}-login-erro-some-ao-editar`] = await page.evaluate(() => ({
+      erroDoEmail: document.querySelector('input[name="email"]')?.getAttribute('aria-invalid'),
+      erroDaSenha: document.querySelector('input[name="senha"]')?.getAttribute('aria-invalid'),
+    }))
+    await capturar(page, `${rotulo}-login-erro-some-ao-editar`, largura, { verificarPagina: false })
 
     await page.getByLabel('E-mail').fill('ninguem@exemplo.com')
     await page.getByLabel('Senha', { exact: true }).fill('senha-errada-123')
@@ -102,19 +123,19 @@ try {
       continue
     }
 
-    // Dashboard real
+    // Painel real
     await page.getByLabel('E-mail').fill(email)
     await page.getByLabel('Senha', { exact: true }).fill(senha)
     await page.getByRole('button', { name: 'Entrar' }).click()
-    await page.getByRole('heading', { name: 'Dashboard' }).waitFor()
+    await page.getByRole('heading', { name: 'Painel' }).waitFor()
     // Espera a resposta de /dashboard aparecer (networkidle passa antes do fetch)
-    await page.getByText('Últimas movimentações').waitFor()
-    await capturar(page, `${rotulo}-dashboard`, largura)
+    await page.getByText(/Últimas movimentações|Cadastre seu primeiro produto/).first().waitFor()
+    await capturar(page, `${rotulo}-painel`, largura)
 
     // Foco pelo teclado no primeiro item do menu (computador) ou no botão do menu (celular)
     await page.keyboard.press('Tab')
     await page.keyboard.press('Tab')
-    await capturar(page, `${rotulo}-dashboard-foco-teclado`, largura, { verificarPagina: false })
+    await capturar(page, `${rotulo}-painel-foco-teclado`, largura, { verificarPagina: false })
 
     // Menu do usuário aberto
     await page.locator('.usuario').click()
@@ -134,16 +155,31 @@ try {
     await page.getByRole('heading', { name: 'Produtos' }).waitFor()
     await capturar(page, `${rotulo}-em-construcao`, largura, { verificarPagina: false })
 
-    // Estados simulados do dashboard
+    // Estados simulados do painel
     const simular = async (nome, tratar) => {
       await page.route('**/dashboard', tratar)
       await page.goto(`${site}/`)
       await page.waitForTimeout(400)
-      await capturar(page, `${rotulo}-dashboard-${nome}`, largura, { verificarPagina: false })
+      await capturar(page, `${rotulo}-painel-${nome}`, largura, { verificarPagina: false })
       await page.unroute('**/dashboard')
     }
     await simular('carregando', () => new Promise(() => {}))
     await simular('erro', (rota) => rota.fulfill({ status: 500, body: '{}', contentType: 'application/json' }))
+    await simular('sem-movimentacoes', (rota) =>
+      rota.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          total_produtos: 4,
+          produtos_estoque_baixo: 4,
+          produtos_sem_estoque: 4,
+          lotes_a_vencer: 0,
+          lotes_vencidos: 0,
+          alertas_ativos: 4,
+          ultimas_movimentacoes: [],
+        }),
+      }),
+    )
     await simular('vazio', (rota) =>
       rota.fulfill({
         status: 200,
@@ -196,7 +232,7 @@ try {
     )
     await page.goto(`${site}/`)
     await page.getByText('Últimas movimentações').waitFor()
-    await capturar(page, `${rotulo}-dashboard-com-dados`, largura)
+    await capturar(page, `${rotulo}-painel-com-dados`, largura)
     await page.unroute('**/dashboard')
 
     relatorio.verificacoes[`${rotulo}-erros-no-console`] = erros

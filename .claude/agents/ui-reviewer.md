@@ -19,7 +19,7 @@ Rode, dentro de `frontend`, com a pasta de saída que foi indicada (ou uma pasta
 node scripts\capturas-ui.mjs <pasta-de-saida> http://localhost:5173
 ```
 
-As credenciais de login vêm das variáveis `UI_EMAIL` e `UI_SENHA` do ambiente, se quem te chamou as passou. O script gera PNGs em 375px e 1280px (login, validação, erro, foco pelo teclado, dashboard, menu do usuário, gaveta do celular, página em construção, e os estados carregando, erro e vazio do dashboard) e um `relatorio.json` com medições automáticas: espaçamentos fora da escala, rolagem horizontal, alvos menores que 44px no celular, fonte carregada e erros no console.
+As credenciais de login vêm das variáveis `UI_EMAIL` e `UI_SENHA` do ambiente, se quem te chamou as passou. O script gera PNGs em 375px e 1280px (login, validação, erro, foco pelo teclado, painel, menu do usuário, gaveta do celular, página em construção, e os estados carregando, erro, vazio e sem movimentações do painel) e um `relatorio.json` com medições automáticas: espaçamentos fora da escala, rolagem horizontal, alvos menores que 44px no celular, fonte carregada erros no console e, no login, se o foco foi para o primeiro campo inválido, se o erro está ligado ao campo e foi anunciado, e se some ao editar.
 
 Erros de console esperados (não são falha): o 401 do teste de senha errada e o 500 do estado de erro simulado.
 

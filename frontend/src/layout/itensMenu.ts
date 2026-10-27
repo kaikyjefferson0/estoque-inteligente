@@ -20,7 +20,7 @@ export interface ItemMenu {
 }
 
 export const ITENS_MENU: ItemMenu[] = [
-  { rota: '/', rotulo: 'Dashboard', icone: IconLayoutDashboard },
+  { rota: '/', rotulo: 'Painel', icone: IconLayoutDashboard },
   { rota: '/estoque', rotulo: 'Estoque', icone: IconBuildingWarehouse },
   { rota: '/produtos', rotulo: 'Produtos', icone: IconBox },
   { rota: '/fornecedores', rotulo: 'Fornecedores', icone: IconTruck },

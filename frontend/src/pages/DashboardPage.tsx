@@ -1,4 +1,11 @@
-import { IconAdjustmentsHorizontal, IconArrowsExchange, IconPackageExport, IconPackageImport, IconRefresh } from '@tabler/icons-react'
+import {
+  IconAdjustmentsHorizontal,
+  IconArrowsExchange,
+  IconBox,
+  IconPackageExport,
+  IconPackageImport,
+  IconRefresh,
+} from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
 import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
@@ -104,7 +111,8 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
                 {m.validade ? `, validade ${formatarData(m.validade)}` : ', sem validade'}
               </span>
             </span>
-            <span className="movimento__quantidade numero" aria-label={`Quantidade ${formatarComSinal(quantidade)}`}>
+            <span className="movimento__quantidade numero">
+              <span className="visualmente-oculto">Quantidade </span>
               {formatarComSinal(quantidade)}
             </span>
             <span className="movimento__autor">
@@ -122,12 +130,14 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
 
 export function DashboardPage() {
   const { dados, erro, carregando, atualizadoEm, recarregar } = useRecurso<Dashboard>('/dashboard')
+  // Sem produtos, as faixas verdes dariam a falsa impressão de que está tudo em dia
+  const semProdutos = dados?.total_produtos === 0
 
   return (
     <div className="pagina">
       <header className="pagina__cabecalho">
         <div>
-          <h1>Dashboard</h1>
+          <h1>Painel</h1>
           <p className="pagina__apoio">
             {atualizadoEm ? `Situação do estoque às ${formatarHora(atualizadoEm)}` : 'Situação do estoque agora'}
           </p>
@@ -138,32 +148,55 @@ export function DashboardPage() {
               Atualizar
             </Botao>
           )}
-          <BotaoLink to="/entrada" variante="primaria" icone={IconPackageImport}>
-            Registrar entrada
-          </BotaoLink>
+          {/* Um único botão primário: sem produtos, ele fica no convite abaixo */}
+          {!semProdutos && (
+            <BotaoLink to="/entrada" variante="primaria" icone={IconPackageImport}>
+              Registrar entrada
+            </BotaoLink>
+          )}
         </div>
       </header>
 
       {!dados && carregando && <Carregando texto="Carregando a situação do estoque…" />}
       {erro && <ErroEstado mensagem={erro} aoTentarDeNovo={recarregar} />}
 
-      {dados && (
+      {dados && semProdutos && (
+        <div className="painel">
+          <Vazio
+            icone={IconBox}
+            titulo="Cadastre seu primeiro produto"
+            acao={
+              <BotaoLink to="/produtos" variante="primaria">
+                Cadastrar produto
+              </BotaoLink>
+            }
+          >
+            Com os produtos cadastrados, o painel mostra o estoque baixo, os lotes a vencer e as últimas movimentações.
+          </Vazio>
+        </div>
+      )}
+
+      {dados && !semProdutos && (
         <>
           <Situacoes dashboard={dados} />
 
-          <dl className="totais">
-            <div className="totais__item">
-              <dt>Produtos cadastrados</dt>
-              <dd className="numero">{formatarNumero(dados.total_produtos)}</dd>
-            </div>
-            <div className="totais__item">
-              <dt>Alertas ativos</dt>
-              <dd className="numero">{formatarNumero(dados.alertas_ativos)}</dd>
-            </div>
-            {dados.alertas_ativos > 0 && <Link to="/alertas" className="link-acao">
+          <div className="totais">
+            <dl className="totais__lista">
+              <div className="totais__item">
+                <dt>Produtos cadastrados</dt>
+                <dd className="numero">{formatarNumero(dados.total_produtos)}</dd>
+              </div>
+              <div className="totais__item">
+                <dt>Alertas ativos</dt>
+                <dd className="numero">{formatarNumero(dados.alertas_ativos)}</dd>
+              </div>
+            </dl>
+            {dados.alertas_ativos > 0 && (
+              <Link to="/alertas" className="link-acao">
                 Ver alertas
-              </Link>}
-          </dl>
+              </Link>
+            )}
+          </div>
 
           <section className="painel" aria-labelledby="titulo-movimentos">
             <div className="painel__cabecalho">

@@ -6,7 +6,7 @@ export function NaoEncontradaPage() {
   return (
     <div className="pagina">
       <div className="painel">
-        <Vazio icone={IconMapOff} titulo="Esta página não existe" acao={<BotaoLink to="/">Voltar ao dashboard</BotaoLink>}>
+        <Vazio icone={IconMapOff} titulo="Esta página não existe" acao={<BotaoLink to="/">Voltar ao painel</BotaoLink>}>
           Confira o endereço ou use o menu para chegar aonde precisa.
         </Vazio>
       </div>

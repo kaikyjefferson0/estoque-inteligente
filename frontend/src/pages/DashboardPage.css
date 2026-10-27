@@ -52,6 +52,13 @@
   color: var(--cor-texto-suave);
 }
 
+.totais__lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--esp-2) var(--esp-5);
+}
+
 .totais__item {
   display: flex;
   align-items: baseline;
@@ -142,22 +149,33 @@
   }
 }
 
+/* Celular: produto e quantidade na primeira linha; tipo e usuário numa linha própria.
+   Produto e autor atravessam a coluna flexível, então não alargam as colunas "auto"
+   e o nome do produto fica com quase toda a largura. */
 @media (max-width: 640px) {
   .movimentos {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
   .movimento {
     grid-template-areas:
-      'produto quantidade'
-      'tipo autor';
-    row-gap: var(--esp-1);
+      'produto produto quantidade'
+      'tipo autor autor';
+    align-items: baseline;
+    row-gap: var(--esp-2);
     column-gap: var(--esp-3);
     padding: var(--esp-3) var(--esp-4);
   }
 
   .movimento__produto {
     grid-area: produto;
+  }
+
+  /* No celular o nome quebra linha em vez de ser cortado */
+  .movimento__nome {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .movimento__quantidade {
@@ -172,6 +190,8 @@
   .movimento__autor {
     grid-area: autor;
     flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: var(--esp-2);
   }
 

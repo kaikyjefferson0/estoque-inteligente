@@ -24,9 +24,40 @@ Toda página que busca dados mostra os três estados, com os componentes de `src
 
 ## Formulários
 
-- Use `<Campo rotulo erro dica>` de `src\components\Campo.tsx` (rótulo ligado ao campo, `aria-invalid` e `aria-describedby` já tratados).
+Referência pronta: `src\pages\LoginPage.tsx`. Todo formulário segue estas três regras, já implementadas por `useErrosDoFormulario` (`src\components\useErrosDoFormulario.ts`) e `<AnuncioDeErros>`:
+
+1. **O erro some ao editar.** No `onChange` de cada campo, chame `limpar('nome')`; o erro daquele campo some assim que a pessoa edita, e os dos outros ficam.
+2. **Foco e anúncio na validação.** No envio, `if (!mostrar(form, validar(...))) return`. O `mostrar` põe o foco no primeiro campo inválido (na ordem da tela, passada ao hook) e escreve um resumo na região viva. Para isso:
+   - cada campo tem `name` igual à chave do erro;
+   - o `<Campo erro={erros.nome}>` já põe `aria-invalid` e liga a mensagem por `aria-describedby`, então o leitor de tela lê o erro ao receber o foco;
+   - o formulário tem `<AnuncioDeErros mensagem={anuncio} />` (`aria-live="polite"`) logo no início, e `noValidate` para usar as nossas mensagens.
+3. **A cor crítica fica em todos os estados.** O campo com erro mantém a borda e o anel de foco em `--cor-critico` também no hover e no foco (`.campo--erro` em `componentes.css`). Não sobrescreva isso no CSS da página.
+
+```tsx
+const CAMPOS = ['quantidade', 'validade'] as const // ordem na tela
+const { erros, anuncio, limpar, mostrar } = useErrosDoFormulario(CAMPOS)
+
+async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
+  evento.preventDefault()
+  const form = evento.currentTarget
+  if (!mostrar(form, validar(valores))) return
+  try {
+    await api('/stock/entries', { body: valores })
+  } catch (erro) {
+    if (erro instanceof ApiError) {
+      mostrar(form, erro.campos) // 422: erros de campo da API pelo mesmo caminho
+      setErroGeral(erro.message)
+    }
+  }
+}
+// <form onSubmit={aoEnviar} noValidate>
+//   <AnuncioDeErros mensagem={anuncio} />
+//   <Campo name="quantidade" rotulo="Quantidade" erro={erros.quantidade}
+//          onChange={(e) => { setQuantidade(e.target.value); limpar('quantidade') }} />
+```
+
 - Valide no cliente antes de enviar, com mensagens que dizem o que fazer ("Informe a quantidade, maior que zero.").
-- Mostre os erros da API: `ApiError.message` num `<Aviso situacao="critico">` no topo do formulário e `ApiError.campos[nome]` no campo correspondente (422).
+- Mostre os erros da API: `ApiError.message` num `<Aviso situacao="critico">` no topo do formulário e `ApiError.campos[nome]` no campo correspondente (422). Se o nome do campo da API for diferente do da tela, converta antes de chamar `mostrar`.
 - O botão de envio usa `<Botao type="submit" variante="primaria" carregando textoCarregando="Registrando…">`, com verbo ("Registrar saída").
 - A regra de negócio é do backend; o frontend só ajuda o usuário a acertar.
 
