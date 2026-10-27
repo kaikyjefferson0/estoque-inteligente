@@ -11,10 +11,14 @@ id, nome, codigo_barras (único), estoque_minimo, controla_validade, dias_alerta
 
 ## batches
 id, produto_id, validade (opcional), quantidade, criado_em
+- quantidade maior ou igual a zero.
+- Um lote por produto + validade, valendo também para validade vazia (NULLS NOT DISTINCT): produto sem controle de validade tem um único lote sem validade (RN-27, RN-28).
 
 ## stock_movements
 id, produto_id, lote_id, tipo (entrada, saida ou ajuste), quantidade, motivo (obrigatório no ajuste), usuario_id, criado_em
 - Só se inserem linhas novas, nunca se altera nem apaga.
+- tipo só entrada, saida ou ajuste; quantidade maior que zero; motivo obrigatório quando o tipo é ajuste.
+- Uma saída que consome vários lotes (FEFO) gera uma movimentação por lote.
 
 ## alerts
 id, tipo (estoque_baixo, vencimento_proximo ou vencido), produto_id, lote_id (opcional), criado_em

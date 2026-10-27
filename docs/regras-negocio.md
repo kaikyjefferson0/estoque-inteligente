@@ -26,6 +26,12 @@
 - RN-10: a saída segue FEFO: sai primeiro do lote que vence antes.
 - RN-11: ajuste de estoque exige motivo e fica registrado.
 - RN-12: o histórico de movimentações é imutável: não se edita nem se apaga.
+- RN-27: produto sem controle de validade tem um único lote, sem data de validade; toda entrada soma nesse lote e toda saída sai dele.
+- RN-28: produto com controle de validade tem um lote por data de validade; uma nova entrada com a mesma validade soma no lote existente.
+- RN-29: na saída de produto com validade, se dois lotes vencem no mesmo dia, sai primeiro o que entrou primeiro (desempate do FEFO).
+- RN-30: o campo "controla validade" de um produto não pode ser alterado depois que o produto tem algum lote.
+- RN-31: a entrada não aceita validade já vencida; para produto sem controle de validade, a entrada não pode informar validade.
+- RN-32: admin e operador registram entradas e saídas; só o admin faz ajustes (RN-02, RN-11).
 
 ## Alertas
 - RN-13: alerta de estoque baixo quando o saldo é igual ou menor que o mínimo.
@@ -37,6 +43,4 @@
 - RN-17: os números do dashboard devem ser iguais aos dados reais do estoque.
 
 ## Pontos a confirmar
-- Produto sem controle de validade tem um lote único ou só um saldo total?
-- Como a saída escolhe entre lotes sem validade?
-- Pode-se ligar ou desligar o controle de validade de um produto que já tem lotes ou movimentações? (hoje o PATCH permite; decidir antes das movimentações, Fase 6)
+- Ajuste de estoque: como indicar se ele aumenta ou diminui o saldo? (hoje a quantidade da movimentação é sempre maior que zero; decidir antes da Fase 6, parte B)
