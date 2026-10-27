@@ -1,4 +1,5 @@
 from app.models.user import User
+from app.services import auth as auth_service
 from app.services.users import buscar_por_email
 
 from tests.conftest import SENHA_ADMIN, SENHA_OPERADOR
@@ -38,6 +39,10 @@ def test_ct01_login_correto(client, admin, operador):
         assert me.status_code == 200
         assert me.json()["id"] == usuario.id
         assert me.json()["perfil"] == usuario.perfil  # perfil não trocado
+
+        # As permissões seguem o perfil: só o admin abre a área de usuários
+        esperado = 200 if usuario.perfil == "admin" else 403
+        assert client.get("/users", headers=auth(corpo["access_token"])).status_code == esperado
 
 
 def test_ct02_senha_errada_mensagem_generica(client, admin):
@@ -94,6 +99,23 @@ def test_usuario_inativo_nao_entra(client, db, operador, token_operador):
     assert resposta.json() == {"detail": MENSAGEM_LOGIN_INVALIDO}
 
     assert client.get("/auth/me", headers=auth(token_operador)).status_code == 401
+
+
+def test_login_recusa_entrada_grande_sem_calcular_hash(client, admin, monkeypatch):
+    """Senha acima de 128 ou e-mail acima de 255 caracteres: mesmo 401 genérico, sem rodar o Argon2."""
+    chamadas = []
+    monkeypatch.setattr(auth_service, "verify_password", lambda *args: chamadas.append(args) or False)
+
+    email_grande = "a" * 250 + "@teste.com"  # 260 caracteres
+    tentativas = [
+        login(client, admin.email, "x" * 129),
+        login(client, email_grande, SENHA_ADMIN),
+    ]
+    for resposta in tentativas:
+        assert resposta.status_code == 401
+        assert resposta.json() == {"detail": MENSAGEM_LOGIN_INVALIDO}
+
+    assert chamadas == []
 
 
 def test_admin_cria_usuario(client, token_admin):
