@@ -1,7 +1,8 @@
-from sqlalchemy import or_, select
+from sqlalchemy import exists, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.models.batch import Batch
 from app.models.product import Product
 from app.models.supplier import Supplier
 
@@ -29,6 +30,10 @@ class FornecedorInexistenteError(Exception):
 
 class DiasAlertaInvalidoError(Exception):
     """RN-26."""
+
+
+class ControlaValidadeBloqueadoError(Exception):
+    """RN-30: produto com lote não pode mudar "controla validade"."""
 
 
 def _validar_validade(controla_validade: bool, dias_alerta_validade: int | None) -> None:
@@ -114,8 +119,8 @@ def listar_produtos(db: Session, busca: str | None = None) -> list[Product]:
     return list(db.scalars(consulta))
 
 
-def obter_produto(db: Session, produto_id: int) -> Product:
-    produto = db.get(Product, produto_id)
+def obter_produto(db: Session, produto_id: int, travar: bool = False) -> Product:
+    produto = db.get(Product, produto_id, with_for_update=travar or None, populate_existing=travar)
     if produto is None:
         raise ProdutoNaoEncontradoError(produto_id)
     return produto
@@ -123,13 +128,19 @@ def obter_produto(db: Session, produto_id: int) -> Product:
 
 def atualizar_produto(db: Session, produto_id: int, dados: dict) -> Product:
     """Altera os campos enviados. As regras valem para o estado final do produto."""
-    produto = obter_produto(db, produto_id)
+    # FOR UPDATE: espera entradas em andamento (que travam o produto com FOR SHARE) para a RN-30
+    produto = obter_produto(db, produto_id, travar=True)
     dados = {campo: valor for campo, valor in dados.items() if campo in CAMPOS_EDITAVEIS}
     if "codigo_barras" in dados:
         dados["codigo_barras"] = dados["codigo_barras"].strip()
     if "nome" in dados:
         dados["nome"] = dados["nome"].strip()
 
+    # RN-30 antes da RN-26: se a mudança é proibida, o usuário sabe logo (409)
+    if dados.get("controla_validade", produto.controla_validade) != produto.controla_validade and db.scalar(
+        select(exists().where(Batch.produto_id == produto.id))
+    ):
+        raise ControlaValidadeBloqueadoError(produto.id)
     _validar_validade(
         dados.get("controla_validade", produto.controla_validade),
         dados.get("dias_alerta_validade", produto.dias_alerta_validade),

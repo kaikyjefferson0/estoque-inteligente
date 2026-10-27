@@ -18,6 +18,9 @@ class Batch(Base):
             name="uq_batches_produto_id_validade",
             postgresql_nulls_not_distinct=True,
         ),
+        # Alvo da FK composta de stock_movements (lote_id, produto_id): garante
+        # que o lote da movimentação é do mesmo produto dela
+        UniqueConstraint("id", "produto_id", name="uq_batches_id_produto_id"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -28,5 +31,4 @@ class Batch(Base):
     # RN-08: só produto que controla validade tem lote com data
     validade: Mapped[date | None] = mapped_column(Date)
     quantidade: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
-    # RN-29: desempate do FEFO pela ordem de entrada
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

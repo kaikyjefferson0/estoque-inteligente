@@ -47,6 +47,11 @@ def atualizar(produto_id: int, dados: ProductUpdate, db: Annotated[Session, Depe
         return service.atualizar_produto(db, produto_id, dados.model_dump(exclude_unset=True))
     except service.ProdutoNaoEncontradoError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+    except service.ControlaValidadeBloqueadoError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail='Produto já tem lotes: "controla validade" não pode ser alterado',  # RN-30
+        )
     except service.DiasAlertaInvalidoError as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.FornecedorInexistenteError:

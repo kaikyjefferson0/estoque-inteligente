@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, ForeignKeyConstraint, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -19,6 +19,13 @@ class StockMovement(Base):
             "tipo <> 'ajuste' OR (motivo IS NOT NULL AND btrim(motivo) <> '')",
             name="ck_stock_movements_motivo_ajuste",
         ),
+        # O lote precisa existir e ser do mesmo produto da movimentação
+        ForeignKeyConstraint(
+            ["lote_id", "produto_id"],
+            ["batches.id", "batches.produto_id"],
+            name="fk_stock_movements_lote_id_produto_id_batches",
+            ondelete="RESTRICT",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -26,10 +33,7 @@ class StockMovement(Base):
         ForeignKey("products.id", ondelete="RESTRICT", name="fk_stock_movements_produto_id_products"),
         index=True,
     )
-    lote_id: Mapped[int] = mapped_column(
-        ForeignKey("batches.id", ondelete="RESTRICT", name="fk_stock_movements_lote_id_batches"),
-        index=True,
-    )
+    lote_id: Mapped[int] = mapped_column(index=True)
     tipo: Mapped[str] = mapped_column(String(20))
     quantidade: Mapped[int] = mapped_column(Integer)
     motivo: Mapped[str | None] = mapped_column(String(255))

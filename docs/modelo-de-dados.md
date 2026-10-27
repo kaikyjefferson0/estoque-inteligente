@@ -19,6 +19,7 @@ id, produto_id, lote_id, tipo (entrada, saida ou ajuste), quantidade, motivo (ob
 - Só se inserem linhas novas, nunca se altera nem apaga.
 - tipo só entrada, saida ou ajuste; quantidade maior que zero; motivo obrigatório quando o tipo é ajuste.
 - Uma saída que consome vários lotes (FEFO) gera uma movimentação por lote.
+- O lote pertence ao mesmo produto da movimentação: chave estrangeira composta (lote_id, produto_id) para batches (id, produto_id).
 
 ## alerts
 id, tipo (estoque_baixo, vencimento_proximo ou vencido), produto_id, lote_id (opcional), criado_em
