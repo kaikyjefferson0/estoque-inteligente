@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -31,6 +31,17 @@ def criar(dados: ProductCreate, db: Annotated[Session, Depends(get_db)]):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Fornecedor informado não existe")
     except service.CodigoBarrasJaCadastradoError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Código de barras já cadastrado")
+
+
+@router.get("/by-barcode/{codigo_barras}", response_model=ProductOut)
+def obter_por_codigo(
+    codigo_barras: Annotated[str, Path(max_length=50, description="Código de barras exato")],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        return service.obter_por_codigo(db, codigo_barras)
+    except service.ProdutoNaoEncontradoError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
 
 
 @router.get("/{produto_id}", response_model=ProductOut)

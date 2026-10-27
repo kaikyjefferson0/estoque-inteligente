@@ -11,10 +11,14 @@ export interface Produto {
   criado_em: string
 }
 
+// RN-14, RN-15 e RN-44: decidida pela API com as mesmas condições dos alertas
+export type SituacaoLote = 'ok' | 'a_vencer' | 'vencido'
+
 export interface Lote {
   id: number
   validade: string | null
   quantidade: number
+  situacao: SituacaoLote
 }
 
 // GET /products/{id}/stock: só traz lotes com quantidade maior que zero

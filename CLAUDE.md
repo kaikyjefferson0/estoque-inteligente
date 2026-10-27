@@ -17,6 +17,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - `docs\`: regras de negócio, casos de teste e modelo de dados
 
 ## Regras de trabalho
+- Responda sempre em português do Brasil.
 - Leia `docs\regras-negocio.md` antes de mexer em qualquer regra de estoque.
 - Cada caso de teste (CT-xx) de `docs\casos-de-teste.md` deve virar um teste pytest.
 - Regra de negócio fica no service, nunca no router.

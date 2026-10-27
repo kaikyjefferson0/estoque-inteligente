@@ -92,3 +92,10 @@
 | CT-24 | Cadastrar produto com fornecedor inexistente | Sistema recusa | Produto salvo com fornecedor que não existe |
 | CT-25 | Cadastrar fornecedor com CNPJ repetido ou inválido | Sistema recusa e avisa | Fornecedor salvo com CNPJ duplicado ou inválido |
 | CT-26 | Cadastrar produto que controla validade sem dias de alerta | Sistema recusa | Produto salvo sem dias de alerta |
+
+## Leitura por código e situação dos lotes
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-52 | Buscar produto pelo código de barras exato (admin ou operador) | Devolve o produto com esse código; código inexistente ou só parecido devolve 404; sem login devolve 401 | Devolve outro produto com código parecido ou aceita sem login |
+| CT-53 | Consultar o saldo de produto com lote vencido, lote a vencer e lote em dia | Cada lote vem com a situação vencido, a_vencer ou ok, pelas mesmas condições dos alertas e com o "hoje" de Brasília; vencer hoje é a_vencer | Situação diferente da usada nos alertas ou calculada no fuso UTC |

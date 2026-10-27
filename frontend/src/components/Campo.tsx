@@ -1,4 +1,4 @@
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useId, type InputHTMLAttributes, type ReactNode, type Ref } from 'react'
 
 interface CampoProps extends InputHTMLAttributes<HTMLInputElement> {
   rotulo: string
@@ -6,6 +6,7 @@ interface CampoProps extends InputHTMLAttributes<HTMLInputElement> {
   dica?: string
   // Botão dentro do campo, à direita (ex.: mostrar senha)
   acessorio?: ReactNode
+  ref?: Ref<HTMLInputElement>
 }
 
 export function Campo({ rotulo, erro, dica, acessorio, id, className, ...resto }: CampoProps) {

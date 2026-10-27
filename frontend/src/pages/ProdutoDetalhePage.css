@@ -33,12 +33,6 @@
   color: var(--cor-texto-suave);
 }
 
-.detalhe__reservado {
-  padding: var(--esp-4) var(--esp-5);
-  font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-}
-
 /* Celular: rótulo em cima do valor */
 @media (max-width: 640px) {
   .ficha {
@@ -50,8 +44,246 @@
     row-gap: var(--esp-1);
     padding: var(--esp-3) var(--esp-4);
   }
+}
 
-  .detalhe__reservado {
+/* ---------- Painel de estoque e lotes ---------- */
+/* Lado esquerdo reto: as etiquetas dos lotes chegam até a borda do painel */
+.detalhe__lotes {
+  border-left: 0;
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+}
+
+/* Cabeçalho, saldos e estados ganham uma faixa neutra, alinhada com as etiquetas */
+.detalhe__lotes > :not(.lotes) {
+  border-left: var(--etiqueta-largura) solid var(--cor-borda);
+}
+
+/* ---------- Saldos ---------- */
+.saldos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--esp-3) var(--esp-6);
+  padding: var(--esp-4) var(--esp-5);
+  border-bottom: var(--borda);
+}
+
+.saldos__lista {
+  display: flex;
+  gap: var(--esp-6);
+}
+
+.saldos__item dt {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.saldos__item dd {
+  font-size: var(--fs-6);
+  font-weight: var(--peso-medio);
+  line-height: var(--lh-numero);
+}
+
+.saldos__item--fisico dd {
+  color: var(--cor-texto-suave);
+}
+
+.saldos__nota {
+  max-width: var(--medida-texto);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.saldos__nota--vencidos {
+  color: var(--cor-critico-texto);
+}
+
+/* ---------- Lotes em ordem FEFO: cada um com a etiqueta de prateleira ---------- */
+.lote {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  column-gap: var(--esp-5);
+  padding: var(--esp-3) var(--esp-5);
+}
+
+.lote + .lote {
+  border-top: var(--borda);
+}
+
+.lote[data-problema] {
+  background: var(--etiqueta-fundo);
+}
+
+.lote__validade {
+  font-weight: var(--peso-medio);
+}
+
+.lote__situacao {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.lote[data-problema] .lote__situacao {
+  font-weight: var(--peso-medio);
+  color: var(--etiqueta-texto);
+}
+
+.lote__quantidade {
+  min-width: var(--esp-7);
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+  text-align: right;
+}
+
+/* ---------- Histórico ---------- */
+.historico__total {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+/* Subgrid: todas as linhas compartilham as mesmas colunas */
+.historico {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+}
+
+.historico__item {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  column-gap: var(--esp-5);
+  row-gap: var(--esp-1);
+  padding: var(--esp-3) var(--esp-5);
+}
+
+.historico__item + .historico__item {
+  border-top: var(--borda);
+}
+
+.historico__data {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+  white-space: nowrap;
+}
+
+.historico__tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+  align-self: center;
+}
+
+.historico__tipo svg {
+  width: var(--icone-p);
+  height: var(--icone-p);
+  color: var(--cor-texto-suave);
+}
+
+.historico__lote {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.historico__quantidade {
+  font-weight: var(--peso-medio);
+  text-align: right;
+}
+
+.historico__usuario {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+  text-align: right;
+}
+
+/* Linha extra do ajuste: antes e depois, e o motivo */
+.historico__ajuste {
+  display: flex;
+  flex-wrap: wrap;
+  grid-column: 3 / -1;
+  gap: var(--esp-1) var(--esp-4);
+  font-size: var(--fs-2);
+}
+
+.historico__mais {
+  display: flex;
+  justify-content: center;
+  padding: var(--esp-2);
+  border-top: var(--borda);
+}
+
+@media (max-width: 640px) {
+  .saldos {
     padding: var(--esp-3) var(--esp-4);
+  }
+
+  .saldos__lista {
+    gap: var(--esp-5);
+  }
+
+  .lote {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'validade quantidade'
+      'situacao quantidade';
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .lote__validade {
+    grid-area: validade;
+  }
+
+  .lote__situacao {
+    grid-area: situacao;
+  }
+
+  .lote__quantidade {
+    grid-area: quantidade;
+  }
+
+  /* Celular: tipo e quantidade em cima; lote, data e usuário embaixo */
+  .historico {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .historico__item {
+    grid-template-areas:
+      'tipo quantidade'
+      'lote lote'
+      'data usuario'
+      'ajuste ajuste';
+    column-gap: var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .historico__tipo {
+    grid-area: tipo;
+  }
+
+  .historico__quantidade {
+    grid-area: quantidade;
+  }
+
+  .historico__lote {
+    grid-area: lote;
+  }
+
+  .historico__data {
+    grid-area: data;
+    font-size: var(--fs-1);
+  }
+
+  .historico__usuario {
+    grid-area: usuario;
+    font-size: var(--fs-1);
+  }
+
+  .historico__ajuste {
+    grid-area: ajuste;
+    grid-column: 1 / -1;
+    flex-direction: column;
   }
 }

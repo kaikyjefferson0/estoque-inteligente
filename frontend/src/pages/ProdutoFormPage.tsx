@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ApiError, api, mensagemDeErro } from '../api/client'
 import { useRecurso } from '../api/useRecurso'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
@@ -139,9 +139,21 @@ function SelecaoDeFornecedor({
   )
 }
 
-function FormularioProduto({ inicial, lotes = 'nao-tem' }: { inicial?: Produto; lotes?: Lotes }) {
+function FormularioProduto({
+  inicial,
+  lotes = 'nao-tem',
+  codigoInicial,
+}: {
+  inicial?: Produto
+  lotes?: Lotes
+  // Código lido na Entrada que não existia: já vem preenchido
+  codigoInicial?: string
+}) {
   const navigate = useNavigate()
-  const [valores, setValores] = useState(() => valoresIniciais(inicial))
+  const [valores, setValores] = useState(() => {
+    const iniciais = valoresIniciais(inicial)
+    return codigoInicial ? { ...iniciais, codigoBarras: codigoInicial } : iniciais
+  })
   const { erros, anuncio, limpar, mostrar } = useErrosDoFormulario(CAMPOS)
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
@@ -291,6 +303,8 @@ function FormularioProduto({ inicial, lotes = 'nao-tem' }: { inicial?: Produto; 
 }
 
 export function ProdutoNovoPage() {
+  const [parametros] = useSearchParams()
+  const codigo = (parametros.get('codigo') ?? '').trim().slice(0, MAX_CODIGO)
   return (
     <div className="pagina">
       <header className="pagina__cabecalho">
@@ -299,7 +313,7 @@ export function ProdutoNovoPage() {
           <p className="pagina__apoio">O código de barras não pode se repetir entre produtos.</p>
         </div>
       </header>
-      <FormularioProduto />
+      <FormularioProduto codigoInicial={codigo || undefined} />
     </div>
   )
 }

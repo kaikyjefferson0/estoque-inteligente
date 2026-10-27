@@ -1,0 +1,186 @@
+/* Entrada e Saída: leitura do código, produto lido e formulário */
+
+/* ---------- Leitura do código ---------- */
+.leitura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--esp-2) var(--esp-3);
+  padding: var(--esp-5);
+  border-bottom: var(--borda);
+}
+
+.leitura__campo {
+  flex: 1 1 var(--largura-busca);
+  min-width: 0;
+  max-width: var(--largura-formulario);
+}
+
+/* Campo maior: é o ponto de partida de toda entrada e saída.
+   Largura em %: o tamanho natural do input não alarga o painel no celular */
+.leitura__campo .campo__entrada {
+  width: 100%;
+  font-size: var(--fs-4);
+}
+
+.leitura__icone {
+  flex-shrink: 0;
+  order: -1;
+  width: var(--icone-m);
+  height: var(--icone-m);
+  margin-left: var(--esp-3);
+  color: var(--cor-texto-suave);
+}
+
+/* Botão dentro da caixa do campo, à direita */
+.leitura__botao {
+  flex-shrink: 0;
+  border-radius: 0 var(--raio-p) var(--raio-p) 0;
+  border-left: var(--borda);
+}
+
+.leitura__cadastrar {
+  flex-basis: 100%;
+}
+
+/* ---------- Produto lido ---------- */
+.registro__produto {
+  display: flex;
+  flex-direction: column;
+}
+
+.resumo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'identificacao saldos'
+    'nota nota';
+  align-items: start;
+  gap: var(--esp-2) var(--esp-5);
+  padding: var(--esp-5);
+}
+
+.resumo__identificacao {
+  grid-area: identificacao;
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  min-width: 0;
+}
+
+.resumo__nome {
+  overflow-wrap: anywhere;
+}
+
+
+.resumo__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-0) var(--esp-4);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.resumo__saldos {
+  grid-area: saldos;
+  display: flex;
+  gap: var(--esp-5);
+}
+
+.resumo__saldo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.resumo__saldo dt {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.resumo__saldo dd {
+  font-size: var(--fs-6);
+  font-weight: var(--peso-medio);
+  line-height: var(--lh-numero);
+}
+
+.resumo__saldo--fisico dd {
+  color: var(--cor-texto-suave);
+}
+
+.resumo__nota {
+  grid-area: nota;
+  font-size: var(--fs-2);
+  color: var(--cor-atencao-texto);
+}
+
+/* ---------- Formulário ---------- */
+.registro__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  max-width: var(--largura-formulario);
+  padding: var(--esp-0) var(--esp-5) var(--esp-5);
+}
+
+.registro__campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--largura-nome), 100%), 1fr));
+  gap: var(--esp-4);
+}
+
+.registro__quantidade .campo__entrada {
+  font-size: var(--fs-4);
+}
+
+/* ---------- Confirmação da saída: quanto saiu de cada lote ---------- */
+.saida__lotes {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  justify-content: start;
+  column-gap: var(--esp-4);
+  margin-top: var(--esp-2);
+}
+
+.saida__lote {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+.saida__lote-quantidade {
+  font-weight: var(--peso-medio);
+  text-align: right;
+}
+
+.saida__lote-resto {
+  color: var(--cor-texto-suave);
+}
+
+@media (max-width: 640px) {
+  .leitura,
+  .resumo {
+    padding: var(--esp-4);
+  }
+
+  .resumo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'identificacao'
+      'saldos'
+      'nota';
+  }
+
+  .resumo__saldo {
+    align-items: flex-start;
+  }
+
+  .registro__formulario {
+    padding: var(--esp-0) var(--esp-4) var(--esp-4);
+  }
+
+  .saida__lotes {
+    column-gap: var(--esp-3);
+  }
+}

@@ -18,6 +18,10 @@ SITUACAO_OK = "ok"
 SITUACAO_BAIXO = "baixo"
 SITUACAO_SEM_ESTOQUE = "sem_estoque"
 
+LOTE_OK = "ok"
+LOTE_A_VENCER = "a_vencer"
+LOTE_VENCIDO = "vencido"
+
 
 def lote_disponivel(dia: date) -> ColumnElement[bool]:
     """RN-36: lote sem validade ou dentro da validade (vencer hoje ainda vale)."""
@@ -39,6 +43,18 @@ def lote_a_vencer(dia: date) -> ColumnElement[bool]:
         Batch.quantidade > 0,
         Batch.validade >= dia,
         Batch.validade <= literal(dia, Date) + Product.dias_alerta_validade,
+    )
+
+
+def situacao_do_lote(dia: date) -> ColumnElement[str]:
+    """Situação de um lote com as mesmas condições dos alertas (RN-14, RN-15, RN-44).
+
+    Exige o join com Product, como lote_a_vencer.
+    """
+    return case(
+        (lote_vencido(dia), LOTE_VENCIDO),
+        (lote_a_vencer(dia), LOTE_A_VENCER),
+        else_=LOTE_OK,
     )
 
 

@@ -72,7 +72,8 @@
   --raio-m: 10px;
 
   /* Bordas e foco */
-  --borda: 1px solid var(--cor-borda);
+  --borda-largura: 1px;
+  --borda: var(--borda-largura) solid var(--cor-borda);
   --etiqueta-largura: 4px;
   --foco-anel: 2px solid var(--cor-foco);
   --foco-distancia: 2px;
@@ -98,6 +99,8 @@
   --largura-nome: 22ch;
   --largura-formulario: 560px;
   --largura-busca: 280px;
+  --largura-coluna-numero: 128px;
+  --largura-coluna-situacao: 160px;
   --camada-cabecalho: 10;
   --camada-sobreposicao: 50;
   --icone-p: 18px;

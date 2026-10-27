@@ -1,0 +1,180 @@
+/* ---------- Filtros e busca ---------- */
+.estoque__filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--esp-3) var(--esp-4);
+}
+
+.estoque__busca {
+  flex: 1 1 var(--largura-busca);
+  max-width: var(--largura-formulario);
+}
+
+.estoque__lupa {
+  flex-shrink: 0;
+  order: -1;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  margin-left: var(--esp-3);
+  color: var(--cor-texto-suave);
+}
+
+.estoque__contagem {
+  display: flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Lista: painel com o lado esquerdo reto, onde ficam as etiquetas ---------- */
+.estoque__painel {
+  background: var(--cor-superficie);
+  border: var(--borda);
+  border-left: 0;
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  overflow: hidden;
+}
+
+/* Colunas com largura fixa: não mudam de lugar ao trocar o filtro ou buscar */
+.estoque {
+  table-layout: fixed;
+}
+
+.estoque__coluna-numero {
+  width: var(--largura-coluna-numero);
+}
+
+.estoque__coluna-situacao {
+  width: var(--largura-coluna-situacao);
+}
+
+/* O cabeçalho ganha uma faixa neutra para alinhar com as etiquetas das linhas */
+.estoque thead tr {
+  border-left: var(--etiqueta-largura) solid var(--cor-borda);
+}
+
+.estoque__linha[data-problema] {
+  background: var(--etiqueta-fundo);
+}
+
+.estoque__produto {
+  overflow-wrap: anywhere;
+}
+
+.estoque__link {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: var(--alvo-min);
+  padding: var(--esp-2) var(--esp-0);
+  text-decoration: none;
+}
+
+.estoque__nome {
+  font-weight: var(--peso-medio);
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-distancia);
+}
+
+.estoque__codigo {
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+.estoque__disponivel {
+  display: block;
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+}
+
+.estoque__linha[data-problema] .estoque__disponivel {
+  color: var(--etiqueta-texto);
+}
+
+.estoque__fisico {
+  display: block;
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+.estoque__situacao {
+  font-size: var(--fs-2);
+  white-space: nowrap;
+}
+
+.estoque__linha[data-problema] .estoque__situacao {
+  font-weight: var(--peso-medio);
+  color: var(--etiqueta-texto);
+}
+
+.estoque__rotulo-celular {
+  display: none;
+}
+
+/* Celular: nome e código em cima; disponível, mínimo e situação embaixo */
+@media (max-width: 640px) {
+  .estoque {
+    table-layout: auto;
+  }
+
+  .estoque thead {
+    display: none;
+  }
+
+  .estoque tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'produto produto'
+      'saldo situacao'
+      'minimo situacao';
+    column-gap: var(--esp-3);
+    padding: var(--esp-2) var(--esp-4) var(--esp-3);
+  }
+
+  .estoque tbody tr + tr {
+    border-top: var(--borda);
+  }
+
+  .estoque td,
+  .estoque tbody tr + tr td {
+    padding: var(--esp-0);
+    border-top: 0;
+  }
+
+  .estoque .tabela__numero {
+    text-align: left;
+  }
+
+  .estoque__produto {
+    grid-area: produto;
+  }
+
+  .estoque__saldo {
+    grid-area: saldo;
+  }
+
+  .estoque__disponivel {
+    font-size: var(--fs-3);
+  }
+
+  .estoque__minimo {
+    grid-area: minimo;
+    font-size: var(--fs-2);
+    color: var(--cor-texto-suave);
+  }
+
+  .estoque__situacao {
+    grid-area: situacao;
+    align-self: center;
+  }
+
+  .estoque__rotulo-celular {
+    display: inline;
+    font-size: var(--fs-2);
+    font-weight: var(--peso-normal);
+    color: var(--cor-texto-suave);
+  }
+}

@@ -322,6 +322,16 @@
   text-align: left;
 }
 
+.painel .estado--erro {
+  padding: var(--esp-4) var(--esp-5);
+}
+
+@media (max-width: 640px) {
+  .painel .estado--erro {
+    padding: var(--esp-3) var(--esp-4);
+  }
+}
+
 .estado__titulo {
   font-size: var(--fs-3);
   font-weight: var(--peso-medio);
@@ -665,4 +675,70 @@
 
 .link-botao:hover {
   color: var(--cor-primaria-escura);
+}
+
+/* ---------- Segmentos: escolha única entre poucas opções (rádios nativos) ---------- */
+.segmentos {
+  display: inline-flex;
+  flex-wrap: wrap;
+  margin: var(--esp-0);
+  padding: var(--esp-0);
+  border: var(--borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  overflow: hidden;
+}
+
+.segmentos__opcao {
+  position: relative;
+  display: inline-flex;
+}
+
+.segmentos__opcao + .segmentos__opcao {
+  border-left: var(--borda);
+}
+
+/* O rádio cobre a opção inteira: o alvo de toque é a opção toda */
+.segmentos__opcao input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: var(--esp-0);
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmentos__opcao span {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  padding: var(--esp-0) var(--esp-4);
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+  transition:
+    background-color var(--mov-rapido) var(--mov-curva),
+    color var(--mov-rapido) var(--mov-curva);
+}
+
+.segmentos__opcao:hover input:not(:checked) + span {
+  background: var(--cor-hover-neutro);
+  color: var(--cor-texto);
+}
+
+.segmentos__opcao input:checked + span {
+  background: var(--cor-primaria);
+  color: var(--cor-texto-inverso);
+}
+
+.segmentos__opcao input:focus-visible + span {
+  outline: var(--foco-anel);
+  outline-offset: calc(-1 * var(--foco-distancia));
+}
+
+/* Na opção escolhida (fundo primário), o anel de foco fica claro para aparecer */
+.segmentos__opcao input:checked:focus-visible + span {
+  outline-color: var(--cor-texto-inverso);
 }

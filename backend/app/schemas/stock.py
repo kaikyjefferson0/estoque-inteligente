@@ -29,12 +29,17 @@ class StockEntryOut(BaseModel):
     criado_em: datetime
 
 
+SituacaoLote = Literal["ok", "a_vencer", "vencido"]
+
+
 class BatchOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     validade: date | None
     quantidade: int
+    # RN-14, RN-15 e RN-44: as mesmas condições dos alertas, com o "hoje" de Brasília
+    situacao: SituacaoLote
 
 
 class ProductStockOut(BaseModel):

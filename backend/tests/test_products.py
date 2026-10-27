@@ -178,3 +178,26 @@ def test_codigo_duplicado_na_corrida_vira_erro_de_dominio(db, refrigerante, monk
     with pytest.raises(service.CodigoBarrasJaCadastradoError):
         service.criar_produto(db, nome="Corrida", codigo_barras=refrigerante.codigo_barras, estoque_minimo=0)
     assert db.query(Product).filter(Product.codigo_barras == refrigerante.codigo_barras).count() == 1
+
+
+def test_ct52_busca_pelo_codigo_de_barras_exato(client, token_admin, token_operador, refrigerante, detergente):
+    """CT-52 / RN-04: busca exata, para qualquer perfil logado."""
+    for token in (token_admin, token_operador):
+        resposta = client.get(f"/products/by-barcode/{refrigerante.codigo_barras}", headers=auth(token))
+        assert resposta.status_code == 200
+        assert resposta.json()["id"] == refrigerante.id
+
+    # Só parecido (parte do código) não serve: a leitura nunca pega o produto errado
+    assert client.get("/products/by-barcode/789100000000", headers=auth(token_operador)).status_code == 404
+    assert client.get("/products/by-barcode/0000000000000", headers=auth(token_operador)).json() == {
+        "detail": "Produto não encontrado"
+    }
+    # Curinga do LIKE não funciona como curinga
+    assert client.get("/products/by-barcode/%25", headers=auth(token_operador)).status_code == 404
+    assert client.get(f"/products/by-barcode/{refrigerante.codigo_barras}").status_code == 401
+
+
+def test_service_busca_por_codigo_ignora_espacos_e_recusa_vazio(db, refrigerante):
+    assert service.obter_por_codigo(db, f"  {refrigerante.codigo_barras} ").id == refrigerante.id
+    with pytest.raises(service.ProdutoNaoEncontradoError):
+        service.obter_por_codigo(db, "   ")

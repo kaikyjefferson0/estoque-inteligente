@@ -12,6 +12,8 @@ interface ConfirmarDialogoProps {
   aoConfirmar: () => void
   carregando?: boolean
   perigo?: boolean
+  // Ao fechar, o Radix devolve o foco a quem abriu; chame preventDefault para levá-lo a outro lugar
+  aoFecharFoco?: (evento: Event) => void
 }
 
 /** Janela de confirmação (Radix AlertDialog): foco preso, fecha com Esc. */
@@ -24,12 +26,13 @@ export function ConfirmarDialogo({
   aoConfirmar,
   carregando,
   perigo,
+  aoFecharFoco,
 }: ConfirmarDialogoProps) {
   return (
     <AlertDialog.Root open={aberto} onOpenChange={aoMudar}>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="sobreposicao" />
-        <AlertDialog.Content className="dialogo">
+        <AlertDialog.Content className="dialogo" onCloseAutoFocus={aoFecharFoco}>
           <AlertDialog.Title className="dialogo__titulo">{titulo}</AlertDialog.Title>
           <AlertDialog.Description className="dialogo__descricao">{descricao}</AlertDialog.Description>
           <div className="dialogo__acoes">

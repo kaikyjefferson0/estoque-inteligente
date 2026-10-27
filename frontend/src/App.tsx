@@ -3,7 +3,10 @@ import { AuthProvider } from './auth/AuthContext'
 import { RotaAdmin, RotaProtegida } from './auth/RotaProtegida'
 import { EmConstrucao } from './components/EmConstrucao'
 import { AppLayout } from './layout/AppLayout'
+import { AjustesPage } from './pages/AjustesPage'
 import { DashboardPage } from './pages/DashboardPage'
+import { EntradaPage } from './pages/EntradaPage'
+import { EstoquePage } from './pages/EstoquePage'
 import { FornecedorEditarPage, FornecedorNovoPage } from './pages/FornecedorFormPage'
 import { FornecedoresPage } from './pages/FornecedoresPage'
 import { LoginPage } from './pages/LoginPage'
@@ -11,6 +14,7 @@ import { NaoEncontradaPage } from './pages/NaoEncontradaPage'
 import { ProdutoDetalhePage } from './pages/ProdutoDetalhePage'
 import { ProdutoEditarPage, ProdutoNovoPage } from './pages/ProdutoFormPage'
 import { ProdutosPage } from './pages/ProdutosPage'
+import { SaidaPage } from './pages/SaidaPage'
 
 export default function App() {
   return (
@@ -21,7 +25,8 @@ export default function App() {
           <Route element={<RotaProtegida />}>
             <Route element={<AppLayout />}>
               <Route index element={<DashboardPage />} />
-              <Route path="estoque" element={<EmConstrucao titulo="Estoque" />} />
+              {/* RN-46: admin e operador veem o estoque */}
+              <Route path="estoque" element={<EstoquePage />} />
               {/* RN-19: admin e operador cadastram e editam produtos e fornecedores */}
               <Route path="produtos" element={<ProdutosPage />} />
               <Route path="produtos/novo" element={<ProdutoNovoPage />} />
@@ -30,11 +35,13 @@ export default function App() {
               <Route path="fornecedores" element={<FornecedoresPage />} />
               <Route path="fornecedores/novo" element={<FornecedorNovoPage />} />
               <Route path="fornecedores/:id/editar" element={<FornecedorEditarPage />} />
-              <Route path="entrada" element={<EmConstrucao titulo="Entrada" />} />
-              <Route path="saida" element={<EmConstrucao titulo="Saída" />} />
+              {/* RN-32: admin e operador registram entradas e saídas */}
+              <Route path="entrada" element={<EntradaPage />} />
+              <Route path="saida" element={<SaidaPage />} />
               <Route path="alertas" element={<EmConstrucao titulo="Alertas" />} />
+              {/* RN-02 e RN-32: só o admin ajusta; o operador é levado ao painel */}
               <Route element={<RotaAdmin />}>
-                <Route path="ajustes" element={<EmConstrucao titulo="Ajustes" />} />
+                <Route path="ajustes" element={<AjustesPage />} />
                 <Route path="usuarios" element={<EmConstrucao titulo="Usuários" />} />
               </Route>
               <Route path="*" element={<NaoEncontradaPage />} />

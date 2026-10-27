@@ -107,6 +107,15 @@ def criar_produto(
     return _salvar(db, produto, codigo_barras)
 
 
+def obter_por_codigo(db: Session, codigo_barras: str) -> Product:
+    """Busca exata pelo código de barras (RN-04: é único), usada pela leitura na entrada e na saída."""
+    codigo = codigo_barras.strip()
+    produto = db.scalar(select(Product).where(Product.codigo_barras == codigo)) if codigo else None
+    if produto is None:
+        raise ProdutoNaoEncontradoError(codigo)
+    return produto
+
+
 def _escapar_like(texto: str) -> str:
     return texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 

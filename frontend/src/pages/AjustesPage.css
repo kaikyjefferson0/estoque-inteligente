@@ -1,0 +1,167 @@
+/* A linha divisória vai de lado a lado; só o campo tem largura limitada */
+.ajuste__produto {
+  padding: var(--esp-5);
+  border-bottom: var(--borda);
+}
+
+.ajuste__produto > .campo {
+  max-width: var(--largura-formulario);
+}
+
+.ajuste__formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  max-width: var(--largura-formulario);
+  padding: var(--esp-5);
+}
+
+/* ---------- Escolha do lote: cada opção é uma etiqueta de prateleira ---------- */
+.ajuste__lotes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  min-width: 0;
+  margin: var(--esp-0);
+  padding: var(--esp-0);
+  border: 0;
+}
+
+.ajuste__lotes legend {
+  padding: var(--esp-0);
+  margin-bottom: var(--esp-2);
+}
+
+.ajuste__lotes:focus-visible {
+  outline: var(--foco-anel);
+  outline-offset: var(--foco-distancia);
+}
+
+.ajuste__lotes[aria-busy='true'] .ajuste__lista {
+  opacity: var(--opacidade-ocupado);
+}
+
+.ajuste__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+}
+
+.lote-opcao {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'marca validade saldo'
+    'marca situacao saldo';
+  align-items: center;
+  column-gap: var(--esp-3);
+  min-height: var(--alvo-min);
+  padding: var(--esp-2) var(--esp-4) var(--esp-2) var(--esp-3);
+  border: var(--borda);
+  border-left-width: var(--etiqueta-largura);
+  border-left-color: var(--etiqueta-cor);
+  border-radius: 0 var(--raio-p) var(--raio-p) 0;
+  background: var(--cor-superficie);
+  cursor: pointer;
+  transition: border-color var(--mov-rapido) var(--mov-curva);
+}
+
+.lote-opcao[data-problema] {
+  background: var(--etiqueta-fundo);
+}
+
+.lote-opcao:hover {
+  border-top-color: var(--cor-borda-forte);
+  border-right-color: var(--cor-borda-forte);
+  border-bottom-color: var(--cor-borda-forte);
+}
+
+/* Escolhido: borda na cor primária, menos a faixa da etiqueta */
+.lote-opcao:has(input:checked) {
+  border-top-color: var(--cor-primaria);
+  border-right-color: var(--cor-primaria);
+  border-bottom-color: var(--cor-primaria);
+  box-shadow: inset 0 0 0 var(--borda-largura) var(--cor-primaria);
+}
+
+.lote-opcao:has(input:focus-visible) {
+  outline: var(--foco-anel);
+  outline-offset: var(--foco-distancia);
+}
+
+.lote-opcao input {
+  grid-area: marca;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  margin: var(--esp-0);
+  accent-color: var(--cor-primaria);
+}
+
+.lote-opcao input:focus-visible {
+  outline: none;
+}
+
+.lote-opcao__validade {
+  grid-area: validade;
+  font-weight: var(--peso-medio);
+}
+
+.lote-opcao__situacao {
+  grid-area: situacao;
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.lote-opcao[data-problema] .lote-opcao__situacao {
+  font-weight: var(--peso-medio);
+  color: var(--etiqueta-texto);
+}
+
+.lote-opcao__saldo {
+  grid-area: saldo;
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+  text-align: right;
+}
+
+.lote-opcao__unidade {
+  display: block;
+  font-size: var(--fs-1);
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+}
+
+.ajuste__lotes--erro .lote-opcao {
+  border-top-color: var(--cor-critico);
+  border-right-color: var(--cor-critico);
+  border-bottom-color: var(--cor-critico);
+}
+
+.ajuste__campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--esp-4);
+}
+
+/* ---------- Janela de confirmação ---------- */
+.ajuste__confirmacao {
+  display: block;
+}
+
+.ajuste__confirmacao:first-child {
+  margin-bottom: var(--esp-2);
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+}
+
+@media (max-width: 640px) {
+  .ajuste__produto,
+  .ajuste__formulario {
+    padding: var(--esp-4);
+  }
+
+  .ajuste__campos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -282,24 +282,35 @@ def registrar_ajuste(
 
 
 @dataclass
+class LoteComSituacao:
+    id: int
+    validade: date | None
+    quantidade: int
+    # ok, a_vencer ou vencido, decidido pelas mesmas condições dos alertas (RN-44)
+    situacao: str
+
+
+@dataclass
 class SaldoProduto:
     saldo_fisico: int
     saldo_disponivel: int
-    lotes: list[Batch]
+    lotes: list[LoteComSituacao]
 
 
 def consultar_saldo(db: Session, produto_id: int) -> SaldoProduto:
     """Saldo físico (com vencidos), saldo disponível (RN-36) e lotes com quantidade,
-    em ordem FEFO (lote sem validade por último)."""
+    em ordem FEFO (lote sem validade por último), cada um com a situação de validade."""
     obter_produto(db, produto_id)
-    saldos = db.execute(condicoes.saldos_por_produto(hoje()).where(Product.id == produto_id)).one()
-    lotes = list(
-        db.scalars(
-            select(Batch)
-            .where(Batch.produto_id == produto_id, Batch.quantidade > 0)
-            .order_by(Batch.validade.asc().nulls_last(), Batch.id)
-        )
+    # Um único "hoje" de Brasília para os saldos e as situações da mesma resposta
+    dia = hoje()
+    saldos = db.execute(condicoes.saldos_por_produto(dia).where(Product.id == produto_id)).one()
+    linhas = db.execute(
+        select(Batch.id, Batch.validade, Batch.quantidade, condicoes.situacao_do_lote(dia).label("situacao"))
+        .join(Product, Product.id == Batch.produto_id)
+        .where(Batch.produto_id == produto_id, Batch.quantidade > 0)
+        .order_by(Batch.validade.asc().nulls_last(), Batch.id)
     )
+    lotes = [LoteComSituacao(**linha._mapping) for linha in linhas]
     return SaldoProduto(saldo_fisico=saldos.saldo_fisico, saldo_disponivel=saldos.saldo_disponivel, lotes=lotes)
 
 

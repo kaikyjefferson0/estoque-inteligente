@@ -630,3 +630,53 @@ def test_banco_recusa_ajuste_com_saldos_incoerentes(db, admin, detergente):
                 db.add(StockMovement(produto_id=detergente.id, lote_id=lote.id, usuario_id=admin.id, **campos))
                 db.flush()
         assert erro.value.orig.diag.constraint_name == constraint, campos
+
+
+# --- Situação dos lotes no saldo (CT-53) ---
+
+
+def test_ct53_saldo_informa_a_situacao_de_cada_lote(client, db, token_operador, token_admin, refrigerante, detergente):
+    """CT-53 / RN-14, RN-15, RN-44: as mesmas condições dos alertas (refrigerante avisa 30 dias antes)."""
+    for quantidade, dias in ((4, 0), (5, 30), (6, 31)):
+        entrada(client, token_admin, refrigerante.codigo_barras, quantidade, em_dias(dias))
+    db.add(Batch(produto_id=refrigerante.id, validade=service.hoje() - timedelta(days=1), quantidade=3))
+    db.flush()
+
+    lotes = saldo(client, token_operador, refrigerante.id)["lotes"]
+    assert [(lote["validade"], lote["situacao"]) for lote in lotes] == [
+        (em_dias(-1), "vencido"),
+        (em_dias(0), "a_vencer"),  # vence hoje: ainda não venceu, entra no aviso
+        (em_dias(30), "a_vencer"),  # último dia do aviso
+        (em_dias(31), "ok"),
+    ]
+
+    entrada(client, token_admin, detergente.codigo_barras, 7)
+    assert [lote["situacao"] for lote in saldo(client, token_operador, detergente.id)["lotes"]] == ["ok"]
+
+
+def test_ct53_situacao_do_lote_usa_o_dia_de_brasilia(client, db, token_admin, refrigerante, monkeypatch):
+    """CT-53 / RN-44: 27/10 01:00 UTC ainda é 26/10 em Brasília; o lote de 26/10 vence hoje, não está vencido."""
+    db.add(Batch(produto_id=refrigerante.id, validade=date(2026, 10, 26), quantidade=2))
+    db.flush()
+    monkeypatch.setattr(clock, "_agora_utc", lambda: datetime(2026, 10, 27, 1, 0, tzinfo=timezone.utc))
+    assert [lote["situacao"] for lote in saldo(client, token_admin, refrigerante.id)["lotes"]] == ["a_vencer"]
+
+    monkeypatch.setattr(clock, "_agora_utc", lambda: datetime(2026, 10, 27, 3, 0, tzinfo=timezone.utc))
+    assert [lote["situacao"] for lote in saldo(client, token_admin, refrigerante.id)["lotes"]] == ["vencido"]
+
+
+def test_situacao_do_lote_bate_com_os_alertas(client, db, token_admin, refrigerante):
+    """RN-44: o lote vencido tem alerta de vencido e o lote a vencer tem alerta de vencimento próximo."""
+    from app.models.alert import Alert
+    from app.services import alerts as alertas
+
+    entrada(client, token_admin, refrigerante.codigo_barras, 5, em_dias(10))
+    vencido = Batch(produto_id=refrigerante.id, validade=service.hoje() - timedelta(days=2), quantidade=3)
+    db.add(vencido)
+    db.flush()
+    alertas.gerar_alertas_produto(db, refrigerante.id)
+
+    tipos = {(a.lote_id, a.tipo) for a in db.query(Alert).filter(Alert.resolvido_em.is_(None), Alert.lote_id.is_not(None))}
+    situacoes = {lote["id"]: lote["situacao"] for lote in saldo(client, token_admin, refrigerante.id)["lotes"]}
+    traducao = {"vencido": "vencido", "a_vencer": "vencimento_proximo"}
+    assert {(lote_id, traducao[s]) for lote_id, s in situacoes.items() if s != "ok"} == tipos

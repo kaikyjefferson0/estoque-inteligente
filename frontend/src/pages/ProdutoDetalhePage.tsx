@@ -1,13 +1,25 @@
-import { IconBox, IconPencil } from '@tabler/icons-react'
+import {
+  IconAdjustmentsHorizontal,
+  IconArrowsExchange,
+  IconBox,
+  IconPackageExport,
+  IconPackageImport,
+  IconPencil,
+} from '@tabler/icons-react'
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useRecurso } from '../api/useRecurso'
+import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
-import { BotaoLink } from '../components/Botao'
+import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
+import type { TipoMovimentacao } from '../types/dashboard'
+import type { Movimentacao } from '../types/estoque'
 import type { Fornecedor } from '../types/fornecedor'
-import type { Produto } from '../types/produto'
-import { formatarDataHora, formatarNumero, plural } from '../utils/formato'
+import type { Produto, SaldoProduto } from '../types/produto'
+import { formatarComSinal, formatarDataHora, formatarNumero, hojeIso, plural } from '../utils/formato'
+import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import './ProdutoDetalhePage.css'
 
 function Ficha({ produto }: { produto: Produto }) {
@@ -55,6 +67,163 @@ function Ficha({ produto }: { produto: Produto }) {
   )
 }
 
+function Estoque({ produto }: { produto: Produto }) {
+  const { usuario } = useAuth()
+  const { dados, erro, carregando, recarregar } = useRecurso<SaldoProduto>(`/products/${produto.id}/stock`)
+  const hoje = hojeIso()
+  const vencidos = dados ? dados.saldo_fisico - dados.saldo_disponivel : 0
+
+  return (
+    <section className="painel detalhe__lotes" aria-labelledby="titulo-lotes">
+      <div className="painel__cabecalho">
+        <h2 id="titulo-lotes">Estoque e lotes</h2>
+        {/* RN-02: só o admin ajusta; o backend confere de novo */}
+        {usuario?.perfil === 'admin' && dados && dados.lotes.length > 0 && (
+          <Link to={`/ajustes?produto=${produto.id}`}>Ajustar lote</Link>
+        )}
+      </div>
+      {!dados && carregando && <Carregando texto="Carregando os lotes…" />}
+      {erro && <ErroEstado mensagem={erro} aoTentarDeNovo={recarregar} />}
+      {dados && (
+        <>
+          <div className="saldos">
+            <dl className="saldos__lista">
+              <div className="saldos__item">
+                <dt>Saldo disponível</dt>
+                <dd className="numero">{formatarNumero(dados.saldo_disponivel)}</dd>
+              </div>
+              <div className="saldos__item saldos__item--fisico">
+                <dt>Saldo físico</dt>
+                <dd className="numero">{formatarNumero(dados.saldo_fisico)}</dd>
+              </div>
+            </dl>
+            {/* Com saldo zero não há o que explicar */}
+            {dados.saldo_fisico > 0 && (
+              <p className={vencidos > 0 ? 'saldos__nota saldos__nota--vencidos' : 'saldos__nota'}>
+                {vencidos > 0
+                  ? `${formatarNumero(vencidos)} em lotes vencidos: contam no físico, mas não saem.`
+                  : 'Nenhuma unidade vencida: todo o saldo pode sair.'}
+              </p>
+            )}
+          </div>
+          {dados.lotes.length === 0 ? (
+            <Vazio
+              icone={IconBox}
+              titulo="Nenhum lote com saldo"
+              acao={
+                <BotaoLink to="/entrada" icone={IconPackageImport}>
+                  Registrar entrada
+                </BotaoLink>
+              }
+            >
+              Os lotes aparecem aqui, na ordem de saída, depois da primeira entrada.
+            </Vazio>
+          ) : (
+            // RN-10: ordem FEFO, como vem da API (sem validade por último)
+            <ol className="lotes" aria-label="Lotes na ordem de saída">
+              {dados.lotes.map((lote) => {
+                const situacao = situacaoDoLote(lote, hoje)
+                return (
+                  <li
+                    key={lote.id}
+                    className={`lote etiqueta etiqueta--${situacao.etiqueta}`}
+                    data-problema={situacao.etiqueta !== 'ok' || undefined}
+                  >
+                    <span className="lote__validade numero">{descreverLote(lote.validade)}</span>
+                    <span className="lote__situacao">{situacao.rotulo}</span>
+                    <span className="lote__quantidade numero">{formatarNumero(lote.quantidade)}</span>
+                  </li>
+                )
+              })}
+            </ol>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
+const TIPO: Record<TipoMovimentacao, { rotulo: string; icone: typeof IconPackageImport }> = {
+  entrada: { rotulo: 'Entrada', icone: IconPackageImport },
+  saida: { rotulo: 'Saída', icone: IconPackageExport },
+  ajuste: { rotulo: 'Ajuste', icone: IconAdjustmentsHorizontal },
+}
+
+const POR_PAGINA = 20
+
+function Historico({ produtoId }: { produtoId: number }) {
+  const { dados, erro, carregando, recarregar } = useRecurso<Movimentacao[]>(`/products/${produtoId}/movements`)
+  const [mostrando, setMostrando] = useState(POR_PAGINA)
+
+  return (
+    <section className="painel" aria-labelledby="titulo-historico">
+      <div className="painel__cabecalho">
+        <h2 id="titulo-historico">Histórico</h2>
+        {dados && dados.length > 0 && (
+          <span className="historico__total">
+            {formatarNumero(dados.length)} {plural(dados.length, 'movimentação', 'movimentações')}
+          </span>
+        )}
+      </div>
+      {!dados && carregando && <Carregando texto="Carregando o histórico…" />}
+      {erro && <ErroEstado mensagem={erro} aoTentarDeNovo={recarregar} />}
+      {dados?.length === 0 && (
+        <Vazio icone={IconArrowsExchange} titulo="Nenhuma movimentação ainda">
+          As entradas, saídas e ajustes deste produto ficam registrados aqui.
+        </Vazio>
+      )}
+      {dados && dados.length > 0 && (
+        // RN-12: histórico só para leitura, sem editar nem apagar
+        <>
+          <ul className="historico">
+            {dados.slice(0, mostrando).map((m) => {
+              const { rotulo, icone: Icone } = TIPO[m.tipo] ?? TIPO.ajuste
+              // Entrada soma, saída subtrai; o ajuste já vem com sinal
+              const quantidade = m.tipo === 'saida' ? -m.quantidade : m.quantidade
+              return (
+                <li key={m.id} className="historico__item">
+                  <time dateTime={m.criado_em} className="historico__data numero">
+                    {formatarDataHora(m.criado_em)}
+                  </time>
+                  <span className="historico__tipo">
+                    <Icone aria-hidden />
+                    {rotulo}
+                  </span>
+                  <span className="historico__lote">{descreverLote(m.validade)}</span>
+                  <span className="historico__quantidade numero">
+                    <span className="visualmente-oculto">Quantidade </span>
+                    {formatarComSinal(quantidade)}
+                  </span>
+                  <span className="historico__usuario">{m.usuario_nome}</span>
+                  {/* RN-34: no ajuste, o saldo do lote antes e depois e o motivo */}
+                  {m.tipo === 'ajuste' && (
+                    <span className="historico__ajuste">
+                      {m.saldo_anterior !== null && m.saldo_novo !== null && (
+                        <span className="numero">
+                          <span className="visualmente-oculto">Saldo do lote: </span>
+                          {formatarNumero(m.saldo_anterior)} → {formatarNumero(m.saldo_novo)}
+                        </span>
+                      )}
+                      {m.motivo && <span>Motivo: {m.motivo}</span>}
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+          {dados.length > mostrando && (
+            <div className="historico__mais">
+              <Botao variante="fantasma" onClick={() => setMostrando((n) => n + POR_PAGINA)}>
+                Mostrar mais {formatarNumero(Math.min(POR_PAGINA, dados.length - mostrando))}
+              </Botao>
+            </div>
+          )}
+        </>
+      )}
+    </section>
+  )
+}
+
 export function ProdutoDetalhePage() {
   const { id } = useParams()
   const { dados, erro, statusErro, carregando, recarregar } = useRecurso<Produto>(`/products/${id}`)
@@ -98,19 +267,8 @@ export function ProdutoDetalhePage() {
         <>
           <Ficha produto={dados} />
 
-          {/* Parte C: lotes com saldo e histórico de movimentações */}
-          <section className="painel" aria-labelledby="titulo-lotes">
-            <div className="painel__cabecalho">
-              <h2 id="titulo-lotes">Lotes</h2>
-            </div>
-            <p className="detalhe__reservado">Os lotes deste produto, com validade e saldo, vão aparecer aqui.</p>
-          </section>
-          <section className="painel" aria-labelledby="titulo-historico">
-            <div className="painel__cabecalho">
-              <h2 id="titulo-historico">Histórico</h2>
-            </div>
-            <p className="detalhe__reservado">As entradas, saídas e ajustes deste produto vão aparecer aqui.</p>
-          </section>
+          <Estoque produto={dados} />
+          <Historico produtoId={dados.id} />
         </>
       )}
     </div>
