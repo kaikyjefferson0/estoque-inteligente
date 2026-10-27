@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user
 from app.schemas.suppliers import SupplierCreate, SupplierOut, SupplierUpdate
 from app.services import suppliers as service
 
@@ -36,7 +36,7 @@ def obter(fornecedor_id: int, db: Annotated[Session, Depends(get_db)]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado")
 
 
-@router.patch("/{fornecedor_id}", response_model=SupplierOut, dependencies=[Depends(require_admin)])
+@router.patch("/{fornecedor_id}", response_model=SupplierOut, dependencies=[Depends(get_current_user)])
 def atualizar(fornecedor_id: int, dados: SupplierUpdate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.atualizar_fornecedor(db, fornecedor_id, dados.model_dump(exclude_unset=True))

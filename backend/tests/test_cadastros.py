@@ -33,18 +33,18 @@ def test_ct21_operador_cadastra_produto_e_fornecedor(client, db, token_operador)
     assert db.get(Product, produto.json()["id"]) is not None
 
 
-def test_ct22_operador_nao_edita_produto_nem_fornecedor(client, db, token_operador, refrigerante, fornecedor):
-    """CT-22 / RN-19: só o admin edita; os dados continuam iguais."""
+def test_ct22_operador_edita_produto_e_fornecedor(client, db, token_operador, refrigerante, fornecedor):
+    """CT-22 / RN-19: o operador edita produto e fornecedor; a alteração é salva."""
     headers = auth(token_operador)
-    produto = client.patch(f"/products/{refrigerante.id}", headers=headers, json={"nome": "Alterado"})
-    forn = client.patch(f"/suppliers/{fornecedor.id}", headers=headers, json={"nome": "Alterado"})
-    assert produto.status_code == 403
-    assert forn.status_code == 403
+    produto = client.patch(f"/products/{refrigerante.id}", headers=headers, json={"nome": "Produto Alterado"})
+    forn = client.patch(f"/suppliers/{fornecedor.id}", headers=headers, json={"nome": "Fornecedor Alterado"})
+    assert produto.status_code == 200
+    assert forn.status_code == 200
 
     db.refresh(refrigerante)
     db.refresh(fornecedor)
-    assert refrigerante.nome == "Refrigerante 2L"
-    assert fornecedor.nome == "Distribuidora Central"
+    assert refrigerante.nome == "Produto Alterado"
+    assert fornecedor.nome == "Fornecedor Alterado"
 
 
 def test_ct23_nao_existe_exclusao(client, db, token_admin, token_operador, refrigerante, fornecedor):

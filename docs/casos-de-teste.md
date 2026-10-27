@@ -62,7 +62,7 @@
 | ID | Teste | Resultado esperado | Resultado não esperado |
 |---|---|---|---|
 | CT-21 | Operador cadastra produto e fornecedor | Produto e fornecedor salvos | Operador bloqueado ao cadastrar |
-| CT-22 | Operador tenta editar produto ou fornecedor | Edição bloqueada e dados continuam iguais | Operador consegue editar |
+| CT-22 | Operador edita produto ou fornecedor | Alteração salva | Operador bloqueado ao editar |
 | CT-23 | Tentar apagar produto ou fornecedor | A ação não existe e o registro continua salvo | Produto ou fornecedor é apagado |
 | CT-24 | Cadastrar produto com fornecedor inexistente | Sistema recusa | Produto salvo com fornecedor que não existe |
 | CT-25 | Cadastrar fornecedor com CNPJ repetido ou inválido | Sistema recusa e avisa | Fornecedor salvo com CNPJ duplicado ou inválido |

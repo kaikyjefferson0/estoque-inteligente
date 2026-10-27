@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.deps import get_current_user, require_admin
+from app.core.deps import get_current_user
 from app.schemas.products import ProductCreate, ProductOut, ProductUpdate
 from app.services import products as service
 
@@ -41,7 +41,7 @@ def obter(produto_id: int, db: Annotated[Session, Depends(get_db)]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
 
 
-@router.patch("/{produto_id}", response_model=ProductOut, dependencies=[Depends(require_admin)])
+@router.patch("/{produto_id}", response_model=ProductOut, dependencies=[Depends(get_current_user)])
 def atualizar(produto_id: int, dados: ProductUpdate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.atualizar_produto(db, produto_id, dados.model_dump(exclude_unset=True))

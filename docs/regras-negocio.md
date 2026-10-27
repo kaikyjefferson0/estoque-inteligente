@@ -13,7 +13,7 @@
 - RN-04: o código de barras do produto é único.
 - RN-05: o produto tem estoque mínimo, indica se controla validade e, se controlar, quantos dias de antecedência para o alerta.
 - RN-06: no fornecedor só o nome é obrigatório; CNPJ é opcional.
-- RN-19: Admin e operador podem cadastrar produtos e fornecedores. Só o admin edita produtos e fornecedores já cadastrados.
+- RN-19: Admin e operador podem cadastrar e editar produtos e fornecedores.
 - RN-23: produtos e fornecedores nunca são apagados (não existe exclusão).
 - RN-24: cada produto pode ter um fornecedor (opcional), e esse fornecedor precisa existir.
 - RN-25: o CNPJ, quando informado, tem 14 dígitos e é único.
