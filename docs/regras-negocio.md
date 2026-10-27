@@ -8,6 +8,9 @@
 - RN-20: não existe auto-cadastro. Só o admin cria usuários, e o primeiro admin é criado por script no terminal.
 - RN-21: usuário inativo não consegue entrar.
 - RN-22: o admin não pode desativar a si mesmo nem mudar o próprio perfil, para o sistema nunca ficar sem admin.
+- RN-47: o login aceita no máximo 10 tentativas por minuto por IP; acima disso responde 429 "Muitas tentativas. Aguarde um minuto e tente de novo." O IP vem do cabeçalho X-Forwarded-For quando a API está atrás de um proxy confiável (Render).
+- RN-48: cada usuário pode trocar a própria senha informando a senha atual; a nova tem no mínimo 8 caracteres e precisa ser diferente da atual. A troca invalida todos os tokens emitidos antes dela.
+- RN-49: o admin pode definir uma nova senha para outro usuário (não para si mesmo), o que também invalida os tokens desse usuário.
 
 ## Cadastros
 - RN-04: o código de barras do produto é único.

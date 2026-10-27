@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -48,6 +50,12 @@ def criar_usuario(db: Session, nome: str, email: str, senha: str, perfil: str) -
     return usuario
 
 
+def gravar_senha(usuario: User, senha: str) -> None:
+    """Grava o hash da nova senha e marca a troca: tokens emitidos antes deixam de valer (RN-48, RN-49)."""
+    usuario.senha_hash = hash_password(senha)
+    usuario.senha_alterada_em = datetime.now(timezone.utc)
+
+
 def listar_usuarios(db: Session) -> list[User]:
     return list(db.scalars(select(User).order_by(User.id)))
 
@@ -83,3 +91,12 @@ def atualizar_usuario(db: Session, admin: User, usuario_id: int, dados: dict) ->
     db.commit()
     db.refresh(usuario)
     return usuario
+
+
+def definir_senha(db: Session, admin: User, usuario_id: int, senha_nova: str) -> None:
+    """RN-49: o admin define a senha de outro usuário; a própria só pela troca com a senha atual (RN-48)."""
+    usuario = obter_usuario(db, usuario_id)
+    if usuario.id == admin.id:
+        raise AutoAlteracaoProibidaError("Para trocar a sua senha, use Minha conta e informe a senha atual.")
+    gravar_senha(usuario, senha_nova)
+    db.commit()

@@ -4,9 +4,11 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, model_validator
 
 SENHA_MINIMA = 8
+SENHA_MAXIMA = 128
 
 Nome = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 Perfil = Literal["admin", "operador"]  # RN-01
+SenhaNova = Annotated[str, Field(min_length=SENHA_MINIMA, max_length=SENHA_MAXIMA)]
 
 
 class UserCreate(BaseModel):
@@ -14,7 +16,7 @@ class UserCreate(BaseModel):
 
     nome: Nome
     email: EmailStr
-    senha: str = Field(min_length=SENHA_MINIMA, max_length=128)
+    senha: SenhaNova
     perfil: Perfil
 
 
@@ -33,6 +35,14 @@ class UserUpdate(BaseModel):
         if nulos:
             raise ValueError(f"Preencha ou retire do envio: {', '.join(sorted(nulos))}.")
         return self
+
+
+class UserPasswordIn(BaseModel):
+    """RN-49: o admin define a nova senha de outro usuário."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    senha_nova: SenhaNova
 
 
 class UserOut(BaseModel):

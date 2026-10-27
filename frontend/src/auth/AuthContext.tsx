@@ -9,6 +9,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate()
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [carregando, setCarregando] = useState(() => lerToken() !== null)
+  const [senhaTrocada, setSenhaTrocada] = useState(false)
 
   useEffect(() => {
     if (!lerToken()) return
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     salvarToken(token.access_token)
     try {
       setUsuario(await api<Usuario>('/auth/me'))
+      setSenhaTrocada(false)
     } catch (erro) {
       apagarToken()
       throw erro
@@ -55,9 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     navigate('/login', { replace: true })
   }, [navigate])
 
+  // Sem navigate aqui: ao perder o usuário, a RotaProtegida já leva ao login
+  const sairAposTrocarSenha = useCallback(() => {
+    apagarToken()
+    setSenhaTrocada(true)
+    setUsuario(null)
+  }, [])
+
   const valor = useMemo(
-    () => ({ usuario, carregando, entrar, sair, atualizarUsuario: setUsuario }),
-    [usuario, carregando, entrar, sair],
+    () => ({ usuario, carregando, entrar, sair, sairAposTrocarSenha, senhaTrocada, atualizarUsuario: setUsuario }),
+    [usuario, carregando, entrar, sair, sairAposTrocarSenha, senhaTrocada],
   )
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>

@@ -23,3 +23,5 @@ class User(Base):
     # RN-21: usuário inativo não entra
     ativo: Mapped[bool] = mapped_column(Boolean, default=True, server_default=true())
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # RN-48 e RN-49: tokens emitidos antes da última troca de senha não valem; vazio se nunca trocou
+    senha_alterada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

@@ -30,6 +30,11 @@ def ler_cors_origins(valor: str | None) -> list[str]:
     return origens or [CORS_ORIGINS_PADRAO]
 
 
+def ler_booleano(valor: str | None) -> bool:
+    """Liga só com true, 1, sim, yes ou on (sem diferenciar maiúsculas); o resto desliga."""
+    return (valor or "").strip().lower() in ("true", "1", "sim", "yes", "on")
+
+
 class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
@@ -38,6 +43,9 @@ class Settings:
     TEST_DATABASE_URL: str = os.getenv("TEST_DATABASE_URL", "")
     # Opcional: origens do frontend autorizadas a chamar a API
     CORS_ORIGINS: list[str] = ler_cors_origins(os.getenv("CORS_ORIGINS"))
+    # RN-47: só ligar quando a API estiver atrás de um proxy confiável (Render);
+    # desligada, o X-Forwarded-For é ignorado e vale o IP da conexão
+    TRUST_PROXY_HEADERS: bool = ler_booleano(os.getenv("TRUST_PROXY_HEADERS"))
 
     def __init__(self) -> None:
         faltando = [nome for nome in ("DATABASE_URL", "SECRET_KEY") if not getattr(self, nome).strip()]

@@ -1,10 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
+from app.core.limiter import limite_excedido, limiter
 from app.routers import alerts, auth, dashboard, products, stock, suppliers, users
 
 app = FastAPI(title="Estoque Inteligente")
+
+# RN-47: limite de tentativas no login (o decorador fica na rota)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, limite_excedido)
 
 # O token vai no cabeçalho Authorization (não em cookie), então não há credenciais de cookie
 app.add_middleware(

@@ -34,6 +34,8 @@ const MENSAGEM_POR_STATUS: Record<number, string> = {
   404: 'O item não foi encontrado. Ele pode ter sido removido; atualize a página.',
   409: 'Os dados entram em conflito com um registro existente. Confira e tente de novo.',
   422: 'Alguns campos estão inválidos. Corrija os destacados e tente de novo.',
+  // RN-47: limite de tentativas de login
+  429: 'Muitas tentativas. Aguarde um minuto e tente de novo.',
 }
 
 const MENSAGEM_SERVIDOR = 'O servidor falhou ao responder. Tente de novo em instantes.'

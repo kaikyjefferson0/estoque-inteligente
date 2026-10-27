@@ -1,16 +1,30 @@
+/* ---------- Lista de usuários ---------- */
+/* O painel decide a forma pela própria largura: blocos empilhados quando estreito, tabela quando largo.
+   Assim a tabela nunca fica espremida, com ou sem o menu lateral. */
+.usuarios {
+  container-type: inline-size;
+}
+
+.usuarios__identificacao {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Nome com reticências e a marca "Você" sempre inteira ao lado */
+.usuarios__linha-nome {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-width: 0;
+}
+
 .usuarios__nome {
-  min-width: var(--largura-nome);
   font-weight: var(--peso-medio);
-  overflow-wrap: anywhere;
 }
 
-.usuarios__sem-quebra {
-  white-space: nowrap;
-}
-
-/* Marca a linha do usuário logado (RN-22: perfil e situação dele não mudam) */
 .usuarios__voce {
-  margin-left: var(--esp-2);
+  flex-shrink: 0;
   padding: var(--esp-0) var(--esp-2);
   border-radius: var(--raio-p);
   background: var(--cor-primaria-clara);
@@ -23,7 +37,6 @@
 .usuarios__email {
   font-size: var(--fs-2);
   color: var(--cor-texto-suave);
-  overflow-wrap: anywhere;
 }
 
 .usuarios__perfil,
@@ -32,22 +45,83 @@
   white-space: nowrap;
 }
 
-.usuarios__acao {
-  text-align: right;
+.usuarios__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-1);
 }
 
 /* Inativo: discreto, mas legível */
-.usuarios__linha[data-inativo] .usuarios__nome {
+[data-inativo] .usuarios__nome {
   font-weight: var(--peso-normal);
   color: var(--cor-texto-suave);
 }
 
-.usuarios__linha[data-inativo] .usuarios__perfil,
-.usuarios__linha[data-inativo] .usuarios__situacao {
+[data-inativo] .usuarios__perfil,
+[data-inativo] .usuarios__situacao {
   color: var(--cor-texto-suave);
 }
 
-/* Formulário: motivo dos campos bloqueados no próprio cadastro (RN-22) */
+/* Estreito: um usuário por bloco (nome, e-mail, perfil e situação, ações embaixo) */
+.usuarios__blocos {
+  margin: var(--esp-0);
+  padding: var(--esp-0);
+  list-style: none;
+}
+
+.usuarios__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
+  min-width: 0;
+  padding: var(--esp-3) var(--esp-4);
+}
+
+.usuarios__bloco + .usuarios__bloco {
+  border-top: var(--borda);
+}
+
+.usuarios__detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-1) var(--esp-4);
+  margin: var(--esp-0);
+}
+
+/* Os botões começam alinhados ao texto: o recuo desconta o padding do fantasma (a borda de 1px fica) */
+.usuarios__bloco .usuarios__acoes {
+  margin-left: calc(-1 * var(--esp-4));
+}
+
+.usuarios__tabela {
+  display: none;
+}
+
+/* Largo: tabela com nome e e-mail na mesma célula; a célula do usuário cede espaço (max-width: 0) */
+/* 53rem: a coluna do usuário fica com pelo menos uns 280px; abaixo disso, blocos */
+@container (min-width: 53rem) {
+  .usuarios__blocos {
+    display: none;
+  }
+
+  .usuarios__tabela {
+    display: table;
+  }
+
+  .usuarios__celula-usuario {
+    width: 100%;
+    max-width: var(--esp-0);
+  }
+
+  /* Grade de duas casas: "Editar" fica na mesma coluna em todas as linhas, mesmo sem a segunda ação */
+  .usuarios__celula-acoes .usuarios__acoes {
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: start;
+  }
+}
+
+/* ---------- Formulário: motivo dos campos bloqueados no próprio cadastro (RN-22) ---------- */
 .usuario-form__motivo {
   display: flex;
   align-items: flex-start;
@@ -62,53 +136,9 @@
   height: var(--icone-p);
 }
 
-/* Celular: nome e e-mail em cima; perfil e situação embaixo; "Editar" à direita */
-@media (max-width: 640px) {
-  .usuarios thead {
-    display: none;
-  }
-
-  .usuarios tbody tr {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas:
-      'nome nome acao'
-      'email email acao'
-      'perfil situacao acao';
-    align-items: center;
-    column-gap: var(--esp-3);
-    padding: var(--esp-3) var(--esp-4);
-  }
-
-  .usuarios tbody tr + tr {
-    border-top: var(--borda);
-  }
-
-  .usuarios td,
-  .usuarios tbody tr + tr td {
-    padding: var(--esp-0);
-    border-top: 0;
-  }
-
-  .usuarios__nome {
-    grid-area: nome;
-    min-width: 0;
-  }
-
-  .usuarios__email {
-    grid-area: email;
-  }
-
-  .usuarios__perfil {
-    grid-area: perfil;
-  }
-
-  .usuarios__situacao {
-    grid-area: situacao;
-    color: var(--cor-texto-suave);
-  }
-
-  .usuarios__acao {
-    grid-area: acao;
-  }
+/* ---------- Janela "Definir nova senha" ---------- */
+.definir-senha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
 }

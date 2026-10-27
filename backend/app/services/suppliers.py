@@ -25,13 +25,12 @@ class FornecedorNaoEncontradoError(Exception):
 def normalizar_cnpj(cnpj: str | None) -> str | None:
     """RN-25: aceita com ou sem pontuação e devolve só os 14 números.
 
-    RN-06: CNPJ vazio conta como não informado.
+    RN-06: CNPJ vazio (ou só espaços) conta como não informado. Só pontuação,
+    como "../-", foi informado e não tem os 14 números, então é recusado.
     """
-    if cnpj is None:
+    if cnpj is None or not cnpj.strip():
         return None
     digitos = PONTUACAO_CNPJ.sub("", cnpj)
-    if not digitos:
-        return None
     if not CNPJ_14_DIGITOS.fullmatch(digitos):
         raise CnpjInvalidoError("O CNPJ tem 14 números. Complete o número ou deixe em branco.")
     return digitos

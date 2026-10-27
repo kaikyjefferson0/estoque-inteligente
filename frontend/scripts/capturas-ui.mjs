@@ -1,6 +1,8 @@
 // Capturas para revisão visual (usado pelo agente ui-reviewer).
 // Uso, dentro de frontend:
 //   node scripts\capturas-ui.mjs <pasta-de-saida> [endereco-do-site]
+//   node scripts\capturas-ui.mjs <pasta-de-saida> [endereco-do-site] usuario
+//   (só a área de usuário nas cinco larguras, com a API simulada; não precisa de login real)
 // Login real: defina UI_EMAIL e UI_SENHA no ambiente (nunca grave em arquivo).
 // Os estados de carregando, erro e vazio do dashboard são simulados
 // interceptando GET /dashboard; o resto usa a API de verdade.
@@ -10,6 +12,7 @@ import { chromium } from 'playwright'
 
 const saida = process.argv[2]
 const site = (process.argv[3] ?? 'http://localhost:5173').replace(/\/+$/, '')
+const secao = process.argv[4]
 const email = process.env.UI_EMAIL
 const senha = process.env.UI_SENHA
 
@@ -20,6 +23,8 @@ if (!saida) {
 mkdirSync(saida, { recursive: true })
 
 const LARGURAS = { celular: 375, computador: 1280 }
+// Revisão de textos longos e listas: as cinco larguras da skill frontend-page
+const LARGURAS_REVISAO = { l320: 320, l375: 375, l414: 414, l768: 768, l1280: 1280 }
 const ESCALA = new Set([0, 4, 8, 12, 16, 24, 32, 48])
 const relatorio = { site, capturas: [], verificacoes: {} }
 
@@ -350,6 +355,14 @@ const USUARIOS = [
   { id: 4, nome: 'Roberto de Albuquerque Lima Filho', email: 'roberto.albuquerque.lima@distribuidora-exemplo.com.br', perfil: 'admin', ativo: true, criado_em: '2026-04-01T00:00:00Z' },
 ]
 
+// Nomes e e-mails de 40 caracteres, inclusive um nome sem espaço, para testar reticências
+const USUARIOS_LONGOS = [
+  { id: 1, nome: 'Maximiliano Bartholomeu Vasconcelos Neto', email: 'maximiliano.vasconcelos.neto@empresa.com', perfil: 'admin', ativo: true, criado_em: '2026-01-01T00:00:00Z' },
+  { id: 2, nome: 'Anaclaudiafernandesdeoliveiramartinsrosa', email: 'anaclaudia.fernandes.oliveira@empresa.co', perfil: 'operador', ativo: true, criado_em: '2026-02-01T00:00:00Z' },
+  { id: 3, nome: 'Maria Souza', email: 'maria.souza@exemplo.com', perfil: 'operador', ativo: false, criado_em: '2026-03-01T00:00:00Z' },
+  { id: 4, nome: 'Roberto de Albuquerque Lima Filho Santos', email: 'roberto.albuquerque.lima@distribuidora.br', perfil: 'admin', ativo: true, criado_em: '2026-04-01T00:00:00Z' },
+]
+
 function dadosDosAlertas() {
   const agora = Date.now()
   const atras = (minutos) => new Date(agora - minutos * 60000).toISOString()
@@ -375,6 +388,15 @@ async function simularEstoque(page, cenario, perfil) {
       const partes = url.pathname.split('/').filter(Boolean)
       const metodo = req.method()
       if (partes[0] === 'auth' && partes[1] === 'login') return json(rota, 200, { access_token: 'simulado', token_type: 'bearer' })
+      if (partes[0] === 'auth' && partes[1] === 'change-password') {
+        // RN-48: "errada-123" faz o papel da senha atual errada
+        const corpo = req.postDataJSON()
+        if (corpo.senha_atual === 'errada-123') {
+          return json(rota, 422, { detail: [{ loc: ['body', 'senha_atual'], msg: 'A senha atual não confere. Digite a senha que você usa para entrar.' }] })
+        }
+        return rota.fulfill({ status: 204 })
+      }
+      if (partes[0] === 'auth' && cenario.nomesLongos) return json(rota, 200, USUARIOS_LONGOS[0])
       if (partes[0] === 'auth') {
         const nome = perfil === 'admin' ? 'Carla Administradora' : 'Ana Operadora'
         return json(rota, 200, { id: 1, nome, email: 'teste@exemplo.com', perfil, ativo: true, criado_em: '2026-01-01T00:00:00Z' })
@@ -400,12 +422,15 @@ async function simularEstoque(page, cenario, perfil) {
       }
       if (partes[0] === 'users') {
         const id = Number(partes[1])
+        const lista = cenario.nomesLongos ? USUARIOS_LONGOS : USUARIOS
         if (metodo === 'GET' && !partes[1]) {
           if (cenario.users === 'carregando') return new Promise(() => {})
           if (cenario.users === 'erro') return json(rota, 500, {})
-          return json(rota, 200, USUARIOS)
+          return json(rota, 200, lista)
         }
-        const usuario = USUARIOS.find((u) => u.id === id)
+        // RN-49: o admin define a senha de outro usuário
+        if (partes[2] === 'password') return rota.fulfill({ status: 204 })
+        const usuario = lista.find((u) => u.id === id)
         if (metodo === 'GET') return usuario ? json(rota, 200, usuario) : json(rota, 404, { detail: 'Usuário não encontrado' })
         const corpo = req.postDataJSON()
         if (metodo === 'POST') {
@@ -804,9 +829,106 @@ async function capturarAlertasEUsuarios(rotulo, largura) {
   await operador.contexto.close()
 }
 
+// ---------- Área de usuário com nomes e e-mails longos, nas cinco larguras ----------
+// Mede, além do padrão: textos cortados sem title e elementos que passam da largura da tela
+async function textosLongos(page) {
+  return page.evaluate(() => {
+    const cortados = [...document.querySelectorAll('.texto-cortado')].filter((el) => el.getClientRects().length > 0)
+    const largura = document.documentElement.clientWidth
+    const descrever = (el) => el.tagName.toLowerCase() + (el.classList.length ? `.${[...el.classList].join('.')}` : '')
+    return {
+      cortadosComReticencias: cortados.filter((el) => el.scrollWidth > el.clientWidth).length,
+      cortadosSemTitleIgualAoTexto: cortados.filter((el) => el.title !== el.textContent).map(descrever),
+      alemDaTela: [...document.querySelectorAll('body *')]
+        .filter((el) => {
+          const r = el.getBoundingClientRect()
+          return r.width > 0 && (r.right > largura + 1 || r.left < -1) && !el.closest('.visualmente-oculto')
+        })
+        .map(descrever)
+        .slice(0, 20),
+    }
+  })
+}
+
+async function capturarAreaDoUsuario(rotulo, largura) {
+  const cenario = { nomesLongos: true }
+  const r = (nome) => `${rotulo}-usuario-${nome}`
+  const v = (nome, valor) => (relatorio.verificacoes[r(nome)] = valor)
+  const abrir = () => novaPagina(largura, cenario, 'admin')
+  const passo = async (page, nome, opcoes) => {
+    await capturar(page, r(nome), largura, opcoes)
+    v(`${nome}-textos-longos`, await textosLongos(page))
+  }
+
+  // Cabeçalho e menu do usuário
+  const conta = await abrir()
+  const page = conta.page
+  await passo(page, 'cabecalho')
+  await page.locator('.usuario').click()
+  await page.getByRole('menu').waitFor()
+  await passo(page, 'menu', { verificarPagina: false })
+  await page.getByRole('menuitem', { name: 'Minha conta' }).click()
+
+  // Minha conta: dados inteiros, validação, senha atual errada e troca concluída
+  await page.getByRole('heading', { name: 'Minha conta', level: 1 }).waitFor()
+  await passo(page, 'minha-conta')
+  await page.getByRole('button', { name: 'Trocar senha' }).click()
+  v('minha-conta-validacao-foco', await focoAtual(page))
+  await passo(page, 'minha-conta-validacao', { verificarPagina: false })
+  await page.getByLabel('Senha atual').fill('errada-123')
+  await page.getByLabel('Nova senha', { exact: true }).fill('senha-nova-456')
+  await page.getByLabel('Confirme a nova senha').fill('senha-nova-456')
+  await page.getByRole('button', { name: 'Trocar senha' }).click()
+  await page.locator('.campo__erro', { hasText: 'A senha atual não confere' }).waitFor()
+  v('minha-conta-senha-errada-foco', await focoAtual(page))
+  await passo(page, 'minha-conta-senha-errada', { verificarPagina: false })
+  await page.getByLabel('Senha atual').fill('senha-atual-123')
+  await page.getByRole('button', { name: 'Trocar senha' }).click()
+  await page.getByText('Senha trocada. Entre com a nova senha.').waitFor()
+  v('minha-conta-depois-vai-para', new URL(page.url()).pathname)
+  await passo(page, 'login-depois-da-troca')
+  v('erros-no-console-conta', conta.erros)
+  await conta.contexto.close()
+
+  // Usuários: lista, "Definir nova senha", cadastro e edição
+  const admin = await abrir()
+  const p2 = admin.page
+  await p2.goto(`${site}/usuarios`)
+  await p2.getByRole('heading', { name: 'Usuários', level: 1 }).waitFor()
+  v('lista-forma', await p2.evaluate(() => (getComputedStyle(document.querySelector('.usuarios__tabela')).display === 'none' ? 'blocos' : 'tabela')))
+  v('lista-proprio-com-definir-senha', await p2.getByRole('button', { name: /^Definir nova senha de Maximiliano/ }).count())
+  await passo(p2, 'lista')
+  await p2.getByRole('button', { name: /^Definir nova senha de Anaclaudia/ }).locator('visible=true').click()
+  await p2.getByRole('alertdialog').waitFor()
+  await passo(p2, 'definir-senha', { verificarPagina: false })
+  await p2.getByRole('alertdialog').getByRole('button', { name: 'Definir nova senha' }).click()
+  v('definir-senha-validacao-foco', await focoAtual(p2))
+  await passo(p2, 'definir-senha-validacao', { verificarPagina: false })
+  await p2.getByLabel('Nova senha', { exact: true }).fill('senha-nova-456')
+  await p2.getByLabel('Confirme a nova senha').fill('senha-nova-456')
+  await p2.getByRole('alertdialog').getByRole('button', { name: 'Definir nova senha' }).click()
+  await p2.getByText(/^Senha de .* definida/).waitFor()
+  await passo(p2, 'definir-senha-concluida', { verificarPagina: false })
+  await p2.goto(`${site}/usuarios/novo`)
+  await p2.getByRole('heading', { name: 'Cadastrar usuário', level: 1 }).waitFor()
+  await passo(p2, 'cadastro')
+  await p2.goto(`${site}/usuarios/2/editar`)
+  await p2.getByLabel('Usuário ativo').waitFor()
+  await passo(p2, 'edicao')
+  await p2.getByLabel('Usuário ativo').uncheck()
+  await p2.getByRole('button', { name: 'Salvar alterações' }).click()
+  await p2.getByRole('alertdialog').waitFor()
+  await passo(p2, 'edicao-desativar', { verificarPagina: false })
+  v('erros-no-console-usuarios', admin.erros)
+  await admin.contexto.close()
+}
+
 const navegador = await chromium.launch()
 try {
-  for (const [rotulo, largura] of Object.entries(LARGURAS)) {
+  if (secao === 'usuario') {
+    for (const [rotulo, largura] of Object.entries(LARGURAS_REVISAO)) await capturarAreaDoUsuario(rotulo, largura)
+  }
+  for (const [rotulo, largura] of secao === 'usuario' ? [] : Object.entries(LARGURAS)) {
     // reducedMotion: menus e gaveta aparecem já abertos, sem captura no meio da animação
     const contexto = await navegador.newContext({
       viewport: { width: largura, height: largura < 900 ? 812 : 800 },
@@ -985,7 +1107,7 @@ try {
     await contexto.close()
   }
 
-  for (const [rotulo, largura] of Object.entries(LARGURAS)) {
+  for (const [rotulo, largura] of secao === 'usuario' ? [] : Object.entries(LARGURAS)) {
     await capturarCadastros(rotulo, largura)
     await capturarEstoque(rotulo, largura)
     await capturarAlertasEUsuarios(rotulo, largura)

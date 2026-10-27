@@ -15,17 +15,22 @@ def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
 ) -> User:
-    """RN-18 e RN-21: exige token válido de um usuário existente e ativo."""
+    """RN-18 e RN-21: exige token válido de um usuário existente e ativo.
+
+    RN-48 e RN-49: token emitido antes da última troca de senha não vale mais.
+    """
     nao_autenticado = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Sessão ausente ou expirada. Entre no sistema para continuar.",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    usuario_id = decode_access_token(token)
-    if usuario_id is None:
+    dados = decode_access_token(token)
+    if dados is None:
         raise nao_autenticado
-    usuario = db.get(User, usuario_id)
+    usuario = db.get(User, dados.usuario_id)
     if usuario is None or not usuario.ativo:
+        raise nao_autenticado
+    if usuario.senha_alterada_em is not None and dados.emitido_em < usuario.senha_alterada_em.timestamp():
         raise nao_autenticado
     return usuario
 

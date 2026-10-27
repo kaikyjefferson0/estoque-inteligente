@@ -2,15 +2,15 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password, verify_password
 from app.models.user import User
-from app.services.users import buscar_por_email
+from app.schemas.users import SENHA_MAXIMA
+from app.services.users import buscar_por_email, gravar_senha
 
 # Hash de uma senha qualquer, usado quando o e-mail não existe: assim o login
 # sempre roda uma verificação Argon2 e o tempo de resposta não revela se o e-mail existe.
 _HASH_FALSO = hash_password("senha-falsa-para-equalizar-tempo")
 
-# Limites de entrada do login: o mesmo máximo de senha do cadastro e o tamanho da coluna users.email.
+# Limite de e-mail do login: o tamanho da coluna users.email (a senha usa o mesmo máximo do cadastro).
 EMAIL_MAXIMO = 255
-SENHA_MAXIMA = 128
 
 
 def autenticar(db: Session, email: str, senha: str) -> User | None:
@@ -27,3 +27,21 @@ def autenticar(db: Session, email: str, senha: str) -> User | None:
     if not usuario.ativo:
         return None
     return usuario
+
+
+class SenhaAtualIncorretaError(Exception):
+    pass
+
+
+class SenhaNovaIgualError(Exception):
+    pass
+
+
+def trocar_senha(db: Session, usuario: User, senha_atual: str, senha_nova: str) -> None:
+    """RN-48: confere a senha atual, exige uma nova diferente e invalida os tokens anteriores."""
+    if not verify_password(senha_atual, usuario.senha_hash):
+        raise SenhaAtualIncorretaError()
+    if verify_password(senha_nova, usuario.senha_hash):
+        raise SenhaNovaIgualError()
+    gravar_senha(usuario, senha_nova)
+    db.commit()

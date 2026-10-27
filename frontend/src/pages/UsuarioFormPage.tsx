@@ -15,6 +15,7 @@ import { Carregando, ErroEstado } from '../components/Estados'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import { NOME_DO_PERFIL, type Perfil, type Usuario } from '../types/auth'
+import { SENHA_MAXIMA, SENHA_MINIMA } from '../utils/senha'
 import './UsuariosPage.css'
 
 // Ordem dos campos na tela: o foco vai para o primeiro inválido
@@ -23,8 +24,6 @@ type CampoUsuario = (typeof CAMPOS)[number]
 
 const MAX_NOME = 120
 const MAX_EMAIL = 254
-const SENHA_MINIMA = 8
-const SENHA_MAXIMA = 128
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // RN-22: motivo mostrado quando o admin abre o próprio cadastro
 const ID_MOTIVO = 'motivo-proprio-usuario'
@@ -134,7 +133,12 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
         erro={erros.nome}
       />
       {inicial ? (
-        <Campo rotulo="E-mail" name="email" value={email} readOnly dica="O e-mail é o login e não pode ser alterado." />
+        // Texto, não campo: o e-mail longo aparece inteiro, quebrando a linha (é o detalhe do usuário)
+        <div className="campo">
+          <p className="campo__rotulo">E-mail</p>
+          <p className="texto-inteiro">{email}</p>
+          <p className="campo__dica">O e-mail é o login e não pode ser alterado.</p>
+        </div>
       ) : (
         <Campo
           rotulo="E-mail"

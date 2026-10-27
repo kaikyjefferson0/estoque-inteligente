@@ -99,3 +99,14 @@
 |---|---|---|---|
 | CT-52 | Buscar produto pelo código de barras exato (admin ou operador) | Devolve o produto com esse código; código inexistente ou só parecido devolve 404; sem login devolve 401 | Devolve outro produto com código parecido ou aceita sem login |
 | CT-53 | Consultar o saldo de produto com lote vencido, lote a vencer e lote em dia | Cada lote vem com a situação vencido, a_vencer ou ok, pelas mesmas condições dos alertas e com o "hoje" de Brasília; vencer hoje é a_vencer | Situação diferente da usada nos alertas ou calculada no fuso UTC |
+
+## Senhas e tentativas
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-54 | Fazer a 11ª tentativa de login no mesmo minuto, do mesmo IP | Sistema responde 429 "Muitas tentativas. Aguarde um minuto e tente de novo." | Tentativa processada normalmente |
+| CT-55 | Trocar a senha informando a senha atual errada | Sistema recusa e a senha continua a mesma | Senha trocada |
+| CT-56 | Trocar a senha e usar o token antigo | O token antigo deixa de valer (401) e a senha nova entra | Token antigo continua valendo ou a senha nova não entra |
+| CT-57 | Admin define nova senha para um operador | O operador entra com a nova senha e o token antigo dele deixa de valer | Senha antiga continua entrando ou o token antigo vale |
+| CT-58 | Admin tenta definir a própria senha pela rota de admin | Sistema recusa | Senha do admin trocada sem informar a senha atual |
+| CT-59 | Operador tenta definir a senha de outro usuário | Acesso bloqueado (403) | Senha do outro usuário trocada |

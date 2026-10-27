@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import require_admin
 from app.models.user import User
-from app.schemas.users import UserCreate, UserOut, UserUpdate
+from app.schemas.users import UserCreate, UserOut, UserPasswordIn, UserUpdate
 from app.services import users as service
 
 # RN-02 e RN-20: toda a área de usuários é só do admin
@@ -43,6 +43,21 @@ def atualizar(
 ):
     try:
         return service.atualizar_usuario(db, admin, usuario_id, dados.model_dump(exclude_unset=True))
+    except service.UsuarioNaoEncontradoError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado. Atualize a lista de usuários.")
+    except service.AutoAlteracaoProibidaError as erro:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
+
+
+@router.post("/{usuario_id}/password", status_code=status.HTTP_204_NO_CONTENT)
+def definir_senha(
+    usuario_id: int,
+    dados: UserPasswordIn,
+    admin: Annotated[User, Depends(require_admin)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    try:
+        service.definir_senha(db, admin, usuario_id, dados.senha_nova)
     except service.UsuarioNaoEncontradoError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado. Atualize a lista de usuários.")
     except service.AutoAlteracaoProibidaError as erro:

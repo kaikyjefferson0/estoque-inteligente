@@ -4,11 +4,12 @@ import { useAuth } from './useAuth'
 
 /** Exige login; quem não está logado vai para /login e volta depois para onde estava. */
 export function RotaProtegida() {
-  const { usuario, carregando } = useAuth()
+  const { usuario, carregando, senhaTrocada } = useAuth()
   const location = useLocation()
 
   if (carregando) return <Carregando texto="Conferindo sua sessão…" telaCheia />
-  if (!usuario) return <Navigate to="/login" replace state={{ de: location.pathname }} />
+  // Depois de trocar a senha, o novo login vai para o painel, não de volta para Minha conta
+  if (!usuario) return <Navigate to="/login" replace state={senhaTrocada ? undefined : { de: location.pathname }} />
   return <Outlet />
 }
 

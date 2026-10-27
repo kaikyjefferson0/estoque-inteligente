@@ -10,6 +10,7 @@ import { EstoquePage } from './pages/EstoquePage'
 import { FornecedorEditarPage, FornecedorNovoPage } from './pages/FornecedorFormPage'
 import { FornecedoresPage } from './pages/FornecedoresPage'
 import { LoginPage } from './pages/LoginPage'
+import { MinhaContaPage } from './pages/MinhaContaPage'
 import { NaoEncontradaPage } from './pages/NaoEncontradaPage'
 import { ProdutoDetalhePage } from './pages/ProdutoDetalhePage'
 import { ProdutoEditarPage, ProdutoNovoPage } from './pages/ProdutoFormPage'
@@ -42,6 +43,8 @@ export default function App() {
               <Route path="saida" element={<SaidaPage />} />
               {/* RN-43: admin e operador veem os alertas */}
               <Route path="alertas" element={<AlertasPage />} />
+              {/* RN-48: cada usuário vê os próprios dados e troca a própria senha */}
+              <Route path="minha-conta" element={<MinhaContaPage />} />
               {/* RN-02 e RN-32: só o admin ajusta e cuida dos usuários; o operador é levado ao painel */}
               <Route element={<RotaAdmin />}>
                 <Route path="ajustes" element={<AjustesPage />} />

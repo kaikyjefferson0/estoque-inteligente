@@ -1,0 +1,11 @@
+# Dependências só de desenvolvimento e testes (não vão para o Render).
+# Instale com: pip install -r requirements-dev.txt
+-r requirements.txt
+
+# Cliente HTTP do TestClient do Starlette (substitui o httpx, que gera aviso de obsoleto)
+httpx2==2.16.0
+httpcore2==2.16.0
+truststore==0.10.5
+
+# Auditoria de vulnerabilidades das dependências: pip-audit -r requirements.txt
+pip-audit==2.10.1

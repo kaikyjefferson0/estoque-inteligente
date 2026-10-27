@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 import app.models  # noqa: F401  (registra as tabelas no Base.metadata)
 from app.core.config import settings
 from app.core.database import Base, get_db
+from app.core.limiter import limiter
 from app.core.security import create_access_token
 from app.main import app
 from app.services.products import criar_produto
@@ -69,6 +70,14 @@ def client(db) -> Generator[TestClient, None, None]:
             yield c
     finally:
         app.dependency_overrides.clear()
+
+
+@pytest.fixture(autouse=True)
+def limite_de_login_zerado():
+    """RN-47: a contagem de tentativas fica em memória; cada teste começa do zero."""
+    limiter.reset()
+    yield
+    limiter.reset()
 
 
 @pytest.fixture

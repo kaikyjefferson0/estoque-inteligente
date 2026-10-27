@@ -362,6 +362,23 @@
   margin-top: var(--esp-2);
 }
 
+/* ---------- Texto longo (nome, e-mail) ---------- */
+/* Uma linha com reticências; o texto inteiro vai no title (mouse) e na tela de detalhe.
+   O pai precisa deixar o item encolher (min-width: 0 em flex ou grid). */
+.texto-cortado {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Texto longo mostrado por inteiro (detalhe): quebra até no meio da palavra, sem estourar */
+.texto-inteiro {
+  overflow-wrap: anywhere;
+}
+
 /* ---------- Página e painel ---------- */
 .pagina {
   display: flex;
@@ -380,6 +397,7 @@
 
 .pagina__apoio {
   margin-top: var(--esp-1);
+  overflow-wrap: anywhere;
   font-size: var(--fs-2);
   color: var(--cor-texto-suave);
 }
@@ -429,6 +447,9 @@
   left: 50%;
   z-index: var(--camada-sobreposicao);
   width: min(var(--largura-dialogo), calc(100vw - 2 * var(--esp-4)));
+  /* Tela baixa (teclado aberto, celular deitado): a janela rola por dentro em vez de sair da tela */
+  max-height: calc(100dvh - 2 * var(--esp-4));
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
@@ -442,12 +463,14 @@
 
 .dialogo__titulo {
   margin: var(--esp-0);
+  overflow-wrap: anywhere;
   font-size: var(--fs-4);
   font-weight: var(--peso-medio);
 }
 
 .dialogo__descricao {
   margin: var(--esp-0);
+  overflow-wrap: anywhere;
   font-size: var(--fs-2);
   color: var(--cor-texto-suave);
 }
@@ -460,10 +483,23 @@
   margin-top: var(--esp-2);
 }
 
+/* Celular estreito: botões empilhados com largura total, a ação principal em cima */
+@media (max-width: 400px) {
+  .dialogo__acoes {
+    flex-direction: column-reverse;
+  }
+
+  .dialogo__acoes .botao {
+    width: 100%;
+  }
+}
+
 /* ---------- Menu suspenso ---------- */
 .suspenso {
   z-index: var(--camada-sobreposicao);
   min-width: var(--largura-suspenso);
+  /* Nunca mais largo que a tela, mesmo com nome ou e-mail longo */
+  max-width: calc(100vw - 2 * var(--esp-4));
   padding: var(--esp-1);
   background: var(--cor-superficie);
   border: var(--borda);
@@ -479,6 +515,7 @@
 .suspenso__nome {
   font-size: var(--fs-2);
   font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
 }
 
 .suspenso__email {
@@ -501,6 +538,9 @@
   padding: var(--esp-0) var(--esp-3);
   border-radius: var(--raio-p);
   font-size: var(--fs-2);
+  /* O item também pode ser um link (ex.: Minha conta) */
+  color: var(--cor-texto);
+  text-decoration: none;
   cursor: pointer;
   outline: none;
   transition: background-color var(--mov-rapido) var(--mov-curva);

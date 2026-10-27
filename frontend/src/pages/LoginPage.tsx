@@ -27,7 +27,7 @@ function validar(email: string, senha: string): ErrosDeCampo<CampoLogin> {
 
 export function LoginPage() {
   useTituloDaPagina('Entrar')
-  const { usuario, entrar } = useAuth()
+  const { usuario, entrar, senhaTrocada } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const estado = location.state as { de?: string; expirou?: boolean } | null
@@ -55,6 +55,9 @@ export function LoginPage() {
       // RN-03: a API devolve a mesma mensagem genérica para qualquer falha de login
       if (erro instanceof ApiError && erro.status === 401) {
         setErroGeral(`${erro.message}. Confira os dados e tente de novo.`)
+      } else if (erro instanceof ApiError && erro.status === 429) {
+        // RN-47: a API já diz quanto esperar
+        setErroGeral(erro.message)
       } else if (erro instanceof ApiError && Object.keys(erro.campos).length > 0) {
         // 422: o formulário OAuth2 chama os campos de username e password
         mostrar(form, { email: erro.campos.username, senha: erro.campos.password })
@@ -78,6 +81,11 @@ export function LoginPage() {
           <p className="login__apoio">Use o e-mail e a senha cadastrados pelo administrador.</p>
         </div>
 
+        {senhaTrocada && !erroGeral && (
+          <Aviso situacao="ok">
+            <p>Senha trocada. Entre com a nova senha.</p>
+          </Aviso>
+        )}
         {estado?.expirou && !erroGeral && (
           <Aviso situacao="atencao">
             <p>Sua sessão expirou. Entre de novo para continuar.</p>

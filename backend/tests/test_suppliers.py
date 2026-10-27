@@ -53,6 +53,21 @@ def test_cnpj_salvo_so_com_numeros(client, token_operador):
     assert resposta.json()["cnpj"] == "45997418000153"
 
 
+def test_cnpj_so_com_pontuacao_e_recusado(client, db, token_operador, token_admin, fornecedor):
+    """RN-25: só pontuação foi informado e não tem 14 números; vazio ou só espaços continua sem CNPJ (RN-06)."""
+    total_antes = db.query(Supplier).count()
+    for cnpj in (".", "../-", "  ./-  ", "..-//", ". . ."):
+        criar = client.post("/suppliers", headers=auth(token_operador), json={"nome": "Só pontuação", "cnpj": cnpj})
+        assert criar.status_code == 422, cnpj
+        editar = client.patch(f"/suppliers/{fornecedor.id}", headers=auth(token_admin), json={"cnpj": cnpj})
+        assert editar.status_code == 422, cnpj
+    assert db.query(Supplier).count() == total_antes
+
+    espacos = client.post("/suppliers", headers=auth(token_operador), json={"nome": "Espaços", "cnpj": "   "})
+    assert espacos.status_code == 201
+    assert espacos.json()["cnpj"] is None
+
+
 def test_listar_e_obter_fornecedor(client, token_operador, fornecedor):
     headers = auth(token_operador)
     lista = client.get("/suppliers", headers=headers)

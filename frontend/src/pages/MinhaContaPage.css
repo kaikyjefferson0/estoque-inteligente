@@ -1,0 +1,54 @@
+/* ---------- Minha conta ---------- */
+.conta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-4);
+  max-width: var(--largura-formulario);
+  padding: var(--esp-5);
+}
+
+.conta__titulo {
+  margin: var(--esp-0);
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+}
+
+.conta__nota {
+  margin: var(--esp-1) var(--esp-0) var(--esp-0);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.conta__dados {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  margin: var(--esp-0);
+}
+
+/* Rótulo à esquerda e valor ao lado; no celular o valor desce para baixo do rótulo */
+.conta__item {
+  display: grid;
+  grid-template-columns: var(--largura-coluna-numero) minmax(0, 1fr);
+  gap: var(--esp-1) var(--esp-4);
+}
+
+.conta__item dt {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.conta__item dd {
+  margin: var(--esp-0);
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .conta {
+    padding: var(--esp-4);
+  }
+
+  .conta__item {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

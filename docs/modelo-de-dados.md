@@ -1,7 +1,7 @@
 # Modelo de dados
 
 ## users
-id, nome, email (único), senha_hash, perfil (admin ou operador), ativo, criado_em
+id, nome, email (único), senha_hash, perfil (admin ou operador), ativo, criado_em, senha_alterada_em (vazio até a primeira troca de senha; tokens emitidos antes dela não valem, RN-48 e RN-49)
 
 ## suppliers
 id, nome, cnpj (opcional; único quando informado), criado_em

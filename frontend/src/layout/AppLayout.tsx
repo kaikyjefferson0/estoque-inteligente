@@ -1,6 +1,6 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { IconChevronDown, IconLogout, IconMenu2, IconX } from '@tabler/icons-react'
+import { IconChevronDown, IconLogout, IconMenu2, IconUserCircle, IconX } from '@tabler/icons-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { AlertasAtivosProvider } from '../alertas/AlertasAtivosProvider'
@@ -24,7 +24,9 @@ function MenuDoUsuario() {
 
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.Trigger className="usuario" aria-label={`Conta de ${usuario.nome}, ${perfil}`}>
+      {/* Nome longo ganha reticências; o texto inteiro aparece ao passar o mouse e no menu aberto */}
+      <DropdownMenu.Trigger className="usuario" aria-label={`${usuario.nome}, ${perfil}: abrir menu da conta`} title={usuario.nome}>
+        <IconUserCircle className="usuario__icone" aria-hidden />
         <span className="usuario__textos">
           <span className="usuario__nome">{usuario.nome}</span>
           <span className="usuario__perfil">{perfil}</span>
@@ -32,12 +34,18 @@ function MenuDoUsuario() {
         <IconChevronDown className="usuario__seta" aria-hidden />
       </DropdownMenu.Trigger>
       <DropdownMenu.Portal>
-        <DropdownMenu.Content className="suspenso" align="end" sideOffset={8}>
+        <DropdownMenu.Content className="suspenso" align="end" sideOffset={8} collisionPadding={16}>
           <div className="suspenso__cabecalho">
             <p className="suspenso__nome">{usuario.nome}</p>
             <p className="suspenso__email">{usuario.email}</p>
           </div>
           <DropdownMenu.Separator className="suspenso__separador" />
+          <DropdownMenu.Item className="suspenso__item" asChild>
+            <Link to="/minha-conta">
+              <IconUserCircle aria-hidden />
+              <span>Minha conta</span>
+            </Link>
+          </DropdownMenu.Item>
           <DropdownMenu.Item className="suspenso__item" onSelect={sair}>
             <IconLogout aria-hidden />
             <span>Sair</span>

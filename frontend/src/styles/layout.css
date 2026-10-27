@@ -103,7 +103,18 @@
   color: var(--cor-texto-suave);
 }
 
+/* Só aparece quando não cabe o nome (celular estreito) */
+.usuario__icone {
+  display: none;
+  flex-shrink: 0;
+  width: var(--icone-m);
+  height: var(--icone-m);
+  color: var(--cor-texto-suave);
+}
+
+/* A seta nunca encolhe, mesmo com nome longo */
 .usuario__seta {
+  flex-shrink: 0;
   width: var(--icone-p);
   height: var(--icone-p);
   color: var(--cor-texto-suave);
@@ -280,5 +291,16 @@
 
   .usuario__nome {
     max-width: 100%;
+  }
+}
+
+/* Celular estreito: o nome caberia em poucas letras; fica o ícone, e o nome inteiro aparece no menu aberto */
+@media (max-width: 400px) {
+  .usuario__textos {
+    display: none;
+  }
+
+  .usuario__icone {
+    display: block;
   }
 }

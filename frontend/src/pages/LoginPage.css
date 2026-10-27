@@ -1,5 +1,7 @@
 .login {
   display: grid;
+  /* A coluna não cresce pelo conteúdo mínimo dos campos: o painel fica centrado em 320px */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   min-height: 100vh;
   padding: var(--esp-5) var(--esp-4);

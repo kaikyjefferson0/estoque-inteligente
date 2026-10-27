@@ -1,13 +1,15 @@
-import { IconPencil, IconPlus, IconUsers } from '@tabler/icons-react'
+import { IconKey, IconPencil, IconPlus, IconUsers } from '@tabler/icons-react'
+import { useState } from 'react'
 import { useRecurso } from '../api/useRecurso'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
-import { BotaoLink } from '../components/Botao'
+import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import { NOME_DO_PERFIL, type Usuario } from '../types/auth'
 import { formatarNumero, plural } from '../utils/formato'
+import { DefinirSenhaDialogo } from './DefinirSenhaDialogo'
 import './UsuariosPage.css'
 
 function resumo(usuarios: Usuario[]): string {
@@ -16,18 +18,37 @@ function resumo(usuarios: Usuario[]): string {
   return inativos > 0 ? `${total}, ${formatarNumero(inativos)} ${plural(inativos, 'inativo', 'inativos')}` : total
 }
 
-/** A marca "Você" fica grudada na última palavra do nome, sem descer sozinha para outra linha. */
-function NomeComMarca({ nome, proprio }: { nome: string; proprio: boolean }) {
-  if (!proprio) return <>{nome}</>
-  const corte = nome.lastIndexOf(' ')
+/** Nome e e-mail em uma linha cada, com reticências; o texto inteiro fica no title e na edição. */
+function Identificacao({ usuario, proprio }: { usuario: Usuario; proprio: boolean }) {
   return (
-    <>
-      {nome.slice(0, corte + 1)}
-      <span className="usuarios__sem-quebra">
-        {nome.slice(corte + 1)}
-        <span className="usuarios__voce">Você</span>
+    <div className="usuarios__identificacao">
+      <div className="usuarios__linha-nome">
+        <span className="usuarios__nome texto-cortado" title={usuario.nome}>
+          {usuario.nome}
+        </span>
+        {/* Marca o usuário logado (RN-22: perfil e situação dele não mudam) */}
+        {proprio && <span className="usuarios__voce">Você</span>}
+      </div>
+      <span className="usuarios__email texto-cortado" title={usuario.email}>
+        {usuario.email}
       </span>
-    </>
+    </div>
+  )
+}
+
+function Acoes({ usuario, proprio, aoDefinirSenha }: { usuario: Usuario; proprio: boolean; aoDefinirSenha: () => void }) {
+  return (
+    <div className="usuarios__acoes">
+      <BotaoLink to={`/usuarios/${usuario.id}/editar`} variante="fantasma" icone={IconPencil} aria-label={`Editar ${usuario.nome}`}>
+        Editar
+      </BotaoLink>
+      {/* RN-49: a própria senha só muda em Minha conta, com a senha atual */}
+      {!proprio && (
+        <Botao variante="fantasma" icone={IconKey} onClick={aoDefinirSenha} aria-label={`Definir nova senha de ${usuario.nome}`}>
+          Definir nova senha
+        </Botao>
+      )}
+    </div>
   )
 }
 
@@ -36,8 +57,11 @@ export function UsuariosPage() {
   useTituloDaPagina('Usuários')
   const { usuario: logado } = useAuth()
   const { dados, erro, carregando, recarregar } = useRecurso<Usuario[]>('/users')
-  const mensagem = useMensagemDaNavegacao()
+  const mensagemDaNavegacao = useMensagemDaNavegacao()
+  const [definindoSenha, setDefinindoSenha] = useState<Usuario | null>(null)
+  const [mensagem, setMensagem] = useState<string | null>(null)
   const vazio = dados?.length === 0
+  const aviso = mensagem ?? mensagemDaNavegacao
 
   return (
     <div className="pagina">
@@ -55,9 +79,9 @@ export function UsuariosPage() {
         )}
       </header>
 
-      {mensagem && (
+      {aviso && (
         <Aviso situacao="ok">
-          <p>{mensagem}</p>
+          <p className="texto-inteiro">{aviso}</p>
         </Aviso>
       )}
 
@@ -80,14 +104,31 @@ export function UsuariosPage() {
         </div>
       )}
 
+      {/* Duas formas da mesma lista: o painel escolhe pela própria largura (container query).
+          Estreito (celular e tablet): um usuário por bloco. Largo: tabela. A escondida sai da leitura de tela. */}
       {dados && !vazio && (
-        <div className="painel">
-          <table className="tabela usuarios">
+        <div className="painel usuarios">
+          <ul className="usuarios__blocos" aria-label="Usuários cadastrados">
+            {dados.map((u) => {
+              const proprio = u.id === logado?.id
+              return (
+                <li key={u.id} className="usuarios__bloco" data-inativo={!u.ativo || undefined}>
+                  <Identificacao usuario={u} proprio={proprio} />
+                  <p className="usuarios__detalhes">
+                    <span className="usuarios__perfil">{NOME_DO_PERFIL[u.perfil]}</span>
+                    <span className="usuarios__situacao">{u.ativo ? 'Ativo' : 'Inativo'}</span>
+                  </p>
+                  <Acoes usuario={u} proprio={proprio} aoDefinirSenha={() => setDefinindoSenha(u)} />
+                </li>
+              )
+            })}
+          </ul>
+
+          <table className="tabela usuarios__tabela">
             <caption className="visualmente-oculto">Usuários cadastrados</caption>
             <thead>
               <tr>
-                <th scope="col">Nome</th>
-                <th scope="col">E-mail</th>
+                <th scope="col">Usuário</th>
                 <th scope="col">Perfil</th>
                 <th scope="col">Situação</th>
                 <th scope="col">
@@ -99,17 +140,14 @@ export function UsuariosPage() {
               {dados.map((u) => {
                 const proprio = u.id === logado?.id
                 return (
-                  <tr key={u.id} className="usuarios__linha" data-inativo={!u.ativo || undefined}>
-                    <td className="usuarios__nome">
-                      <NomeComMarca nome={u.nome} proprio={proprio} />
+                  <tr key={u.id} data-inativo={!u.ativo || undefined}>
+                    <td className="usuarios__celula-usuario">
+                      <Identificacao usuario={u} proprio={proprio} />
                     </td>
-                    <td className="usuarios__email">{u.email}</td>
                     <td className="usuarios__perfil">{NOME_DO_PERFIL[u.perfil]}</td>
                     <td className="usuarios__situacao">{u.ativo ? 'Ativo' : 'Inativo'}</td>
-                    <td className="usuarios__acao">
-                      <BotaoLink to={`/usuarios/${u.id}/editar`} variante="fantasma" icone={IconPencil} aria-label={`Editar ${u.nome}`}>
-                        Editar
-                      </BotaoLink>
+                    <td className="usuarios__celula-acoes">
+                      <Acoes usuario={u} proprio={proprio} aoDefinirSenha={() => setDefinindoSenha(u)} />
                     </td>
                   </tr>
                 )
@@ -118,6 +156,15 @@ export function UsuariosPage() {
           </table>
         </div>
       )}
+
+      <DefinirSenhaDialogo
+        usuario={definindoSenha}
+        aoFechar={() => setDefinindoSenha(null)}
+        aoDefinir={(u) => {
+          setDefinindoSenha(null)
+          setMensagem(`Senha de ${u.nome} definida. Os acessos abertos dessa pessoa foram encerrados.`)
+        }}
+      />
     </div>
   )
 }

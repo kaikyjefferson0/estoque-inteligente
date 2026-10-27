@@ -73,6 +73,16 @@ async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
 - Ícones só de `@tabler/icons-react`, com `aria-hidden` quando há texto ao lado; o tamanho vem do CSS (`--icone-p` ou `--icone-m`).
 - Sem gradientes, vidro, grade de cartões idênticos com sombra, CAIXA ALTA, setas "→" em botões ou emojis. Textos curtos, em português, com verbo nos botões.
 
+## Textos longos e larguras
+
+- **Nenhuma tela tem rolagem horizontal**, em nenhuma largura.
+- **Nomes, e-mails e outros textos livres** (pense em 40 caracteres, inclusive uma palavra só, sem espaço) não podem estourar a tela nem empurrar botões:
+  - Em listas, tabelas, cabeçalho e menus: uma linha com reticências, usando a classe `texto-cortado` (`componentes.css`) com `title={texto}` igual ao texto, para mostrar tudo ao passar o mouse. O pai precisa deixar o item encolher (`min-width: 0` em flex ou grid; em tabela, a célula com `width: 100%` e `max-width: 0`).
+  - Na tela de detalhe (edição, "Minha conta", janelas de confirmação): o texto aparece **inteiro**, quebrando a linha com `texto-inteiro` (`overflow-wrap: anywhere`). É ali que quem está no celular, sem mouse, lê o texto completo.
+  - Ícones, setas e marcas ao lado de um texto que encolhe levam `flex-shrink: 0`.
+- **Listas no celular:** tabela com mais de duas ou três colunas vira lista empilhada (um item por bloco, ações embaixo), em vez de tabela espremida. Prefira container query no painel (`container-type: inline-size`), para a forma depender da largura real da lista, com ou sem o menu lateral. Exemplo pronto: `src\pages\UsuariosPage.tsx` e `UsuariosPage.css`.
+- **Larguras de revisão:** 320, 375, 414, 768 e 1280px. Confira cada tela nas cinco (o `scripts\capturas-ui.mjs` tem `LARGURAS_REVISAO` e mede rolagem horizontal e elementos além da tela).
+
 ## Etiqueta de prateleira
 
 Itens de estoque, lotes e alertas levam a etiqueta: classe `etiqueta etiqueta--ok | etiqueta--atencao | etiqueta--critico` (tipo `Situacao` de `src\types\situacao.ts`). Ela é a faixa de 4px à esquerda, na cor da situação, com o canto esquerdo reto: o contêiner não pode arredondar o lado esquerdo. Para itens com problema, use o fundo claro `var(--etiqueta-fundo)` e o texto `var(--etiqueta-texto)`. O resto da tela fica calmo.
@@ -92,4 +102,4 @@ Itens de estoque, lotes e alertas levam a etiqueta: classe `etiqueta etiqueta--o
 ## Ao terminar
 
 1. `npm run build` (sem erros de TypeScript) e `npm run lint`, dentro de `frontend`.
-2. Suba a API e o site e chame o subagente **ui-reviewer** na página nova. Corrija os itens Críticos e mostre ao usuário os Importantes.
+2. Suba a API e o site e chame o subagente **ui-reviewer** na página nova, pedindo as cinco larguras de revisão (320, 375, 414, 768 e 1280px) e dados com textos longos. Corrija os itens Críticos e mostre ao usuário os Importantes.
