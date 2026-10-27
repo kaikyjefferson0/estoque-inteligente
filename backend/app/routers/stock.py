@@ -10,18 +10,25 @@ from app.schemas.stock import (
     ExitBatchOut,
     MovementOut,
     ProductStockOut,
+    Situacao,
     StockAdjustmentCreate,
     StockAdjustmentOut,
     StockEntryCreate,
     StockEntryOut,
     StockExitCreate,
     StockExitOut,
+    StockItemOut,
 )
 from app.services import stock as service
 
-# RN-18: tudo exige login. RN-32: admin e operador registram entradas e saídas; só o admin ajusta.
+# RN-18: tudo exige login. RN-46: admin e operador veem a lista de estoque. RN-32: admin e operador registram entradas e saídas; só o admin ajusta.
 # RN-12: não existe rota de edição nem de exclusão de movimentações.
 router = APIRouter(tags=["stock"], dependencies=[Depends(get_current_user)])
+
+
+@router.get("/stock", response_model=list[StockItemOut])
+def listar_estoque(db: Annotated[Session, Depends(get_db)], situacao: Situacao | None = None):
+    return service.listar_estoque(db, situacao=situacao)
 
 
 @router.post("/stock/entries", response_model=StockEntryOut, status_code=status.HTTP_201_CREATED)
@@ -48,7 +55,6 @@ def registrar_entrada(
         usuario_id=movimentacao.usuario_id,
         criado_em=movimentacao.criado_em,
     )
-
 
 
 @router.post("/stock/exits", response_model=StockExitOut, status_code=status.HTTP_201_CREATED)
@@ -118,10 +124,15 @@ def registrar_ajuste(
 @router.get("/products/{produto_id}/stock", response_model=ProductStockOut)
 def consultar_saldo(produto_id: int, db: Annotated[Session, Depends(get_db)]):
     try:
-        saldo_total, lotes = service.consultar_saldo(db, produto_id)
+        saldo = service.consultar_saldo(db, produto_id)
     except service.ProdutoNaoEncontradoError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
-    return ProductStockOut(produto_id=produto_id, saldo_total=saldo_total, lotes=lotes)
+    return ProductStockOut(
+        produto_id=produto_id,
+        saldo_fisico=saldo.saldo_fisico,
+        saldo_disponivel=saldo.saldo_disponivel,
+        lotes=saldo.lotes,
+    )
 
 
 @router.get("/products/{produto_id}/movements", response_model=list[MovementOut])

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
@@ -39,7 +39,10 @@ class BatchOut(BaseModel):
 
 class ProductStockOut(BaseModel):
     produto_id: int
-    saldo_total: int
+    # Soma de todos os lotes, vencidos inclusive
+    saldo_fisico: int
+    # RN-36: só lotes dentro da validade; é o que pode sair
+    saldo_disponivel: int
     # Ordem FEFO: validade mais próxima primeiro; lote sem validade por último
     lotes: list[BatchOut]
 
@@ -115,3 +118,19 @@ class StockAdjustmentOut(BaseModel):
     saldo_total: int
     usuario_id: int
     criado_em: datetime
+
+
+Situacao = Literal["ok", "baixo", "sem_estoque"]
+
+
+class StockItemOut(BaseModel):
+    """CT-48: uma linha da lista de estoque."""
+
+    produto_id: int
+    nome: str
+    codigo_barras: str
+    saldo_fisico: int
+    saldo_disponivel: int
+    estoque_minimo: int
+    # sem_estoque: disponível zero; baixo: disponível <= mínimo (RN-13, RN-41)
+    situacao: Situacao

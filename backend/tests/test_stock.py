@@ -38,13 +38,13 @@ def saldo(client, token, produto_id) -> dict:
 
 def test_ct07_entrada_pelo_codigo_aumenta_saldo_e_aparece_no_historico(client, token_admin, admin, refrigerante):
     """CT-07 / RN-07, RN-08: saldo +10 e entrada no histórico."""
-    assert saldo(client, token_admin, refrigerante.id)["saldo_total"] == 0
+    assert saldo(client, token_admin, refrigerante.id)["saldo_fisico"] == 0
 
     resposta = entrada(client, token_admin, refrigerante.codigo_barras, 10, em_dias(60))
     assert resposta.status_code == 201
     assert resposta.json()["saldo_total"] == 10
 
-    assert saldo(client, token_admin, refrigerante.id)["saldo_total"] == 10
+    assert saldo(client, token_admin, refrigerante.id)["saldo_fisico"] == 10
     historico = client.get(f"/products/{refrigerante.id}/movements", headers=auth(token_admin)).json()
     assert len(historico) == 1
     assert historico[0]["tipo"] == "entrada"
@@ -184,12 +184,12 @@ def test_entrada_cria_exatamente_uma_movimentacao(client, db, token_admin, admin
     assert (mov.tipo, mov.quantidade, mov.produto_id, mov.usuario_id) == ("entrada", 7, detergente.id, admin.id)
 
 
-def test_saldo_total_e_soma_dos_lotes_em_ordem_fefo(client, token_admin, refrigerante):
+def test_saldo_fisico_e_soma_dos_lotes_em_ordem_fefo(client, token_admin, refrigerante):
     for quantidade, dias in ((5, 90), (8, 30), (2, 60)):
         entrada(client, token_admin, refrigerante.codigo_barras, quantidade, em_dias(dias))
 
     estoque = saldo(client, token_admin, refrigerante.id)
-    assert estoque["saldo_total"] == sum(lote["quantidade"] for lote in estoque["lotes"]) == 15
+    assert estoque["saldo_fisico"] == sum(lote["quantidade"] for lote in estoque["lotes"]) == 15
     assert [lote["validade"] for lote in estoque["lotes"]] == [em_dias(30), em_dias(60), em_dias(90)]
 
 
@@ -273,7 +273,7 @@ def test_ct10_saida_com_saldo_suficiente(client, token_admin, admin, detergente)
     assert corpo["saldo_total"] == 7
     assert corpo["usuario_id"] == admin.id
 
-    assert saldo(client, token_admin, detergente.id)["saldo_total"] == 7
+    assert saldo(client, token_admin, detergente.id)["saldo_fisico"] == 7
     ultima = historico(client, token_admin, detergente.id)[0]
     assert (ultima["tipo"], ultima["quantidade"], ultima["usuario_nome"]) == ("saida", 3, "Admin")
 
@@ -285,7 +285,7 @@ def test_ct11_saida_maior_que_o_saldo(client, token_admin, detergente):
     resposta = saida(client, token_admin, detergente.codigo_barras, 6)
     assert resposta.status_code == 409
     assert "Saldo insuficiente" in resposta.json()["detail"]
-    assert saldo(client, token_admin, detergente.id)["saldo_total"] == 5
+    assert saldo(client, token_admin, detergente.id)["saldo_fisico"] == 5
 
 
 def test_ct12_saida_segue_fefo_entre_dois_lotes(client, db, token_admin, refrigerante):
@@ -355,7 +355,7 @@ def test_ct35_saida_com_quantidade_zero_ou_negativa(client, db, token_admin, det
     for quantidade in (0, -3):
         assert saida(client, token_admin, detergente.codigo_barras, quantidade).status_code == 422
     assert db.query(StockMovement).filter(StockMovement.tipo == "saida").count() == 0
-    assert saldo(client, token_admin, detergente.id)["saldo_total"] == 10
+    assert saldo(client, token_admin, detergente.id)["saldo_fisico"] == 10
 
 
 def test_ct35_service_tambem_recusa_quantidade_invalida(db, admin, detergente):
@@ -406,7 +406,7 @@ def test_lote_que_zera_continua_existindo(client, db, token_admin, detergente):
 
     lote = db.get(Batch, lote_id)
     assert lote is not None and lote.quantidade == 0
-    assert saldo(client, token_admin, detergente.id) == {"produto_id": detergente.id, "saldo_total": 0, "lotes": []}
+    assert saldo(client, token_admin, detergente.id) == {"produto_id": detergente.id, "saldo_fisico": 0, "saldo_disponivel": 0, "lotes": []}
     assert [mov["lote_id"] for mov in historico(client, token_admin, detergente.id)] == [lote_id, lote_id]
 
     # Nova entrada volta a somar no mesmo lote (RN-27)
@@ -591,7 +591,7 @@ def test_saldo_do_produto_reflete_o_ajuste(client, token_admin, refrigerante):
 
     ajuste(client, token_admin, lote_a, 2, "Avaria")
     estoque = saldo(client, token_admin, refrigerante.id)
-    assert estoque["saldo_total"] == 12
+    assert estoque["saldo_fisico"] == 12
     assert (estoque["lotes"][0]["id"], estoque["lotes"][0]["quantidade"]) == (lote_a, 2)
 
 

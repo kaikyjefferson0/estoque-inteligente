@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import timedelta
 
 from sqlalchemy import func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
@@ -10,6 +9,7 @@ from app.core.clock import hoje
 from app.models.alert import Alert
 from app.models.batch import Batch
 from app.models.product import Product
+from app.services import condicoes
 
 # Primeira chave do pg_advisory_xact_lock(chave, produto_id): separa as travas de
 # alertas de qualquer outra trava consultiva que o sistema venha a usar
@@ -41,28 +41,29 @@ def travar_produto(db: Session, produto_id: int) -> None:
     db.execute(text("SELECT pg_advisory_xact_lock(:chave, :produto_id)"), {"chave": _TRAVA_ALERTAS, "produto_id": produto_id})
 
 
-def _alertas_esperados(produto: Product, lotes: list[Batch]) -> set[tuple[str, int | None]]:
-    """Condições ativas do produto, como pares (tipo, lote_id)."""
+def _alertas_esperados(db: Session, produto_id: int) -> set[tuple[str, int | None]]:
+    """Condições ativas do produto, como pares (tipo, lote_id).
+
+    RN-44: as condições vêm de app.services.condicoes, as mesmas da lista de estoque e do dashboard.
+    """
     dia = hoje()
     esperados: set[tuple[str, int | None]] = set()
 
-    # RN-13 e RN-41: saldo disponível (sem vencidos; vencer hoje ainda vale, RN-36) <= mínimo
-    disponivel = sum(lote.quantidade for lote in lotes if lote.validade is None or lote.validade >= dia)
-    if disponivel <= produto.estoque_minimo:
+    # RN-13 e RN-41: saldo disponível <= mínimo. scalar_one: o produto precisa existir
+    saldos = condicoes.saldos_por_produto(dia).where(Product.id == produto_id).subquery()
+    baixo = db.execute(
+        select(condicoes.estoque_baixo(saldos.c.saldo_disponivel, saldos.c.estoque_minimo))
+    ).scalar_one()
+    if baixo:
         esperados.add(("estoque_baixo", None))
 
-    if produto.controla_validade:
-        limite = dia + timedelta(days=produto.dias_alerta_validade)
-        for lote in lotes:
-            # RN-42: lote zerado não gera alerta de validade
-            if lote.quantidade <= 0 or lote.validade is None:
-                continue
-            if lote.validade < dia:
-                # RN-15: a validade já passou
-                esperados.add(("vencido", lote.id))
-            elif lote.validade <= limite:
-                # RN-14: vence de hoje até hoje + dias de antecedência
-                esperados.add(("vencimento_proximo", lote.id))
+    lotes_do_produto = select(Batch.id).join(Product, Product.id == Batch.produto_id).where(Batch.produto_id == produto_id)
+    # RN-15 e RN-42
+    for lote_id in db.scalars(lotes_do_produto.where(condicoes.lote_vencido(dia))):
+        esperados.add(("vencido", lote_id))
+    # RN-14 e RN-42
+    for lote_id in db.scalars(lotes_do_produto.where(condicoes.lote_a_vencer(dia))):
+        esperados.add(("vencimento_proximo", lote_id))
     return esperados
 
 
@@ -73,16 +74,8 @@ def gerar_alertas_produto(db: Session, produto_id: int) -> ResultadoGeracao:
     """
     db.flush()  # mudanças pendentes nos lotes entram na leitura abaixo
     travar_produto(db, produto_id)
-    # populate_existing: relê do banco, e não de objetos antigos da sessão
-    produto = db.scalars(
-        select(Product).where(Product.id == produto_id).execution_options(populate_existing=True)
-    ).one()
-    lotes = list(
-        db.scalars(
-            select(Batch).where(Batch.produto_id == produto_id).execution_options(populate_existing=True)
-        )
-    )
-    esperados = _alertas_esperados(produto, lotes)
+    # Lido direto no banco por SQL, e não de objetos antigos da sessão
+    esperados = _alertas_esperados(db, produto_id)
     ativos = db.execute(
         select(Alert.id, Alert.tipo, Alert.lote_id).where(
             Alert.produto_id == produto_id, Alert.resolvido_em.is_(None)

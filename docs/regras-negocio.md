@@ -52,6 +52,9 @@
 
 ## Dashboard
 - RN-17: os números do dashboard devem ser iguais aos dados reais do estoque.
+- RN-44: o dashboard e a lista de estoque calculam os números na hora, a partir dos lotes, usando as mesmas funções que decidem os alertas, para os três nunca discordarem. Exceção: o número de alertas ativos lê a tabela de alertas e reflete a última geração (RN-40); um lote que vence sem nenhuma movimentação só ganha o alerta na próxima geração completa.
+- RN-45: o dashboard mostra: total de produtos, produtos com estoque baixo, produtos sem estoque (saldo disponível zero), lotes a vencer, lotes vencidos com quantidade, alertas ativos e as 5 últimas movimentações.
+- RN-46: admin e operador veem o dashboard e a lista de estoque.
 
 ## Pontos a confirmar
 - Nenhum no momento.

@@ -11,6 +11,7 @@ from app.models.product import Product
 from app.models.stock_movement import StockMovement
 from app.models.user import User
 from app.services import alerts as alertas
+from app.services import condicoes
 from app.services.products import ProdutoNaoEncontradoError, obter_produto
 
 
@@ -149,8 +150,8 @@ def registrar_entrada(
     return ResultadoEntrada(movimentacao=movimentacao, lote=lote, saldo_total=saldo)
 
 
-def _travar_lotes_com_saldo(db: Session, produto_id: int) -> list[Batch]:
-    """Trava (FOR UPDATE) os lotes com saldo do produto, sempre por id.
+def _travar_lotes_disponiveis(db: Session, produto_id: int) -> list[Batch]:
+    """Trava (FOR UPDATE) os lotes com saldo e disponíveis (RN-36) do produto, sempre por id.
 
     A ordem fixa evita deadlock entre duas saídas simultâneas do mesmo produto.
     Em READ COMMITTED, quem esperou a trava reavalia "quantidade > 0" com o valor
@@ -159,7 +160,7 @@ def _travar_lotes_com_saldo(db: Session, produto_id: int) -> list[Batch]:
     return list(
         db.scalars(
             select(Batch)
-            .where(Batch.produto_id == produto_id, Batch.quantidade > 0)
+            .where(Batch.produto_id == produto_id, Batch.quantidade > 0, condicoes.lote_disponivel(hoje()))
             .order_by(Batch.id)
             .with_for_update(key_share=True)
             .execution_options(populate_existing=True)
@@ -167,12 +168,9 @@ def _travar_lotes_com_saldo(db: Session, produto_id: int) -> list[Batch]:
     )
 
 
-def _lotes_disponiveis_fefo(lotes: list[Batch]) -> list[Batch]:
-    """RN-36: só lotes dentro da validade (vencer hoje ainda vale).
-    RN-10: validade mais próxima primeiro; empate ou sem validade, por id."""
-    dia = hoje()
-    disponiveis = [lote for lote in lotes if lote.validade is None or lote.validade >= dia]
-    return sorted(disponiveis, key=lambda lote: (lote.validade is None, lote.validade or dia, lote.id))
+def _ordem_fefo(lotes: list[Batch]) -> list[Batch]:
+    """RN-10: validade mais próxima primeiro; empate ou sem validade, por id."""
+    return sorted(lotes, key=lambda lote: (lote.validade is None, lote.validade or date.min, lote.id))
 
 
 def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: int) -> ResultadoSaida:
@@ -187,7 +185,7 @@ def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: 
     try:
         # Ordem das travas: produto (consultiva) -> lotes
         alertas.travar_produto(db, produto.id)
-        lotes = _lotes_disponiveis_fefo(_travar_lotes_com_saldo(db, produto.id))
+        lotes = _ordem_fefo(_travar_lotes_disponiveis(db, produto.id))
         disponivel = sum(lote.quantidade for lote in lotes)
         # RN-09: recusa antes de mexer em qualquer lote
         if disponivel < quantidade:
@@ -283,9 +281,18 @@ def registrar_ajuste(
     return ResultadoAjuste(movimentacao=movimentacao, lote=lote, saldo_total=saldo)
 
 
-def consultar_saldo(db: Session, produto_id: int) -> tuple[int, list[Batch]]:
-    """Saldo total e lotes com quantidade, em ordem FEFO (lote sem validade por último)."""
+@dataclass
+class SaldoProduto:
+    saldo_fisico: int
+    saldo_disponivel: int
+    lotes: list[Batch]
+
+
+def consultar_saldo(db: Session, produto_id: int) -> SaldoProduto:
+    """Saldo físico (com vencidos), saldo disponível (RN-36) e lotes com quantidade,
+    em ordem FEFO (lote sem validade por último)."""
     obter_produto(db, produto_id)
+    saldos = db.execute(condicoes.saldos_por_produto(hoje()).where(Product.id == produto_id)).one()
     lotes = list(
         db.scalars(
             select(Batch)
@@ -293,7 +300,23 @@ def consultar_saldo(db: Session, produto_id: int) -> tuple[int, list[Batch]]:
             .order_by(Batch.validade.asc().nulls_last(), Batch.id)
         )
     )
-    return sum(lote.quantidade for lote in lotes), lotes
+    return SaldoProduto(saldo_fisico=saldos.saldo_fisico, saldo_disponivel=saldos.saldo_disponivel, lotes=lotes)
+
+
+def listar_estoque(db: Session, situacao: str | None = None) -> list[dict]:
+    """RN-44 e CT-48: todos os produtos com saldos e situação, numa só consulta agregada.
+
+    CT-50: o filtro "baixo" traz todos com estoque baixo, inclusive os "sem_estoque",
+    para bater com o número do dashboard.
+    """
+    saldos = condicoes.saldos_por_produto(hoje()).subquery()
+    situacao_col = condicoes.situacao(saldos.c.saldo_disponivel, saldos.c.estoque_minimo).label("situacao")
+    consulta = select(saldos, situacao_col).order_by(saldos.c.nome, saldos.c.produto_id)
+    if situacao == condicoes.SITUACAO_BAIXO:
+        consulta = consulta.where(condicoes.estoque_baixo(saldos.c.saldo_disponivel, saldos.c.estoque_minimo))
+    elif situacao is not None:
+        consulta = consulta.where(situacao_col == situacao)
+    return [dict(linha) for linha in db.execute(consulta).mappings()]
 
 
 def listar_movimentacoes(db: Session, produto_id: int) -> list[dict]:

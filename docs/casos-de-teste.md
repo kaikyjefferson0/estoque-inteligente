@@ -77,6 +77,10 @@
 | ID | Teste | Resultado esperado | Resultado não esperado |
 |---|---|---|---|
 | CT-20 | Abrir o dashboard após as movimentações | Números (produtos, estoque baixo, a vencer) iguais aos da lista de estoque | Números diferentes dos dados reais |
+| CT-48 | Abrir a lista de estoque | Cada produto aparece com saldo físico, saldo disponível, mínimo e situação | Produto faltando ou sem algum desses dados |
+| CT-49 | Lote vencido com quantidade | Conta no saldo físico e nos lotes vencidos, e não no saldo disponível | Vencido somado no saldo disponível ou fora dos lotes vencidos |
+| CT-50 | Produto com saldo disponível zero | Conta em "sem estoque" e em "estoque baixo" | Fica fora de um dos dois |
+| CT-51 | Abrir o dashboard sem nenhum produto | Todos os números zerados | Erro ou número diferente de zero |
 
 ## Cadastros: permissões e validações
 
