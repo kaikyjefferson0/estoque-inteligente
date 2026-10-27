@@ -84,7 +84,7 @@ export function ResumoDoProduto({ lido, children }: { lido: ProdutoLido; childre
       </dl>
       {vencidos > 0 && (
         <p className="resumo__nota">
-          {formatarNumero(vencidos)} em lotes vencidos, que não saem até serem ajustados.
+          {formatarNumero(vencidos)} em lotes vencidos: contam no físico, mas não saem até serem ajustados.
         </p>
       )}
       {children}

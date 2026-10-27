@@ -4,12 +4,14 @@ import { Aviso } from '../components/Aviso'
 import { BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import { formatarCnpj, formatarNumero, plural } from '../utils/formato'
 import './FornecedoresPage.css'
 
 // RN-23: fornecedores nunca são apagados, então não há ação de excluir
 export function FornecedoresPage() {
+  useTituloDaPagina('Fornecedores')
   const { dados, erro, carregando, recarregar } = useRecurso<Fornecedor[]>('/suppliers')
   const mensagem = useMensagemDaNavegacao()
   const vazio = dados?.length === 0

@@ -14,6 +14,7 @@ import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { TipoMovimentacao } from '../types/dashboard'
 import type { Movimentacao } from '../types/estoque'
 import type { Fornecedor } from '../types/fornecedor'
@@ -89,11 +90,11 @@ function Estoque({ produto }: { produto: Produto }) {
           <div className="saldos">
             <dl className="saldos__lista">
               <div className="saldos__item">
-                <dt>Saldo disponível</dt>
+                <dt>Disponível</dt>
                 <dd className="numero">{formatarNumero(dados.saldo_disponivel)}</dd>
               </div>
               <div className="saldos__item saldos__item--fisico">
-                <dt>Saldo físico</dt>
+                <dt>Físico</dt>
                 <dd className="numero">{formatarNumero(dados.saldo_fisico)}</dd>
               </div>
             </dl>
@@ -101,7 +102,7 @@ function Estoque({ produto }: { produto: Produto }) {
             {dados.saldo_fisico > 0 && (
               <p className={vencidos > 0 ? 'saldos__nota saldos__nota--vencidos' : 'saldos__nota'}>
                 {vencidos > 0
-                  ? `${formatarNumero(vencidos)} em lotes vencidos: contam no físico, mas não saem.`
+                  ? `${formatarNumero(vencidos)} em lotes vencidos: contam no físico, mas não saem até serem ajustados.`
                   : 'Nenhuma unidade vencida: todo o saldo pode sair.'}
               </p>
             )}
@@ -199,9 +200,12 @@ function Historico({ produtoId }: { produtoId: number }) {
                   {m.tipo === 'ajuste' && (
                     <span className="historico__ajuste">
                       {m.saldo_anterior !== null && m.saldo_novo !== null && (
-                        <span className="numero">
-                          <span className="visualmente-oculto">Saldo do lote: </span>
-                          {formatarNumero(m.saldo_anterior)} → {formatarNumero(m.saldo_novo)}
+                        <span>
+                          Saldo do lote:{' '}
+                          <span className="numero">
+                            {formatarNumero(m.saldo_anterior)} <span aria-hidden>→</span>
+                            <span className="visualmente-oculto"> para </span> {formatarNumero(m.saldo_novo)}
+                          </span>
                         </span>
                       )}
                       {m.motivo && <span>Motivo: {m.motivo}</span>}
@@ -227,6 +231,7 @@ function Historico({ produtoId }: { produtoId: number }) {
 export function ProdutoDetalhePage() {
   const { id } = useParams()
   const { dados, erro, statusErro, carregando, recarregar } = useRecurso<Produto>(`/products/${id}`)
+  useTituloDaPagina(dados?.nome ?? 'Produto')
   const mensagem = useMensagemDaNavegacao()
 
   return (

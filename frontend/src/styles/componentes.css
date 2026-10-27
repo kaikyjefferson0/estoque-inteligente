@@ -26,6 +26,14 @@
   --etiqueta-fundo: var(--cor-critico-fundo);
 }
 
+/* Foco pelo teclado dentro de avisos e linhas de atenção ou crítico: anel escuro e mais grosso */
+.etiqueta--atencao :focus-visible,
+.etiqueta--critico :focus-visible,
+.etiqueta--atencao:focus-visible,
+.etiqueta--critico:focus-visible {
+  outline: var(--foco-anel-forte);
+}
+
 /* ---------- Botões ---------- */
 .botao {
   display: inline-flex;
@@ -34,7 +42,7 @@
   gap: var(--esp-2);
   min-height: var(--alvo-min);
   padding: var(--esp-0) var(--esp-4);
-  border: 1px solid transparent;
+  border: var(--borda-largura) solid transparent;
   border-radius: var(--raio-p);
   font-size: var(--fs-2);
   font-weight: var(--peso-medio);
@@ -204,7 +212,7 @@
   display: flex;
   align-items: center;
   background: var(--cor-superficie);
-  border: 1px solid var(--cor-borda-forte);
+  border: var(--borda-largura) solid var(--cor-borda-forte);
   border-radius: var(--raio-p);
   transition: border-color var(--mov-rapido) var(--mov-curva);
 }
@@ -219,7 +227,8 @@
   outline-offset: var(--esp-0);
 }
 
-.campo__caixa:has(.campo__entrada:disabled) {
+.campo__caixa:has(.campo__entrada:disabled),
+.campo__caixa:has(.campo__entrada[readonly]) {
   background: var(--cor-desabilitado-fundo);
   border-color: var(--cor-borda);
 }
@@ -248,6 +257,13 @@
 .campo__entrada:disabled {
   color: var(--cor-desabilitado-texto);
   cursor: not-allowed;
+}
+
+/* Lista bloqueada (ex.: o próprio perfil, RN-22): o valor salvo precisa continuar legível */
+.campo__selecao:disabled {
+  color: var(--cor-texto-suave);
+  /* O Chromium aplica opacidade 0,7 no select bloqueado; sem isso o contraste cai para 2,7:1 */
+  opacity: 1;
 }
 
 .campo__acessorio {
@@ -472,7 +488,7 @@
 }
 
 .suspenso__separador {
-  height: 1px;
+  height: var(--borda-largura);
   margin: var(--esp-1) var(--esp-0);
   background: var(--cor-borda);
 }
@@ -738,7 +754,9 @@
   outline-offset: calc(-1 * var(--foco-distancia));
 }
 
-/* Na opção escolhida (fundo primário), o anel de foco fica claro para aparecer */
+/* Na opção escolhida (fundo primário), o anel fica claro e mais para dentro, com o azul em volta */
 .segmentos__opcao input:checked:focus-visible + span {
+  outline: var(--foco-anel-forte);
   outline-color: var(--cor-texto-inverso);
+  outline-offset: calc(-2 * var(--foco-distancia) - var(--borda-largura));
 }

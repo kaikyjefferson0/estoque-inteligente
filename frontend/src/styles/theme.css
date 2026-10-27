@@ -75,7 +75,11 @@
   --borda-largura: 1px;
   --borda: var(--borda-largura) solid var(--cor-borda);
   --etiqueta-largura: 4px;
+  /* Desconto no recuo de painéis com etiqueta: o texto alinha com os painéis de borda de 1px */
+  --recuo-etiqueta: calc(var(--borda-largura) - var(--etiqueta-largura));
   --foco-anel: 2px solid var(--cor-foco);
+  /* Sobre fundo de atenção ou crítico, o anel fica mais grosso e escuro para não sumir na cor */
+  --foco-anel-forte: 3px solid var(--cor-texto);
   --foco-distancia: 2px;
   --sublinhado-distancia: 3px;
   --sombra-flutuante: 0 8px 24px rgba(27, 42, 58, 0.14);
@@ -101,8 +105,11 @@
   --largura-busca: 280px;
   --largura-coluna-numero: 128px;
   --largura-coluna-situacao: 160px;
+  --largura-coluna-tempo: 224px;
   --camada-cabecalho: 10;
   --camada-sobreposicao: 50;
+  /* Elemento só para leitor de tela: 1px, o mínimo que ele ainda lê */
+  --tamanho-oculto: 1px;
   --icone-p: 18px;
   --icone-m: 20px;
 }

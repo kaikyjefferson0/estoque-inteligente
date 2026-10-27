@@ -40,7 +40,7 @@ def registrar_entrada(
     try:
         resultado = service.registrar_entrada(db, usuario, **dados.model_dump())
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
     except (service.QuantidadeInvalidaError, service.ValidadeInvalidaError) as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     movimentacao, lote = resultado.movimentacao, resultado.lote
@@ -66,7 +66,7 @@ def registrar_saida(
     try:
         resultado = service.registrar_saida(db, usuario, **dados.model_dump())
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
     except service.QuantidadeInvalidaError as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.SaldoInsuficienteError as erro:
@@ -100,7 +100,7 @@ def registrar_ajuste(
     try:
         resultado = service.registrar_ajuste(db, usuario, **dados.model_dump())
     except service.LoteNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lote não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Lote não encontrado. Atualize a página e escolha o lote de novo.")
     except (service.QuantidadeInvalidaError, service.MotivoObrigatorioError) as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.AjusteSemDiferencaError as erro:
@@ -126,7 +126,7 @@ def consultar_saldo(produto_id: int, db: Annotated[Session, Depends(get_db)]):
     try:
         saldo = service.consultar_saldo(db, produto_id)
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
     return ProductStockOut(
         produto_id=produto_id,
         saldo_fisico=saldo.saldo_fisico,
@@ -140,4 +140,4 @@ def listar_movimentacoes(produto_id: int, db: Annotated[Session, Depends(get_db)
     try:
         return service.listar_movimentacoes(db, produto_id)
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")

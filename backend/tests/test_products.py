@@ -190,7 +190,7 @@ def test_ct52_busca_pelo_codigo_de_barras_exato(client, token_admin, token_opera
     # Só parecido (parte do código) não serve: a leitura nunca pega o produto errado
     assert client.get("/products/by-barcode/789100000000", headers=auth(token_operador)).status_code == 404
     assert client.get("/products/by-barcode/0000000000000", headers=auth(token_operador)).json() == {
-        "detail": "Produto não encontrado"
+        "detail": "Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página."
     }
     # Curinga do LIKE não funciona como curinga
     assert client.get("/products/by-barcode/%25", headers=auth(token_operador)).status_code == 404

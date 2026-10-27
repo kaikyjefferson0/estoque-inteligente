@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Dashboard, MovimentacaoRecente, TipoMovimentacao } from '../types/dashboard'
 import type { Situacao } from '../types/situacao'
 import { formatarComSinal, formatarData, formatarDataHora, formatarHora, formatarNumero, plural } from '../utils/formato'
@@ -129,6 +130,7 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
 }
 
 export function DashboardPage() {
+  useTituloDaPagina('Painel')
   const { dados, erro, carregando, atualizadoEm, recarregar } = useRecurso<Dashboard>('/dashboard')
   // Sem produtos, as faixas verdes dariam a falsa impressão de que está tudo em dia
   const semProdutos = dados?.total_produtos === 0

@@ -42,10 +42,10 @@ def _validar_validade(controla_validade: bool, dias_alerta_validade: int | None)
     if controla_validade:
         if dias_alerta_validade is None or dias_alerta_validade <= 0:
             raise DiasAlertaInvalidoError(
-                "Produto que controla validade exige dias de alerta maiores que zero."
+                "Informe em quantos dias antes de vencer o alerta deve aparecer, maior que zero."
             )
     elif dias_alerta_validade is not None:
-        raise DiasAlertaInvalidoError("Produto que não controla validade não tem dias de alerta.")
+        raise DiasAlertaInvalidoError("Dias de alerta só valem para produto que controla validade. Deixe o campo vazio.")
 
 
 def _validar_fornecedor(db: Session, fornecedor_id: int | None) -> None:

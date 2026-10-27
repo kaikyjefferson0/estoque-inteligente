@@ -28,9 +28,9 @@ def criar(dados: ProductCreate, db: Annotated[Session, Depends(get_db)]):
     except service.DiasAlertaInvalidoError as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.FornecedorInexistenteError:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Fornecedor informado não existe")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="O fornecedor escolhido não existe mais. Escolha outro fornecedor ou deixe sem fornecedor.")
     except service.CodigoBarrasJaCadastradoError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Código de barras já cadastrado")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este código de barras já está cadastrado em outro produto. Confira o código ou edite o produto existente.")
 
 
 @router.get("/by-barcode/{codigo_barras}", response_model=ProductOut)
@@ -41,7 +41,7 @@ def obter_por_codigo(
     try:
         return service.obter_por_codigo(db, codigo_barras)
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
 
 
 @router.get("/{produto_id}", response_model=ProductOut)
@@ -49,7 +49,7 @@ def obter(produto_id: int, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.obter_produto(db, produto_id)
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
 
 
 @router.patch("/{produto_id}", response_model=ProductOut, dependencies=[Depends(get_current_user)])
@@ -57,15 +57,15 @@ def atualizar(produto_id: int, dados: ProductUpdate, db: Annotated[Session, Depe
     try:
         return service.atualizar_produto(db, produto_id, dados.model_dump(exclude_unset=True))
     except service.ProdutoNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
     except service.ControlaValidadeBloqueadoError:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail='Produto já tem lotes: "controla validade" não pode ser alterado',  # RN-30
+            detail='Este produto já tem lotes, então "controla validade" não pode mudar. Cadastre um produto novo se precisar.',  # RN-30
         )
     except service.DiasAlertaInvalidoError as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.FornecedorInexistenteError:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Fornecedor informado não existe")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="O fornecedor escolhido não existe mais. Escolha outro fornecedor ou deixe sem fornecedor.")
     except service.CodigoBarrasJaCadastradoError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Código de barras já cadastrado")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este código de barras já está cadastrado em outro produto. Confira o código ou edite o produto existente.")

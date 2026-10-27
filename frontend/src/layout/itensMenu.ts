@@ -17,6 +17,8 @@ export interface ItemMenu {
   icone: Icon
   // Escondido para o operador; a permissão real é verificada pelo backend
   soAdmin?: boolean
+  // Número ao lado do rótulo (ex.: alertas ativos)
+  contagem?: 'alertas'
 }
 
 export const ITENS_MENU: ItemMenu[] = [
@@ -26,7 +28,7 @@ export const ITENS_MENU: ItemMenu[] = [
   { rota: '/fornecedores', rotulo: 'Fornecedores', icone: IconTruck },
   { rota: '/entrada', rotulo: 'Entrada', icone: IconPackageImport },
   { rota: '/saida', rotulo: 'Saída', icone: IconPackageExport },
-  { rota: '/alertas', rotulo: 'Alertas', icone: IconBell },
+  { rota: '/alertas', rotulo: 'Alertas', icone: IconBell, contagem: 'alertas' },
   { rota: '/ajustes', rotulo: 'Ajustes', icone: IconAdjustmentsHorizontal, soAdmin: true },
   { rota: '/usuarios', rotulo: 'Usuários', icone: IconUsers, soAdmin: true },
 ]

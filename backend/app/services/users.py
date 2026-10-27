@@ -30,7 +30,7 @@ def buscar_por_email(db: Session, email: str) -> User | None:
 
 def criar_usuario(db: Session, nome: str, email: str, senha: str, perfil: str) -> User:
     if perfil not in PERFIS:
-        raise ValueError(f"Perfil inválido: {perfil}")
+        raise ValueError(f"Perfil inválido: {perfil}. Use admin ou operador.")
 
     email = normalizar_email(email)
     if buscar_por_email(db, email) is not None:
@@ -64,14 +64,14 @@ def atualizar_usuario(db: Session, admin: User, usuario_id: int, dados: dict) ->
     usuario = obter_usuario(db, usuario_id)
 
     if "perfil" in dados and dados["perfil"] not in PERFIS:
-        raise ValueError(f"Perfil inválido: {dados['perfil']}")
+        raise ValueError(f"Perfil inválido: {dados['perfil']}. Use admin ou operador.")
 
     # RN-22
     if usuario.id == admin.id:
         if dados.get("ativo") is False:
-            raise AutoAlteracaoProibidaError("O admin não pode desativar a si mesmo.")
+            raise AutoAlteracaoProibidaError("Você não pode desativar o próprio usuário. Peça a outro administrador, se precisar.")
         if "perfil" in dados and dados["perfil"] != usuario.perfil:
-            raise AutoAlteracaoProibidaError("O admin não pode mudar o próprio perfil.")
+            raise AutoAlteracaoProibidaError("Você não pode mudar o próprio perfil. Peça a outro administrador, se precisar.")
 
     if "nome" in dados:
         usuario.nome = dados["nome"].strip()

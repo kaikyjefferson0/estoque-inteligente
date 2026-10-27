@@ -1,14 +1,17 @@
 import { IconBarcode, IconPackageExport } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { ApiError, api, mensagemDeErro } from '../api/client'
+import { useAlertasAtivos } from '../alertas/useAlertasAtivos'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Aviso } from '../components/Aviso'
 import { Botao } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Vazio } from '../components/Estados'
+import { SaldoAtualizado } from '../components/SaldoAtualizado'
 import { LeituraDeCodigo, ResumoDoProduto } from '../components/LeituraDeCodigo'
 import { useLeituraDeCodigo, type ProdutoLido } from '../components/useLeituraDeCodigo'
 import { useErrosDoFormulario } from '../components/useErrosDoFormulario'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { SaidaRegistrada } from '../types/estoque'
 import type { SaldoProduto } from '../types/produto'
 import { formatarComSinal, formatarNumero, plural } from '../utils/formato'
@@ -111,7 +114,8 @@ function ConfirmacaoDaSaida({ nome, resultado }: { nome: string; resultado: Said
     <Aviso situacao="ok">
       <p>
         <strong>Saída registrada.</strong> {formatarNumero(resultado.quantidade)} de {nome}, de {formatarNumero(lotes)}{' '}
-        {plural(lotes, 'lote', 'lotes')}. Saldo total: <span className="numero">{formatarNumero(resultado.saldo_total)}</span>.
+        {plural(lotes, 'lote', 'lotes')}.{' '}
+        <SaldoAtualizado key={resultado.lotes[0]?.movimentacao_id} produtoId={resultado.produto_id} saldoFisico={resultado.saldo_total} />
       </p>
       {/* RN-10: uma linha por lote, na ordem FEFO em que saiu */}
       <ul className="saida__lotes">
@@ -131,9 +135,11 @@ function ConfirmacaoDaSaida({ nome, resultado }: { nome: string; resultado: Said
 
 // RN-32: admin e operador registram saídas
 export function SaidaPage() {
+  useTituloDaPagina('Saída')
   const [leitura, campoCodigo] = useLeituraDeCodigo()
   const { lido, setLido } = leitura
   const [ultima, setUltima] = useState<{ nome: string; resultado: SaidaRegistrada } | null>(null)
+  const { atualizarAlertas } = useAlertasAtivos()
 
   return (
     <div className="pagina">
@@ -163,6 +169,8 @@ export function SaidaPage() {
               lido={lido}
               aoRegistrar={(resultado) => {
                 setUltima({ nome: lido.produto.nome, resultado })
+                // RN-40: a saída já gerou os alertas do produto; o menu mostra a nova contagem
+                atualizarAlertas()
                 leitura.recomecar()
               }}
               aoErroNoCodigo={leitura.mostrarErro}

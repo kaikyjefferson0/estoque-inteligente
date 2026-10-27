@@ -112,7 +112,8 @@
 .resumo__nota {
   grid-area: nota;
   font-size: var(--fs-2);
-  color: var(--cor-atencao-texto);
+  /* Mesma cor da nota de lotes vencidos no detalhe do produto */
+  color: var(--cor-critico-texto);
 }
 
 /* ---------- Formulário ---------- */
@@ -178,6 +179,12 @@
 
   .registro__formulario {
     padding: var(--esp-0) var(--esp-4) var(--esp-4);
+  }
+
+  /* Celular: "Registrar" e "Ler outro código" empilhados, na largura toda e alinhados */
+  .registro__formulario .formulario__acoes {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .saida__lotes {

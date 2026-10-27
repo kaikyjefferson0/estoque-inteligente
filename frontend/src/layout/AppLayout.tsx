@@ -3,6 +3,7 @@ import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { IconChevronDown, IconLogout, IconMenu2, IconX } from '@tabler/icons-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
+import { AlertasAtivosProvider } from '../alertas/AlertasAtivosProvider'
 import { useAuth } from '../auth/useAuth'
 import { NOME_DO_PERFIL } from '../types/auth'
 import { MenuLateral } from './MenuLateral'
@@ -59,43 +60,45 @@ export function AppLayout() {
   }
 
   return (
-    <div className="app">
-      <a href="#conteudo" className="pular-conteudo">
-        Pular para o conteúdo
-      </a>
-      <header className="cabecalho">
-        <div className="cabecalho__inicio">
-        <Dialog.Root open={gavetaAberta} onOpenChange={setGavetaAberta}>
-          <Dialog.Trigger className="botao-icone cabecalho__menu" aria-label="Abrir menu">
-            <IconMenu2 aria-hidden />
-          </Dialog.Trigger>
-          <Dialog.Portal>
-            <Dialog.Overlay className="sobreposicao" />
-            <Dialog.Content className="gaveta" aria-describedby={undefined}>
-              <div className="gaveta__topo">
-                <Dialog.Title asChild>
-                  <span className="gaveta__titulo">Menu</span>
-                </Dialog.Title>
-                <Dialog.Close className="botao-icone" aria-label="Fechar menu">
-                  <IconX aria-hidden />
-                </Dialog.Close>
-              </div>
-              <MenuLateral aoNavegar={() => setGavetaAberta(false)} />
-            </Dialog.Content>
-          </Dialog.Portal>
-        </Dialog.Root>
-        <Marca />
+    <AlertasAtivosProvider>
+      <div className="app">
+        <a href="#conteudo" className="pular-conteudo">
+          Pular para o conteúdo
+        </a>
+        <header className="cabecalho">
+          <div className="cabecalho__inicio">
+            <Dialog.Root open={gavetaAberta} onOpenChange={setGavetaAberta}>
+              <Dialog.Trigger className="botao-icone cabecalho__menu" aria-label="Abrir menu">
+                <IconMenu2 aria-hidden />
+              </Dialog.Trigger>
+              <Dialog.Portal>
+                <Dialog.Overlay className="sobreposicao" />
+                <Dialog.Content className="gaveta" aria-describedby={undefined}>
+                  <div className="gaveta__topo">
+                    <Dialog.Title asChild>
+                      <span className="gaveta__titulo">Menu</span>
+                    </Dialog.Title>
+                    <Dialog.Close className="botao-icone" aria-label="Fechar menu">
+                      <IconX aria-hidden />
+                    </Dialog.Close>
+                  </div>
+                  <MenuLateral aoNavegar={() => setGavetaAberta(false)} />
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
+            <Marca />
+          </div>
+          <MenuDoUsuario />
+        </header>
+        <div className="app__corpo">
+          <aside className="lateral">
+            <MenuLateral />
+          </aside>
+          <main id="conteudo" className="conteudo" tabIndex={-1}>
+            <Outlet />
+          </main>
         </div>
-        <MenuDoUsuario />
-      </header>
-      <div className="app__corpo">
-        <aside className="lateral">
-          <MenuLateral />
-        </aside>
-        <main id="conteudo" className="conteudo" tabIndex={-1}>
-          <Outlet />
-        </main>
       </div>
-    </div>
+    </AlertasAtivosProvider>
   )
 }

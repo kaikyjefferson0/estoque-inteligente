@@ -71,7 +71,7 @@ def test_ct09_produto_com_validade_sem_informar_a_data(client, db, token_admin, 
     """CT-09 / RN-08: recusa e pede a data."""
     resposta = entrada(client, token_admin, refrigerante.codigo_barras, 10)
     assert resposta.status_code == 422
-    assert "validade" in resposta.json()["detail"]
+    assert resposta.json()["detail"] == "Este produto controla validade. Informe a data de validade do lote."
     assert db.query(Batch).count() == 0
     assert db.query(StockMovement).count() == 0
 
@@ -99,7 +99,11 @@ def test_ct28_produto_sem_validade_soma_no_lote_unico(client, db, token_admin, d
 
 def test_ct29_entrada_com_validade_vencida(client, db, token_admin, refrigerante):
     """CT-29 / RN-31: validade anterior a hoje é recusada; vencer hoje ainda é aceito."""
-    assert entrada(client, token_admin, refrigerante.codigo_barras, 10, em_dias(-1)).status_code == 422
+    resposta = entrada(client, token_admin, refrigerante.codigo_barras, 10, em_dias(-1))
+    assert resposta.status_code == 422
+    assert resposta.json()["detail"] == (
+        "Esta validade já passou e produto vencido não entra no estoque. Informe uma data a partir de hoje."
+    )
     assert db.query(Batch).count() == 0
 
     assert entrada(client, token_admin, refrigerante.codigo_barras, 10, em_dias(0)).status_code == 201
@@ -120,7 +124,9 @@ def test_ct31_mudar_controla_validade_de_produto_com_lotes(client, db, token_adm
     # Só controla_validade: a RN-30 vem antes da RN-26, então é 409 e não 422 (dias de alerta)
     resposta = client.patch(f"/products/{refrigerante.id}", headers=headers, json={"controla_validade": False})
     assert resposta.status_code == 409
-    assert "já tem lotes" in resposta.json()["detail"]
+    assert resposta.json()["detail"] == (
+        'Este produto já tem lotes, então "controla validade" não pode mudar. Cadastre um produto novo se precisar.'
+    )
 
     resposta = client.patch(
         f"/products/{refrigerante.id}",
@@ -284,8 +290,22 @@ def test_ct11_saida_maior_que_o_saldo(client, token_admin, detergente):
 
     resposta = saida(client, token_admin, detergente.codigo_barras, 6)
     assert resposta.status_code == 409
-    assert "Saldo insuficiente" in resposta.json()["detail"]
+    assert resposta.json()["detail"] == "Saldo insuficiente: há 5 unidades disponíveis e foram pedidas 6. Informe até 5."
     assert saldo(client, token_admin, detergente.id)["saldo_fisico"] == 5
+
+
+def test_mensagem_da_saida_diz_o_que_fazer(client, token_admin, detergente):
+    """RN-09: a mensagem diz o problema e o que fazer, no singular e sem saldo nenhum."""
+    resposta = saida(client, token_admin, detergente.codigo_barras, 1)
+    assert resposta.status_code == 409
+    assert resposta.json()["detail"] == (
+        "Não há unidades disponíveis para saída (lotes vencidos não saem). Registre uma entrada antes."
+    )
+
+    entrada(client, token_admin, detergente.codigo_barras, 1)
+    resposta = saida(client, token_admin, detergente.codigo_barras, 3)
+    assert resposta.status_code == 409
+    assert resposta.json()["detail"] == "Saldo insuficiente: há 1 unidade disponível e foram pedidas 3. Informe até 1."
 
 
 def test_ct12_saida_segue_fefo_entre_dois_lotes(client, db, token_admin, refrigerante):
@@ -513,7 +533,9 @@ def test_ct38_ajuste_com_saldo_contado_igual_ao_atual(client, db, token_admin, d
 
     resposta = ajuste(client, token_admin, lote_id, 10)
     assert resposta.status_code == 409
-    assert "nada a ajustar" in resposta.json()["detail"]
+    assert resposta.json()["detail"] == (
+        "O lote já tem 10 unidades, igual à contagem. Confira a contagem ou cancele o ajuste."
+    )
     assert db.query(StockMovement).filter(StockMovement.tipo == "ajuste").count() == 0
 
 

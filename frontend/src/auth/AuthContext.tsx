@@ -55,7 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     navigate('/login', { replace: true })
   }, [navigate])
 
-  const valor = useMemo(() => ({ usuario, carregando, entrar, sair }), [usuario, carregando, entrar, sair])
+  const valor = useMemo(
+    () => ({ usuario, carregando, entrar, sair, atualizarUsuario: setUsuario }),
+    [usuario, carregando, entrar, sair],
+  )
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>
 }

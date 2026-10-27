@@ -8,6 +8,7 @@ import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado } from '../components/Estados'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import { formatarCnpj, somenteDigitos } from '../utils/formato'
 
@@ -120,6 +121,7 @@ function FormularioFornecedor({ inicial }: { inicial?: Fornecedor }) {
 }
 
 export function FornecedorNovoPage() {
+  useTituloDaPagina('Cadastrar fornecedor')
   return (
     <div className="pagina">
       <header className="pagina__cabecalho">
@@ -134,6 +136,7 @@ export function FornecedorNovoPage() {
 }
 
 export function FornecedorEditarPage() {
+  useTituloDaPagina('Editar fornecedor')
   const { id } = useParams()
   const { dados, erro, carregando, recarregar } = useRecurso<Fornecedor>(`/suppliers/${id}`)
 

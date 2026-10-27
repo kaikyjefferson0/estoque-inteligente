@@ -62,17 +62,29 @@ class ResultadoAjuste:
     saldo_total: int
 
 
+def _unidades(quantidade: int) -> str:
+    return f"{quantidade} unidade" if quantidade == 1 else f"{quantidade} unidades"
+
+
+def _mensagem_saldo_insuficiente(disponivel: int, pedido: int) -> str:
+    # RN-09 e RN-36: o disponível não conta lotes vencidos
+    if disponivel == 0:
+        return "Não há unidades disponíveis para saída (lotes vencidos não saem). Registre uma entrada antes."
+    disponiveis = "disponível" if disponivel == 1 else "disponíveis"
+    return f"Saldo insuficiente: há {_unidades(disponivel)} {disponiveis} e foram pedidas {pedido}. Informe até {disponivel}."
+
+
 def _validar_validade_da_entrada(produto: Product, validade: date | None) -> None:
     if produto.controla_validade:
         # RN-08
         if validade is None:
-            raise ValidadeInvalidaError("Produto controla validade: informe a data de validade.")
+            raise ValidadeInvalidaError("Este produto controla validade. Informe a data de validade do lote.")
         # RN-31: vencido é validade anterior a hoje (RN-15: "já passou")
         if validade < hoje():
-            raise ValidadeInvalidaError("Validade já vencida.")
+            raise ValidadeInvalidaError("Esta validade já passou e produto vencido não entra no estoque. Informe uma data a partir de hoje.")
     elif validade is not None:
         # RN-31 / RN-27
-        raise ValidadeInvalidaError("Produto não controla validade: não informe a data de validade.")
+        raise ValidadeInvalidaError("Este produto não controla validade. Registre a entrada sem data de validade.")
 
 
 def _saldo_total(db: Session, produto_id: int) -> int:
@@ -107,7 +119,7 @@ def registrar_entrada(
 ) -> ResultadoEntrada:
     """RN-32: qualquer usuário logado. Soma no lote e grava a movimentação numa só transação."""
     if quantidade <= 0:
-        raise QuantidadeInvalidaError("A quantidade deve ser maior que zero.")
+        raise QuantidadeInvalidaError("Informe uma quantidade maior que zero.")
 
     produto_id = db.scalar(select(Product.id).where(Product.codigo_barras == codigo_barras.strip()))
     if produto_id is None:
@@ -176,7 +188,7 @@ def _ordem_fefo(lotes: list[Batch]) -> list[Batch]:
 def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: int) -> ResultadoSaida:
     """RN-32: qualquer usuário logado. Retira em FEFO e grava uma movimentação por lote, numa só transação."""
     if quantidade <= 0:
-        raise QuantidadeInvalidaError("A quantidade deve ser maior que zero.")
+        raise QuantidadeInvalidaError("Informe uma quantidade maior que zero.")
 
     produto = db.scalars(select(Product).where(Product.codigo_barras == codigo_barras.strip())).one_or_none()
     if produto is None:
@@ -189,7 +201,7 @@ def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: 
         disponivel = sum(lote.quantidade for lote in lotes)
         # RN-09: recusa antes de mexer em qualquer lote
         if disponivel < quantidade:
-            raise SaldoInsuficienteError(f"Saldo insuficiente: disponível {disponivel}, pedido {quantidade}.")
+            raise SaldoInsuficienteError(_mensagem_saldo_insuficiente(disponivel, quantidade))
 
         retiradas: list[tuple[StockMovement, Batch]] = []
         restante = quantidade
@@ -230,11 +242,11 @@ def registrar_ajuste(
     e a diferença como movimentação, numa só transação. RN-38: vale também para lote vencido."""
     # RN-35
     if saldo_contado < 0:
-        raise QuantidadeInvalidaError("O saldo contado não pode ser negativo.")
+        raise QuantidadeInvalidaError("Informe quantas unidades você contou, 0 ou mais.")
     # RN-11
     motivo = (motivo or "").strip()
     if not motivo:
-        raise MotivoObrigatorioError("Informe o motivo do ajuste.")
+        raise MotivoObrigatorioError("Informe o motivo do ajuste, por exemplo “contagem do inventário”.")
 
     try:
         produto_id = db.scalar(select(Batch.produto_id).where(Batch.id == lote_id))
@@ -253,7 +265,9 @@ def registrar_ajuste(
         diferenca = saldo_contado - saldo_anterior
         # RN-35
         if diferenca == 0:
-            raise AjusteSemDiferencaError(f"O lote já tem {saldo_anterior} unidade(s): nada a ajustar.")
+            raise AjusteSemDiferencaError(
+                f"O lote já tem {_unidades(saldo_anterior)}, igual à contagem. Confira a contagem ou cancele o ajuste."
+            )
 
         # RN-37: o lote zerado continua existindo
         lote.quantidade = saldo_contado

@@ -2,6 +2,7 @@ import { IconAdjustmentsHorizontal, IconBox, IconPackageImport } from '@tabler/i
 import { useRef, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ApiError, api, mensagemDeErro } from '../api/client'
+import { useAlertasAtivos } from '../alertas/useAlertasAtivos'
 import { useRecurso } from '../api/useRecurso'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Aviso } from '../components/Aviso'
@@ -11,6 +12,7 @@ import { CampoSelecao } from '../components/CampoSelecao'
 import { ConfirmarDialogo } from '../components/ConfirmarDialogo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { AjusteRegistrado, ItemEstoque } from '../types/estoque'
 import type { Lote, SaldoProduto } from '../types/produto'
 import { formatarComSinal, formatarNumero, hojeIso } from '../utils/formato'
@@ -36,7 +38,7 @@ function validar(lote: Lote | undefined, contado: string, motivo: string): Erros
   const erroContado = validarSaldoContado(contado)
   if (erroContado) erros.saldo_contado = erroContado
   // RN-11: ajuste exige motivo
-  if (!motivo.trim()) erros.motivo = 'Informe o motivo do ajuste, por exemplo "contagem do inventário" ou "vencido".'
+  if (!motivo.trim()) erros.motivo = 'Informe o motivo do ajuste, por exemplo “contagem do inventário” ou “vencido”.'
   else if (motivo.trim().length > MAX_MOTIVO) erros.motivo = `Use até ${MAX_MOTIVO} caracteres no motivo.`
   return erros
 }
@@ -212,7 +214,7 @@ function FormularioAjuste({ produtoId, aoRegistrar }: { produtoId: number; aoReg
       </div>
 
       <div className="formulario__acoes">
-        <Botao type="submit" variante="primaria" icone={IconAdjustmentsHorizontal} carregando={enviando && !pendente} textoCarregando="Registrando…">
+        <Botao type="submit" variante="primaria" icone={IconAdjustmentsHorizontal} carregando={enviando && !pendente} textoCarregando="Conferindo…">
           Revisar ajuste
         </Botao>
       </div>
@@ -225,7 +227,8 @@ function FormularioAjuste({ produtoId, aoRegistrar }: { produtoId: number; aoReg
           pendente && (
             <>
               <span className="ajuste__confirmacao numero">
-                {descreverLote(pendente.lote.validade)}: {formatarNumero(pendente.lote.quantidade)} → {formatarNumero(pendente.contado)} (
+                {descreverLote(pendente.lote.validade)}: {formatarNumero(pendente.lote.quantidade)} <span aria-hidden>→</span>
+                <span className="visualmente-oculto"> para </span> {formatarNumero(pendente.contado)} (
                 {formatarComSinal(diferenca)})
               </span>
               <span className="ajuste__confirmacao">Motivo: {pendente.motivo}</span>
@@ -252,10 +255,12 @@ function FormularioAjuste({ produtoId, aoRegistrar }: { produtoId: number; aoReg
 
 // RN-02, RN-32 e RN-33: só o admin ajusta. A rota fica em <RotaAdmin>; quem garante é o backend (require_admin)
 export function AjustesPage() {
+  useTituloDaPagina('Ajustes')
   const [parametros, setParametros] = useSearchParams()
   const produtoId = Number(parametros.get('produto')) || null
   const estoque = useRecurso<ItemEstoque[]>('/stock')
   const [ultimo, setUltimo] = useState<{ nome: string; resultado: AjusteRegistrado } | null>(null)
+  const { atualizarAlertas } = useAlertasAtivos()
 
   const produtos = estoque.dados ?? []
   const selecionado = produtos.find((p) => p.produto_id === produtoId)
@@ -274,7 +279,8 @@ export function AjustesPage() {
           <p>
             <strong>Ajuste registrado.</strong> {ultimo.nome}, {descreverLote(ultimo.resultado.validade).toLowerCase()}:{' '}
             <span className="numero">
-              {formatarNumero(ultimo.resultado.saldo_anterior)} → {formatarNumero(ultimo.resultado.saldo_novo)} (
+              {formatarNumero(ultimo.resultado.saldo_anterior)} <span aria-hidden>→</span>
+              <span className="visualmente-oculto"> para </span> {formatarNumero(ultimo.resultado.saldo_novo)} (
               {formatarComSinal(ultimo.resultado.quantidade)})
             </span>
             .
@@ -328,6 +334,8 @@ export function AjustesPage() {
               aoRegistrar={(resultado) => {
                 setUltimo({ nome: selecionado.nome, resultado })
                 estoque.recarregar()
+                // RN-40: o ajuste já gerou os alertas do produto; o menu mostra a nova contagem
+                atualizarAlertas()
               }}
             />
           ) : (

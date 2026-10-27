@@ -10,6 +10,7 @@ import { Campo } from '../components/Campo'
 import { CampoSelecao } from '../components/CampoSelecao'
 import { Carregando, ErroEstado } from '../components/Estados'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import type { Produto, SaldoProduto } from '../types/produto'
 
@@ -303,6 +304,7 @@ function FormularioProduto({
 }
 
 export function ProdutoNovoPage() {
+  useTituloDaPagina('Cadastrar produto')
   const [parametros] = useSearchParams()
   const codigo = (parametros.get('codigo') ?? '').trim().slice(0, MAX_CODIGO)
   return (
@@ -319,6 +321,7 @@ export function ProdutoNovoPage() {
 }
 
 export function ProdutoEditarPage() {
+  useTituloDaPagina('Editar produto')
   const { id } = useParams()
   const produto = useRecurso<Produto>(`/products/${id}`)
   const saldo = useRecurso<SaldoProduto>(`/products/${id}/stock`)

@@ -8,6 +8,7 @@ import { Botao } from '../components/Botao'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Campo } from '../components/Campo'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import './LoginPage.css'
 
 // Ordem dos campos na tela: o foco vai para o primeiro inválido
@@ -25,6 +26,7 @@ function validar(email: string, senha: string): ErrosDeCampo<CampoLogin> {
 }
 
 export function LoginPage() {
+  useTituloDaPagina('Entrar')
   const { usuario, entrar } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()

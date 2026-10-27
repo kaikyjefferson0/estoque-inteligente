@@ -23,7 +23,7 @@ def criar(dados: UserCreate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.criar_usuario(db, nome=dados.nome, email=dados.email, senha=dados.senha, perfil=dados.perfil)
     except service.EmailJaCadastradoError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="E-mail já cadastrado")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este e-mail já está cadastrado. Use outro e-mail.")
 
 
 @router.get("/{usuario_id}", response_model=UserOut)
@@ -31,7 +31,7 @@ def obter(usuario_id: int, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.obter_usuario(db, usuario_id)
     except service.UsuarioNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado. Atualize a lista de usuários.")
 
 
 @router.patch("/{usuario_id}", response_model=UserOut)
@@ -44,6 +44,6 @@ def atualizar(
     try:
         return service.atualizar_usuario(db, admin, usuario_id, dados.model_dump(exclude_unset=True))
     except service.UsuarioNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado. Atualize a lista de usuários.")
     except service.AutoAlteracaoProibidaError as erro:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))

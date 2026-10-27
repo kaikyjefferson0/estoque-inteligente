@@ -1,0 +1,114 @@
+.usuarios__nome {
+  min-width: var(--largura-nome);
+  font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
+}
+
+.usuarios__sem-quebra {
+  white-space: nowrap;
+}
+
+/* Marca a linha do usuário logado (RN-22: perfil e situação dele não mudam) */
+.usuarios__voce {
+  margin-left: var(--esp-2);
+  padding: var(--esp-0) var(--esp-2);
+  border-radius: var(--raio-p);
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+  font-size: var(--fs-1);
+  font-weight: var(--peso-medio);
+  white-space: nowrap;
+}
+
+.usuarios__email {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.usuarios__perfil,
+.usuarios__situacao {
+  font-size: var(--fs-2);
+  white-space: nowrap;
+}
+
+.usuarios__acao {
+  text-align: right;
+}
+
+/* Inativo: discreto, mas legível */
+.usuarios__linha[data-inativo] .usuarios__nome {
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+}
+
+.usuarios__linha[data-inativo] .usuarios__perfil,
+.usuarios__linha[data-inativo] .usuarios__situacao {
+  color: var(--cor-texto-suave);
+}
+
+/* Formulário: motivo dos campos bloqueados no próprio cadastro (RN-22) */
+.usuario-form__motivo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-2);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.usuario-form__motivo svg {
+  flex-shrink: 0;
+  width: var(--icone-p);
+  height: var(--icone-p);
+}
+
+/* Celular: nome e e-mail em cima; perfil e situação embaixo; "Editar" à direita */
+@media (max-width: 640px) {
+  .usuarios thead {
+    display: none;
+  }
+
+  .usuarios tbody tr {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'nome nome acao'
+      'email email acao'
+      'perfil situacao acao';
+    align-items: center;
+    column-gap: var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .usuarios tbody tr + tr {
+    border-top: var(--borda);
+  }
+
+  .usuarios td,
+  .usuarios tbody tr + tr td {
+    padding: var(--esp-0);
+    border-top: 0;
+  }
+
+  .usuarios__nome {
+    grid-area: nome;
+    min-width: 0;
+  }
+
+  .usuarios__email {
+    grid-area: email;
+  }
+
+  .usuarios__perfil {
+    grid-area: perfil;
+  }
+
+  .usuarios__situacao {
+    grid-area: situacao;
+    color: var(--cor-texto-suave);
+  }
+
+  .usuarios__acao {
+    grid-area: acao;
+  }
+}

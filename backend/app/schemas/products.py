@@ -45,7 +45,7 @@ class ProductUpdate(BaseModel):
             campo for campo in self.model_fields_set if campo not in anulaveis and getattr(self, campo) is None
         ]
         if nulos:
-            raise ValueError(f"Campo(s) não pode(m) ser nulo(s): {', '.join(sorted(nulos))}")
+            raise ValueError(f"Preencha ou retire do envio: {', '.join(sorted(nulos))}.")
         return self
 
 

@@ -5,6 +5,7 @@ import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { ItemEstoque, SituacaoEstoque } from '../types/estoque'
 import { formatarHora, formatarNumero, plural } from '../utils/formato'
 import { SITUACAO_DO_ESTOQUE } from '../utils/situacao'
@@ -67,6 +68,7 @@ function Linha({ item }: { item: ItemEstoque }) {
 
 // RN-46: admin e operador veem a lista de estoque
 export function EstoquePage() {
+  useTituloDaPagina('Estoque')
   const [parametros, setParametros] = useSearchParams()
   // Estado local responde na hora; o endereço só espelha (a navegação do router é uma transição)
   const [filtro, setFiltro] = useState(() => lerFiltro(parametros.get('situacao')))

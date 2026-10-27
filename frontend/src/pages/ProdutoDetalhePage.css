@@ -58,6 +58,15 @@
   border-left: var(--etiqueta-largura) solid var(--cor-borda);
 }
 
+/* A faixa tem 4px e a borda dos outros painéis 1px: o recuo desconta a diferença
+   para o texto começar na mesma linha que o do Cadastro e do Histórico */
+.detalhe__lotes .painel__cabecalho,
+.detalhe__lotes .saldos,
+.detalhe__lotes .lote,
+.detalhe__lotes.painel .estado--erro {
+  padding-left: calc(var(--esp-5) + var(--recuo-etiqueta));
+}
+
 /* ---------- Saldos ---------- */
 .saldos {
   display: flex;
@@ -234,6 +243,13 @@
 
   .lote__validade {
     grid-area: validade;
+  }
+
+  .detalhe__lotes .painel__cabecalho,
+  .detalhe__lotes .saldos,
+  .detalhe__lotes .lote,
+  .detalhe__lotes.painel .estado--erro {
+    padding-left: calc(var(--esp-4) + var(--recuo-etiqueta));
   }
 
   .lote__situacao {

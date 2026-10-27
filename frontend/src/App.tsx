@@ -1,9 +1,9 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { RotaAdmin, RotaProtegida } from './auth/RotaProtegida'
-import { EmConstrucao } from './components/EmConstrucao'
 import { AppLayout } from './layout/AppLayout'
 import { AjustesPage } from './pages/AjustesPage'
+import { AlertasPage } from './pages/AlertasPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { EntradaPage } from './pages/EntradaPage'
 import { EstoquePage } from './pages/EstoquePage'
@@ -15,6 +15,8 @@ import { ProdutoDetalhePage } from './pages/ProdutoDetalhePage'
 import { ProdutoEditarPage, ProdutoNovoPage } from './pages/ProdutoFormPage'
 import { ProdutosPage } from './pages/ProdutosPage'
 import { SaidaPage } from './pages/SaidaPage'
+import { UsuarioEditarPage, UsuarioNovoPage } from './pages/UsuarioFormPage'
+import { UsuariosPage } from './pages/UsuariosPage'
 
 export default function App() {
   return (
@@ -38,11 +40,14 @@ export default function App() {
               {/* RN-32: admin e operador registram entradas e saídas */}
               <Route path="entrada" element={<EntradaPage />} />
               <Route path="saida" element={<SaidaPage />} />
-              <Route path="alertas" element={<EmConstrucao titulo="Alertas" />} />
-              {/* RN-02 e RN-32: só o admin ajusta; o operador é levado ao painel */}
+              {/* RN-43: admin e operador veem os alertas */}
+              <Route path="alertas" element={<AlertasPage />} />
+              {/* RN-02 e RN-32: só o admin ajusta e cuida dos usuários; o operador é levado ao painel */}
               <Route element={<RotaAdmin />}>
                 <Route path="ajustes" element={<AjustesPage />} />
-                <Route path="usuarios" element={<EmConstrucao titulo="Usuários" />} />
+                <Route path="usuarios" element={<UsuariosPage />} />
+                <Route path="usuarios/novo" element={<UsuarioNovoPage />} />
+                <Route path="usuarios/:id/editar" element={<UsuarioEditarPage />} />
               </Route>
               <Route path="*" element={<NaoEncontradaPage />} />
             </Route>

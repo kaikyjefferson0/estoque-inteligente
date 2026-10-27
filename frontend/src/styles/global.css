@@ -86,8 +86,8 @@ a:hover {
 
 .visualmente-oculto {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  width: var(--tamanho-oculto);
+  height: var(--tamanho-oculto);
   padding: var(--esp-0);
   overflow: hidden;
   clip: rect(0 0 0 0);

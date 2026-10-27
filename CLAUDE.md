@@ -52,6 +52,6 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - [x] Fase 8: ajustes e histórico imutável (CT-13 a 15) — concluída
 - [x] Fase 9: alertas (CT-16 a 19) — concluída
 - [x] Fase 10: dashboard (CT-20) — concluída
-- [~] Fase 11: frontend React — em andamento (parte A: base, login e dashboard)
+- [x] Fase 11: frontend React — concluída
 - [ ] Fase 12: revisão final e segurança
 - [ ] Fase 13: deploy no Render e README

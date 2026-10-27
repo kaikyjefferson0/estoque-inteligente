@@ -18,7 +18,7 @@ def get_current_user(
     """RN-18 e RN-21: exige token válido de um usuário existente e ativo."""
     nao_autenticado = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Não autenticado",
+        detail="Sessão ausente ou expirada. Entre no sistema para continuar.",
         headers={"WWW-Authenticate": "Bearer"},
     )
     usuario_id = decode_access_token(token)
@@ -33,5 +33,5 @@ def get_current_user(
 def require_admin(usuario: Annotated[User, Depends(get_current_user)]) -> User:
     """RN-02: só o admin passa."""
     if usuario.perfil != "admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Acesso restrito ao admin")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Só o administrador pode fazer isso. Peça a um administrador.")
     return usuario

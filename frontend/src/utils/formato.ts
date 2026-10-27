@@ -81,3 +81,16 @@ export function formatarCnpj(valor: string): string {
   if (d.length > 12) texto += `-${d.slice(12, 14)}`
   return texto
 }
+
+const RELATIVO = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' })
+const MS_MINUTO = 60_000
+const MS_HORA = 3_600_000
+
+/** Tempo desde `iso`: "há 5 minutos", "há 3 horas", "ontem", "há 12 dias". */
+export function formatarTempoDecorrido(iso: string, agora = Date.now()): string {
+  const passado = Math.max(agora - Date.parse(iso), 0)
+  if (passado < MS_MINUTO) return 'agora há pouco'
+  if (passado < MS_HORA) return RELATIVO.format(-Math.floor(passado / MS_MINUTO), 'minute')
+  if (passado < MS_DIA) return RELATIVO.format(-Math.floor(passado / MS_HORA), 'hour')
+  return RELATIVO.format(-Math.floor(passado / MS_DIA), 'day')
+}

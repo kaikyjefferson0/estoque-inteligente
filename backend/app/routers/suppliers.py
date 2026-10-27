@@ -25,7 +25,7 @@ def criar(dados: SupplierCreate, db: Annotated[Session, Depends(get_db)]):
     except service.CnpjInvalidoError as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.CnpjJaCadastradoError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="CNPJ já cadastrado")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este CNPJ já está cadastrado em outro fornecedor. Confira o número.")
 
 
 @router.get("/{fornecedor_id}", response_model=SupplierOut)
@@ -33,7 +33,7 @@ def obter(fornecedor_id: int, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.obter_fornecedor(db, fornecedor_id)
     except service.FornecedorNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado. Ele pode ter sido removido; atualize a página.")
 
 
 @router.patch("/{fornecedor_id}", response_model=SupplierOut, dependencies=[Depends(get_current_user)])
@@ -41,8 +41,8 @@ def atualizar(fornecedor_id: int, dados: SupplierUpdate, db: Annotated[Session, 
     try:
         return service.atualizar_fornecedor(db, fornecedor_id, dados.model_dump(exclude_unset=True))
     except service.FornecedorNaoEncontradoError:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fornecedor não encontrado. Ele pode ter sido removido; atualize a página.")
     except service.CnpjInvalidoError as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     except service.CnpjJaCadastradoError:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="CNPJ já cadastrado")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este CNPJ já está cadastrado em outro fornecedor. Confira o número.")

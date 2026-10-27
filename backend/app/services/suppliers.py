@@ -33,7 +33,7 @@ def normalizar_cnpj(cnpj: str | None) -> str | None:
     if not digitos:
         return None
     if not CNPJ_14_DIGITOS.fullmatch(digitos):
-        raise CnpjInvalidoError("O CNPJ deve ter 14 dígitos.")
+        raise CnpjInvalidoError("O CNPJ tem 14 números. Complete o número ou deixe em branco.")
     return digitos
 
 

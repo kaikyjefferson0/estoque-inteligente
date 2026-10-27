@@ -7,6 +7,7 @@ import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import type { Produto } from '../types/produto'
 import { formatarNumero, plural } from '../utils/formato'
@@ -19,6 +20,7 @@ const MAX_BUSCA = 120
 
 // RN-23: produtos nunca são apagados, então não há ação de excluir
 export function ProdutosPage() {
+  useTituloDaPagina('Produtos')
   const [parametros, setParametros] = useSearchParams()
   const buscaNaUrl = parametros.get('busca') ?? ''
   const [busca, setBusca] = useState(buscaNaUrl)

@@ -84,7 +84,7 @@ const PRODUTOS = [
   { id: 3, nome: 'Parafuso sextavado zincado M8 x 40 mm, caixa com 100 unidades', codigo_barras: '7899999000123', estoque_minimo: 1200, controla_validade: false, dias_alerta_validade: null, fornecedor_id: null, criado_em: '2026-09-12T10:00:00Z' },
   { id: 4, nome: 'Café torrado e moído 500 g', codigo_barras: '7896005800018', estoque_minimo: 12, controla_validade: true, dias_alerta_validade: 30, fornecedor_id: 3, criado_em: '2026-09-13T15:45:00Z' },
 ]
-const CAMINHO_API = /^\/(auth|dashboard|products|suppliers)(\/|$)/
+const CAMINHO_API = /^\/(auth|dashboard|products|suppliers|alerts)(\/|$)/
 
 async function simularApi(page, cenario) {
   const json = (rota, status, corpo) => rota.fulfill({ status, contentType: 'application/json', body: JSON.stringify(corpo) })
@@ -102,6 +102,8 @@ async function simularApi(page, cenario) {
       if (partes[0] === 'dashboard') {
         return json(rota, 200, { total_produtos: 4, produtos_estoque_baixo: 0, produtos_sem_estoque: 0, lotes_a_vencer: 0, lotes_vencidos: 0, alertas_ativos: 0, ultimas_movimentacoes: [] })
       }
+      // Contagem do menu: sem alertas nos cadastros
+      if (partes[0] === 'alerts') return json(rota, 200, [])
       const estado = cenario[partes[0]]
       if (metodo === 'GET' && partes.length === 1) {
         if (estado === 'carregando') return new Promise(() => {})
@@ -341,11 +343,32 @@ function dadosDoEstoque() {
   return { ESTOQUE, LOTES, MOVIMENTOS }
 }
 
+const USUARIOS = [
+  { id: 1, nome: 'Carla Administradora', email: 'carla@exemplo.com', perfil: 'admin', ativo: true, criado_em: '2026-01-01T00:00:00Z' },
+  { id: 2, nome: 'João Pereira', email: 'joao@exemplo.com', perfil: 'operador', ativo: true, criado_em: '2026-02-01T00:00:00Z' },
+  { id: 3, nome: 'Maria Souza', email: 'maria.souza@exemplo.com', perfil: 'operador', ativo: false, criado_em: '2026-03-01T00:00:00Z' },
+  { id: 4, nome: 'Roberto de Albuquerque Lima Filho', email: 'roberto.albuquerque.lima@distribuidora-exemplo.com.br', perfil: 'admin', ativo: true, criado_em: '2026-04-01T00:00:00Z' },
+]
+
+function dadosDosAlertas() {
+  const agora = Date.now()
+  const atras = (minutos) => new Date(agora - minutos * 60000).toISOString()
+  return [
+    { id: 6, tipo: 'estoque_baixo', produto_id: 4, produto_nome: 'Café torrado e moído 500 g', lote_id: null, validade: null, criado_em: atras(10), resolvido_em: null },
+    { id: 5, tipo: 'vencido', produto_id: 2, produto_nome: 'Leite integral UHT 1 L', lote_id: 21, validade: diaIso(-7), criado_em: atras(120), resolvido_em: null },
+    { id: 4, tipo: 'estoque_baixo', produto_id: 1, produto_nome: 'Arroz tipo 1, pacote de 5 kg', lote_id: null, validade: null, criado_em: atras(1560), resolvido_em: null },
+    { id: 3, tipo: 'vencimento_proximo', produto_id: 2, produto_nome: 'Leite integral UHT 1 L', lote_id: 22, validade: diaIso(5), criado_em: atras(4320), resolvido_em: null },
+    { id: 2, tipo: 'vencimento_proximo', produto_id: 2, produto_nome: 'Leite integral UHT 1 L', lote_id: 21, validade: diaIso(-7), criado_em: atras(20000), resolvido_em: atras(10000) },
+    { id: 1, tipo: 'estoque_baixo', produto_id: 3, produto_nome: 'Parafuso sextavado zincado M8 x 40 mm, caixa com 100 unidades', lote_id: null, validade: null, criado_em: atras(30000), resolvido_em: atras(18000) },
+  ]
+}
+
 async function simularEstoque(page, cenario, perfil) {
   const { ESTOQUE, LOTES, MOVIMENTOS } = dadosDoEstoque()
+  const ALERTAS = dadosDosAlertas()
   const json = (rota, status, corpo) => rota.fulfill({ status, contentType: 'application/json', body: JSON.stringify(corpo) })
   await page.route(
-    (url) => /^\/(auth|dashboard|products|suppliers|stock)(\/|$)/.test(url.pathname),
+    (url) => /^\/(auth|dashboard|products|suppliers|stock|alerts|users)(\/|$)/.test(url.pathname),
     async (rota) => {
       const req = rota.request()
       const url = new URL(req.url())
@@ -361,6 +384,39 @@ async function simularEstoque(page, cenario, perfil) {
       }
       if (partes[0] === 'suppliers') return json(rota, 200, FORNECEDORES)
 
+      if (partes[0] === 'alerts') {
+        if (partes[1] === 'generate') {
+          if (cenario.gerar === 'erro') return json(rota, 500, {})
+          return json(rota, 200, { criados: 1, resolvidos: 2 })
+        }
+        // A contagem do menu (sem filtro) não entra nos estados simulados da lista
+        const daLista = url.search !== ''
+        if (cenario.alerts === 'carregando' && daLista) return new Promise(() => {})
+        if (cenario.alerts === 'erro' && daLista) return json(rota, 500, {})
+        if (cenario.alerts === 'vazio') return json(rota, 200, [])
+        const tipo = url.searchParams.get('tipo')
+        const comResolvidos = url.searchParams.get('incluir_resolvidos') === 'true'
+        return json(rota, 200, ALERTAS.filter((a) => (!tipo || a.tipo === tipo) && (comResolvidos || !a.resolvido_em)))
+      }
+      if (partes[0] === 'users') {
+        const id = Number(partes[1])
+        if (metodo === 'GET' && !partes[1]) {
+          if (cenario.users === 'carregando') return new Promise(() => {})
+          if (cenario.users === 'erro') return json(rota, 500, {})
+          return json(rota, 200, USUARIOS)
+        }
+        const usuario = USUARIOS.find((u) => u.id === id)
+        if (metodo === 'GET') return usuario ? json(rota, 200, usuario) : json(rota, 404, { detail: 'Usuário não encontrado' })
+        const corpo = req.postDataJSON()
+        if (metodo === 'POST') {
+          if (corpo.email === 'joao@exemplo.com') return json(rota, 409, { detail: 'Este e-mail já está cadastrado. Use outro e-mail.' })
+          const { senha: _senha, ...semSenha } = corpo
+          return json(rota, 201, { id: 10, ativo: true, criado_em: new Date().toISOString(), ...semSenha })
+        }
+        if (id === 1 && corpo.ativo === false) return json(rota, 409, { detail: 'Você não pode desativar o próprio usuário. Peça a outro administrador, se precisar.' })
+        return json(rota, 200, { ...usuario, ...corpo })
+      }
+
       if (partes[0] === 'stock' && metodo === 'GET') {
         if (cenario.stock === 'carregando') return new Promise(() => {})
         if (cenario.stock === 'erro') return json(rota, 500, {})
@@ -374,7 +430,7 @@ async function simularEstoque(page, cenario, perfil) {
         cenario.ultimaEntrada = corpo
         const produto = PRODUTOS.find((p) => p.codigo_barras === corpo.codigo_barras)
         if (!produto) return json(rota, 404, { detail: 'Produto não encontrado' })
-        if (corpo.validade === '2030-02-02') return json(rota, 422, { detail: 'Validade já vencida.' })
+        if (corpo.validade === '2030-02-02') return json(rota, 422, { detail: 'Esta validade já passou e produto vencido não entra no estoque. Informe uma data a partir de hoje.' })
         return json(rota, 201, {
           movimentacao_id: 99, produto_id: produto.id, lote_id: 24, validade: corpo.validade, quantidade: corpo.quantidade,
           quantidade_lote: corpo.quantidade + (corpo.validade ? 0 : 15), saldo_total: 48 + corpo.quantidade, usuario_id: 1, criado_em: new Date().toISOString(),
@@ -386,7 +442,7 @@ async function simularEstoque(page, cenario, perfil) {
         if (!produto) return json(rota, 404, { detail: 'Produto não encontrado' })
         const item = ESTOQUE.find((i) => i.produto_id === produto.id)
         if (corpo.quantidade > item.saldo_disponivel) {
-          return json(rota, 409, { detail: `Saldo insuficiente: disponível ${item.saldo_disponivel}, pedido ${corpo.quantidade}.` })
+          return json(rota, 409, { detail: `Saldo insuficiente: há ${item.saldo_disponivel} unidades disponíveis e foram pedidas ${corpo.quantidade}. Informe até ${item.saldo_disponivel}.` })
         }
         return json(rota, 201, {
           produto_id: produto.id, quantidade: corpo.quantidade,
@@ -402,7 +458,7 @@ async function simularEstoque(page, cenario, perfil) {
         const lote = Object.values(LOTES).flat().find((l) => l.id === corpo.lote_id)
         if (!lote) return json(rota, 404, { detail: 'Lote não encontrado' })
         if (corpo.saldo_contado === lote.quantidade) {
-          return json(rota, 409, { detail: `O lote já tem ${lote.quantidade} unidade(s): nada a ajustar.` })
+          return json(rota, 409, { detail: `O lote já tem ${lote.quantidade} unidades, igual à contagem. Confira a contagem ou cancele o ajuste.` })
         }
         return json(rota, 201, {
           movimentacao_id: 102, produto_id: 2, lote_id: lote.id, validade: lote.validade, quantidade: corpo.saldo_contado - lote.quantidade,
@@ -537,7 +593,7 @@ async function capturarEstoque(rotulo, largura) {
   await page.getByLabel('Quantidade').fill('12')
   await page.getByLabel('Validade').pressSequentially('02022030')
   await page.getByRole('button', { name: 'Registrar entrada' }).click()
-  await page.locator('.campo__erro', { hasText: 'Validade já vencida' }).waitFor()
+  await page.locator('.campo__erro', { hasText: 'Esta validade já passou' }).waitFor()
   v('entrada-erro-api-acessibilidade', await acessibilidadeDoFoco(page))
   await capturar(page, r('entrada-erro-api-validade'), largura, { verificarPagina: false })
   await page.getByLabel('Validade').fill('')
@@ -586,7 +642,7 @@ async function capturarEstoque(rotulo, largura) {
   await page.getByLabel('Saldo contado').fill('12')
   await page.getByLabel('Motivo').fill('Contagem do inventário')
   await page.getByRole('button', { name: 'Revisar ajuste' }).click()
-  await page.locator('.campo__erro', { hasText: 'nada a ajustar' }).waitFor()
+  await page.locator('.campo__erro', { hasText: 'igual à contagem' }).waitFor()
   v('ajustes-sem-diferenca-acessibilidade', await acessibilidadeDoFoco(page))
   await capturar(page, r('ajustes-sem-diferenca'), largura, { verificarPagina: false })
   await page.getByLabel('Saldo contado').fill('9')
@@ -612,6 +668,139 @@ async function capturarEstoque(rotulo, largura) {
   await operador.page.getByRole('heading', { name: 'Painel', level: 1 }).waitFor()
   v('operador-em-ajustes-vai-para', new URL(operador.page.url()).pathname)
   v('operador-menu-tem-ajustes', await operador.page.getByRole('link', { name: 'Ajustes' }).count())
+  await operador.contexto.close()
+}
+
+// ---------- Alertas, usuários e página não encontrada, com a API simulada ----------
+async function capturarAlertasEUsuarios(rotulo, largura) {
+  const cenario = {}
+  const { contexto, page, erros } = await novaPagina(largura, cenario, 'admin')
+  const r = (nome) => `${rotulo}-au-${nome}`
+  const v = (nome, valor) => (relatorio.verificacoes[r(nome)] = valor)
+  const titulo = (nome) => page.getByRole('heading', { name: nome, level: 1 }).waitFor()
+  const contagemDoMenu = () => page.evaluate(() => [...document.querySelectorAll('.menu__contagem')].map((el) => el.textContent))
+
+  // Alertas
+  await page.goto(`${site}/alertas`)
+  await page.locator('.alerta').first().waitFor()
+  v('contagem-no-menu', await contagemDoMenu())
+  v('titulo-da-aba', await page.title())
+  await capturar(page, r('alertas-lista'), largura)
+  await page.keyboard.press('Tab')
+  await page.locator('.alerta__link').nth(1).focus()
+  await capturar(page, r('alertas-foco-teclado'), largura, { verificarPagina: false })
+  await page.getByRole('radio', { name: 'Vencido' }).check()
+  await page.waitForTimeout(300)
+  await capturar(page, r('alertas-filtro-vencido'), largura, { verificarPagina: false })
+  await page.getByRole('radio', { name: 'Todos' }).check()
+  await page.getByLabel('Mostrar resolvidos').check()
+  await page.waitForTimeout(300)
+  await capturar(page, r('alertas-com-resolvidos'), largura)
+  await page.getByLabel('Mostrar resolvidos').uncheck()
+  await page.getByRole('button', { name: 'Verificar agora' }).click()
+  await page.getByText('Verificação concluída').waitFor()
+  await capturar(page, r('alertas-verificado'), largura, { verificarPagina: false })
+  if (largura < 900) {
+    await page.getByRole('button', { name: 'Abrir menu' }).click()
+    await page.getByRole('dialog').waitFor()
+    await capturar(page, r('gaveta-com-contagem'), largura, { verificarPagina: false })
+    await page.keyboard.press('Escape')
+  }
+  cenario.gerar = 'erro'
+  await page.getByRole('button', { name: 'Verificar agora' }).click()
+  await page.getByRole('alert').waitFor()
+  await capturar(page, r('alertas-verificar-erro'), largura, { verificarPagina: false })
+  cenario.gerar = undefined
+  for (const estado of ['carregando', 'erro']) {
+    cenario.alerts = estado
+    await page.goto(`${site}/alertas?tipo=vencido`)
+    await page.waitForTimeout(400)
+    await capturar(page, r(`alertas-${estado}`), largura, { verificarPagina: false })
+  }
+  cenario.alerts = 'vazio'
+  await page.goto(`${site}/alertas`)
+  await page.getByText('Nenhum alerta ativo').waitFor()
+  v('contagem-no-menu-com-zero', await contagemDoMenu())
+  await capturar(page, r('alertas-vazio'), largura, { verificarPagina: false })
+  await page.getByRole('radio', { name: 'Estoque baixo' }).check()
+  await page.waitForTimeout(300)
+  await capturar(page, r('alertas-filtro-vazio'), largura, { verificarPagina: false })
+  cenario.alerts = undefined
+
+  // Usuários
+  await page.goto(`${site}/usuarios`)
+  await page.getByRole('table').waitFor()
+  await capturar(page, r('usuarios-lista'), largura)
+  await page.getByRole('link', { name: 'Cadastrar usuário' }).click()
+  await titulo('Cadastrar usuário')
+  await capturar(page, r('usuario-novo'), largura)
+  await page.getByRole('button', { name: 'Cadastrar usuário' }).click()
+  v('usuario-validacao-foco', await focoAtual(page))
+  await capturar(page, r('usuario-validacao'), largura, { verificarPagina: false })
+  await page.getByLabel('Nome').fill('Pedro Alves')
+  await page.getByLabel('E-mail').fill('joao@exemplo.com')
+  await page.getByLabel('Senha', { exact: true }).fill('senha-boa-123')
+  await page.getByLabel('Confirme a senha').fill('senha-outra-123')
+  await page.getByRole('button', { name: 'Cadastrar usuário' }).click()
+  v('usuario-senhas-diferentes-foco', await focoAtual(page))
+  await capturar(page, r('usuario-senhas-diferentes'), largura, { verificarPagina: false })
+  await page.getByLabel('Confirme a senha').fill('senha-boa-123')
+  await page.getByRole('button', { name: 'Cadastrar usuário' }).click()
+  await page.locator('.campo__erro', { hasText: 'Este e-mail já está cadastrado' }).waitFor()
+  v('usuario-email-repetido-foco', await focoAtual(page))
+  await capturar(page, r('usuario-email-repetido'), largura, { verificarPagina: false })
+  await page.getByLabel('E-mail').fill('pedro@exemplo.com')
+  await page.getByRole('button', { name: 'Cadastrar usuário' }).click()
+  await page.getByText('Usuário cadastrado').waitFor()
+  await capturar(page, r('usuario-cadastrado'), largura, { verificarPagina: false })
+
+  await page.goto(`${site}/usuarios/2/editar`)
+  await page.getByLabel('Usuário ativo').waitFor()
+  v('titulo-da-aba-editar', await page.title())
+  await capturar(page, r('usuario-editar'), largura)
+  await page.getByLabel('Usuário ativo').uncheck()
+  await page.getByRole('button', { name: 'Salvar alterações' }).click()
+  await page.getByRole('alertdialog').waitFor()
+  await capturar(page, r('usuario-desativar-confirmacao'), largura, { verificarPagina: false })
+  await page.getByRole('button', { name: 'Desativar usuário' }).click()
+  await page.getByText('Usuário desativado').waitFor()
+  await capturar(page, r('usuario-desativado'), largura, { verificarPagina: false })
+
+  await page.goto(`${site}/usuarios/1/editar`)
+  await page.getByLabel('Usuário ativo').waitFor()
+  v(
+    'proprio-bloqueado',
+    await page.evaluate(() => ({
+      perfil: document.querySelector('select[name="perfil"]')?.disabled,
+      ativo: document.querySelector('input[name="ativo"]')?.disabled,
+    })),
+  )
+  await capturar(page, r('usuario-editar-proprio'), largura, { verificarPagina: false })
+
+  cenario.users = 'erro'
+  await page.goto(`${site}/usuarios`)
+  await page.waitForTimeout(400)
+  await capturar(page, r('usuarios-erro'), largura, { verificarPagina: false })
+  cenario.users = undefined
+
+  // Página não encontrada
+  await page.goto(`${site}/rota-que-nao-existe`)
+  await titulo('Página não encontrada')
+  v('titulo-da-aba-404', await page.title())
+  await capturar(page, r('nao-encontrada'), largura)
+
+  v('erros-no-console', erros)
+  await contexto.close()
+
+  // Operador: sem Usuários no menu, a rota leva ao painel, e vê os alertas
+  const operador = await novaPagina(largura, {}, 'operador')
+  await operador.page.goto(`${site}/usuarios`)
+  await operador.page.getByRole('heading', { name: 'Painel', level: 1 }).waitFor()
+  v('operador-em-usuarios-vai-para', new URL(operador.page.url()).pathname)
+  v('operador-menu-tem-usuarios', await operador.page.getByRole('link', { name: 'Usuários' }).count())
+  await operador.page.goto(`${site}/alertas`)
+  await operador.page.locator('.alerta').first().waitFor()
+  await capturar(operador.page, r('alertas-operador'), largura, { verificarPagina: false })
   await operador.contexto.close()
 }
 
@@ -665,20 +854,29 @@ try {
     await page.getByRole('alert').waitFor()
     await capturar(page, `${rotulo}-login-erro`, largura, { verificarPagina: false })
 
+    // Sem UI_EMAIL/UI_SENHA, o login e o painel usam a API simulada (nada é gravado no banco)
     if (!email || !senha) {
-      relatorio.aviso = 'UI_EMAIL e UI_SENHA não definidos: telas logadas não capturadas.'
-      await contexto.close()
-      continue
+      relatorio.aviso = 'UI_EMAIL e UI_SENHA não definidos: painel capturado com login simulado.'
+      const json = (rota, corpo) => rota.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(corpo) })
+      await page.route('**/auth/login', (rota) => json(rota, { access_token: 'simulado', token_type: 'bearer' }))
+      await page.route('**/auth/me', (rota) =>
+        json(rota, { id: 1, nome: 'Carla Administradora', email: 'carla@exemplo.com', perfil: 'admin', ativo: true, criado_em: '2026-01-01T00:00:00Z' }),
+      )
+      await page.route(/\/alerts(\?|$)/, (rota) => json(rota, dadosDosAlertas().filter((a) => !a.resolvido_em)))
+      await page.route('**/dashboard', (rota) =>
+        json(rota, { total_produtos: 0, produtos_estoque_baixo: 0, produtos_sem_estoque: 0, lotes_a_vencer: 0, lotes_vencidos: 0, alertas_ativos: 0, ultimas_movimentacoes: [] }),
+      )
     }
 
-    // Painel real
-    await page.getByLabel('E-mail').fill(email)
-    await page.getByLabel('Senha', { exact: true }).fill(senha)
+    // Painel
+    await page.getByLabel('E-mail').fill(email ?? 'carla@exemplo.com')
+    await page.getByLabel('Senha', { exact: true }).fill(senha ?? 'simulada')
     await page.getByRole('button', { name: 'Entrar' }).click()
     await page.getByRole('heading', { name: 'Painel' }).waitFor()
     // Espera a resposta de /dashboard aparecer (networkidle passa antes do fetch)
     await page.getByText(/Últimas movimentações|Cadastre seu primeiro produto/).first().waitFor()
     await capturar(page, `${rotulo}-painel`, largura)
+    if (!email || !senha) await page.unroute('**/dashboard')
 
     // Foco pelo teclado no primeiro item do menu (computador) ou no botão do menu (celular)
     await page.keyboard.press('Tab')
@@ -698,10 +896,10 @@ try {
       await page.keyboard.press('Escape')
     }
 
-    // Página em construção (destaque do item atual no menu)
-    await page.goto(`${site}/entrada`)
-    await page.getByRole('heading', { name: 'Entrada' }).waitFor()
-    await capturar(page, `${rotulo}-em-construcao`, largura, { verificarPagina: false })
+    // Página não encontrada (endereço que não existe)
+    await page.goto(`${site}/endereco-inexistente`)
+    await page.getByRole('heading', { name: 'Página não encontrada' }).waitFor()
+    await capturar(page, `${rotulo}-nao-encontrada`, largura, { verificarPagina: false })
 
     // Estados simulados do painel
     const simular = async (nome, tratar) => {
@@ -790,6 +988,7 @@ try {
   for (const [rotulo, largura] of Object.entries(LARGURAS)) {
     await capturarCadastros(rotulo, largura)
     await capturarEstoque(rotulo, largura)
+    await capturarAlertasEUsuarios(rotulo, largura)
   }
 } finally {
   await navegador.close()

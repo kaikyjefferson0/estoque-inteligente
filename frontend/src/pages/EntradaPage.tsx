@@ -1,14 +1,17 @@
 import { IconBarcode, IconPackageImport } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { ApiError, api, mensagemDeErro } from '../api/client'
+import { useAlertasAtivos } from '../alertas/useAlertasAtivos'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Aviso } from '../components/Aviso'
 import { Botao } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Vazio } from '../components/Estados'
+import { SaldoAtualizado } from '../components/SaldoAtualizado'
 import { LeituraDeCodigo, ResumoDoProduto } from '../components/LeituraDeCodigo'
 import { useLeituraDeCodigo, type ProdutoLido } from '../components/useLeituraDeCodigo'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
+import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { EntradaRegistrada } from '../types/estoque'
 import { formatarNumero, hojeIso, lerData, mascararData } from '../utils/formato'
 import { descreverLote } from '../utils/situacao'
@@ -141,9 +144,11 @@ interface Ultima {
 
 // RN-32: admin e operador registram entradas
 export function EntradaPage() {
+  useTituloDaPagina('Entrada')
   const [leitura, campoCodigo] = useLeituraDeCodigo()
   const { lido } = leitura
   const [ultima, setUltima] = useState<Ultima | null>(null)
+  const { atualizarAlertas } = useAlertasAtivos()
 
   return (
     <div className="pagina">
@@ -160,7 +165,12 @@ export function EntradaPage() {
             <strong>Entrada registrada.</strong> {formatarNumero(ultima.resultado.quantidade)} de {ultima.nome}
             {ultima.resultado.validade &&
               `, ${descreverLote(ultima.resultado.validade).toLowerCase()} (lote agora com ${formatarNumero(ultima.resultado.quantidade_lote)})`}
-            . Saldo total: <span className="numero">{formatarNumero(ultima.resultado.saldo_total)}</span>.
+            .{' '}
+            <SaldoAtualizado
+              key={ultima.resultado.movimentacao_id}
+              produtoId={ultima.resultado.produto_id}
+              saldoFisico={ultima.resultado.saldo_total}
+            />
           </p>
         </Aviso>
       )}
@@ -182,6 +192,8 @@ export function EntradaPage() {
               lido={lido}
               aoRegistrar={(resultado) => {
                 setUltima({ nome: lido.produto.nome, resultado })
+                // RN-40: a entrada já gerou os alertas do produto; o menu mostra a nova contagem
+                atualizarAlertas()
                 // Pronta para o próximo item
                 leitura.recomecar()
               }}

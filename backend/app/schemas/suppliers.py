@@ -28,7 +28,7 @@ class SupplierUpdate(BaseModel):
     @model_validator(mode="after")
     def nome_enviado_nao_nulo(self):
         if "nome" in self.model_fields_set and self.nome is None:
-            raise ValueError("Campo não pode ser nulo: nome")
+            raise ValueError("Informe o nome do fornecedor.")
         return self
 
 
