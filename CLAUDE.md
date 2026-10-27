@@ -22,6 +22,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Regra de negócio fica no service, nunca no router.
 - Nunca ler, mostrar nem commitar o arquivo `.env`.
 - Toda mudança de tabela passa por migration do Alembic.
+- O tema visual fica em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios e durações; páginas seguem a skill `frontend-page`.
 - Estamos no Windows (cmd): use `py` e caminhos com barra invertida.
 - Trabalhe uma fase por vez e explique o que está fazendo; o usuário é o engenheiro e decide a arquitetura.
 
@@ -30,6 +31,13 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Rodar a API: `uvicorn app.main:app --reload` (dentro de `backend`)
 - Testes: `pytest` (dentro de `backend`)
 - Migrations: `alembic upgrade head`
+
+## Comandos do frontend (dentro de `frontend`)
+- Instalar dependências: `npm install`
+- Rodar o site: `npm run dev` (http://localhost:5173)
+- Build com checagem de TypeScript: `npm run build`
+- Lint: `npm run lint`
+- Capturas para o ui-reviewer: `node scripts\capturas-ui.mjs <pasta>`
 
 ## Roteiro de fases
 - [x] Fase 0: ambiente — concluída
@@ -42,7 +50,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - [x] Fase 7: saídas com FEFO (CT-10 a 12, CT-32 a 36) — concluída
 - [x] Fase 8: ajustes e histórico imutável (CT-13 a 15) — concluída
 - [x] Fase 9: alertas (CT-16 a 19) — concluída
-- [~] Fase 10: dashboard (CT-20) — em andamento
-- [ ] Fase 11: frontend React
+- [x] Fase 10: dashboard (CT-20) — concluída
+- [~] Fase 11: frontend React — em andamento (parte A: base, login e dashboard)
 - [ ] Fase 12: revisão final e segurança
 - [ ] Fase 13: deploy no Render e README

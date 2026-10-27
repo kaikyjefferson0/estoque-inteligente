@@ -1,0 +1,114 @@
+/*
+ * Tema do Estoque Inteligente: única fonte de valores visuais.
+ * Nenhum outro arquivo define cor, espaçamento, tamanho de fonte,
+ * raio ou duração diretamente; todos usam estas variáveis.
+ */
+
+:root {
+  /* Cores de base */
+  --cor-primaria: #2f5d8a;
+  --cor-primaria-escura: #1f4266;
+  --cor-primaria-clara: #eaf1f8;
+  --cor-superficie: #ffffff;
+  --cor-fundo: #f4f7fa;
+  --cor-texto: #1b2a3a;
+  --cor-texto-suave: #5b6b7d;
+  --cor-borda: #dce3eb;
+  --cor-texto-inverso: #ffffff;
+
+  /* Situação: cor da faixa, cor de texto sobre branco e fundo claro */
+  --cor-ok: #2e7d5b;
+  --cor-ok-texto: #2e7d5b;
+  --cor-ok-fundo: #e8f4ee;
+  --cor-atencao: #b26b00;
+  --cor-atencao-texto: #8a5300;
+  --cor-atencao-fundo: #fdf3e3;
+  --cor-critico: #b42318;
+  --cor-critico-texto: #b42318;
+  --cor-critico-fundo: #fcecea;
+
+  /* Estados de controle */
+  --cor-primaria-pressionada: #183552;
+  --cor-primaria-clara-pressionada: #dbe7f3;
+  --cor-critico-escura: #921c13;
+  --cor-critico-pressionada: #76170f;
+  --cor-borda-forte: #a9b6c4;
+  --cor-hover-neutro: #eef2f6;
+  --cor-pressionado-neutro: #e2e8ef;
+  --cor-desabilitado-fundo: #e9edf2;
+  --cor-desabilitado-texto: #8593a3;
+  --cor-foco: #2f5d8a;
+  --cor-sobreposicao: rgba(27, 42, 58, 0.45);
+
+  /* Espaçamento: escala de 4px. Nenhum margin, padding ou gap fora dela */
+  --esp-0: 0;
+  --esp-1: 4px;
+  --esp-2: 8px;
+  --esp-3: 12px;
+  --esp-4: 16px;
+  --esp-5: 24px;
+  --esp-6: 32px;
+  --esp-7: 48px;
+
+  /* Tipografia */
+  --fonte: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --peso-normal: 400;
+  --peso-medio: 500;
+  --fs-1: 0.8125rem; /* 13px: metadados */
+  --fs-2: 0.875rem; /* 14px: rótulos e texto secundário */
+  --fs-3: 1rem; /* 16px: corpo */
+  --fs-4: 1.125rem; /* 18px: títulos de seção */
+  --fs-5: 1.5rem; /* 24px: título da página */
+  --fs-6: 2rem; /* 32px: números de situação */
+  --lh-corpo: 1.55;
+  --lh-titulo: 1.25;
+  --lh-numero: 1.1;
+  --medida-texto: 68ch;
+
+  /* Raios: pequeno para controles, médio para painéis */
+  --raio-p: 6px;
+  --raio-m: 10px;
+
+  /* Bordas e foco */
+  --borda: 1px solid var(--cor-borda);
+  --etiqueta-largura: 4px;
+  --foco-anel: 2px solid var(--cor-foco);
+  --foco-distancia: 2px;
+  --sombra-flutuante: 0 8px 24px rgba(27, 42, 58, 0.14);
+
+  /* Movimento: só em resposta a ações do usuário */
+  --mov-rapido: 120ms;
+  --mov-medio: 200ms;
+  --mov-curva: cubic-bezier(0.2, 0, 0, 1);
+  /* Giro do indicador de carregando (não é transição; some com reduced-motion) */
+  --mov-giro: 800ms;
+
+  /* Dimensões */
+  --alvo-min: 40px;
+  --largura-menu: 240px;
+  --altura-cabecalho: 56px;
+  --largura-conteudo: 1120px;
+  --largura-login: 400px;
+  --largura-gaveta: 288px;
+  --largura-dialogo: 440px;
+  --largura-suspenso: 240px;
+  --largura-nome: 22ch;
+  --camada-cabecalho: 10;
+  --camada-sobreposicao: 50;
+  --icone-p: 18px;
+  --icone-m: 20px;
+}
+
+/* Celular e tablet: alvos de toque com pelo menos 44px */
+@media (max-width: 900px) {
+  :root {
+    --alvo-min: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mov-rapido: 0ms;
+    --mov-medio: 0ms;
+  }
+}

@@ -1,0 +1,494 @@
+/* Componentes compartilhados. Só usa variáveis do theme.css. */
+
+/* ---------- Etiqueta de prateleira ---------- */
+/* Faixa à esquerda na cor da situação; o canto da faixa nunca é arredondado */
+.etiqueta {
+  border-left: var(--etiqueta-largura) solid var(--etiqueta-cor);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.etiqueta--ok {
+  --etiqueta-cor: var(--cor-ok);
+  --etiqueta-texto: var(--cor-ok-texto);
+  --etiqueta-fundo: var(--cor-ok-fundo);
+}
+
+.etiqueta--atencao {
+  --etiqueta-cor: var(--cor-atencao);
+  --etiqueta-texto: var(--cor-atencao-texto);
+  --etiqueta-fundo: var(--cor-atencao-fundo);
+}
+
+.etiqueta--critico {
+  --etiqueta-cor: var(--cor-critico);
+  --etiqueta-texto: var(--cor-critico-texto);
+  --etiqueta-fundo: var(--cor-critico-fundo);
+}
+
+/* ---------- Botões ---------- */
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--esp-2);
+  min-height: var(--alvo-min);
+  padding: var(--esp-0) var(--esp-4);
+  border: 1px solid transparent;
+  border-radius: var(--raio-p);
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+  line-height: var(--lh-titulo);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--mov-rapido) var(--mov-curva),
+    border-color var(--mov-rapido) var(--mov-curva),
+    color var(--mov-rapido) var(--mov-curva);
+}
+
+.botao svg {
+  flex-shrink: 0;
+  width: var(--icone-p);
+  height: var(--icone-p);
+}
+
+.botao--largura-total {
+  width: 100%;
+}
+
+.botao--primaria {
+  background: var(--cor-primaria);
+  color: var(--cor-texto-inverso);
+}
+
+.botao--primaria:hover {
+  background: var(--cor-primaria-escura);
+  color: var(--cor-texto-inverso);
+}
+
+.botao--primaria:active {
+  background: var(--cor-primaria-pressionada);
+}
+
+.botao--secundaria {
+  background: var(--cor-superficie);
+  border-color: var(--cor-borda);
+  color: var(--cor-texto);
+}
+
+.botao--secundaria:hover {
+  background: var(--cor-hover-neutro);
+  border-color: var(--cor-borda-forte);
+  color: var(--cor-texto);
+}
+
+.botao--secundaria:active {
+  background: var(--cor-pressionado-neutro);
+}
+
+.botao--fantasma {
+  background: transparent;
+  color: var(--cor-primaria);
+}
+
+.botao--fantasma:hover {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+}
+
+.botao--fantasma:active {
+  background: var(--cor-primaria-clara-pressionada);
+}
+
+.botao--perigo {
+  background: var(--cor-critico);
+  color: var(--cor-texto-inverso);
+}
+
+.botao--perigo:hover {
+  background: var(--cor-critico-escura);
+  color: var(--cor-texto-inverso);
+}
+
+.botao--perigo:active {
+  background: var(--cor-critico-pressionada);
+}
+
+.botao:disabled {
+  background: var(--cor-desabilitado-fundo);
+  border-color: transparent;
+  color: var(--cor-desabilitado-texto);
+  cursor: not-allowed;
+}
+
+/* Carregando: mantém a cor da variante para não parecer desabilitado */
+.botao[data-carregando].botao--primaria {
+  background: var(--cor-primaria-escura);
+  color: var(--cor-texto-inverso);
+}
+
+.botao[data-carregando].botao--secundaria {
+  background: var(--cor-hover-neutro);
+  color: var(--cor-texto);
+}
+
+.botao[data-carregando].botao--fantasma {
+  background: var(--cor-primaria-clara);
+  color: var(--cor-primaria-escura);
+}
+
+.botao[data-carregando].botao--perigo {
+  background: var(--cor-critico-escura);
+  color: var(--cor-texto-inverso);
+}
+
+.botao[data-carregando] {
+  cursor: progress;
+}
+
+/* Botão só com ícone (menu, fechar, mostrar senha) */
+.botao-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--alvo-min);
+  height: var(--alvo-min);
+  padding: var(--esp-0);
+  border: 0;
+  border-radius: var(--raio-p);
+  background: transparent;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+  transition:
+    background-color var(--mov-rapido) var(--mov-curva),
+    color var(--mov-rapido) var(--mov-curva);
+}
+
+.botao-icone svg {
+  width: var(--icone-m);
+  height: var(--icone-m);
+}
+
+.botao-icone:hover {
+  background: var(--cor-hover-neutro);
+  color: var(--cor-texto);
+}
+
+.botao-icone:active {
+  background: var(--cor-pressionado-neutro);
+}
+
+.botao-icone:disabled {
+  color: var(--cor-desabilitado-texto);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/* ---------- Campos ---------- */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.campo__rotulo {
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+}
+
+/* A borda fica na caixa para o acessório (ex.: mostrar senha) ficar dentro do campo */
+.campo__caixa {
+  display: flex;
+  align-items: center;
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: var(--raio-p);
+  transition: border-color var(--mov-rapido) var(--mov-curva);
+}
+
+.campo__caixa:hover {
+  border-color: var(--cor-texto-suave);
+}
+
+.campo__caixa:has(.campo__entrada:focus) {
+  border-color: var(--cor-primaria);
+  outline: var(--foco-anel);
+  outline-offset: var(--esp-0);
+}
+
+.campo__caixa:has(.campo__entrada:disabled) {
+  background: var(--cor-desabilitado-fundo);
+  border-color: var(--cor-borda);
+}
+
+/* O alvo de toque é o próprio campo, não a caixa com borda */
+.campo__entrada {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--alvo-min);
+  align-self: stretch;
+  padding: var(--esp-0) var(--esp-3);
+  border: 0;
+  background: transparent;
+  font-size: var(--fs-3);
+}
+
+.campo__entrada:focus {
+  outline: none;
+}
+
+.campo__entrada:disabled {
+  color: var(--cor-desabilitado-texto);
+  cursor: not-allowed;
+}
+
+.campo__acessorio {
+  border-radius: var(--raio-p);
+}
+
+.campo--erro .campo__caixa {
+  border-color: var(--cor-critico);
+}
+
+.campo__dica {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.campo__erro {
+  font-size: var(--fs-2);
+  color: var(--cor-critico-texto);
+}
+
+/* ---------- Aviso ---------- */
+.aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-3);
+  padding: var(--esp-3) var(--esp-4);
+  background: var(--etiqueta-fundo);
+  border-radius: var(--raio-p);
+  font-size: var(--fs-2);
+  color: var(--cor-texto);
+}
+
+.aviso__icone {
+  flex-shrink: 0;
+  width: var(--icone-m);
+  height: var(--icone-m);
+  color: var(--etiqueta-texto);
+}
+
+/* ---------- Estados: carregando, erro e vazio ---------- */
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--esp-3);
+  padding: var(--esp-7) var(--esp-5);
+  color: var(--cor-texto-suave);
+  font-size: var(--fs-2);
+  text-align: center;
+}
+
+.estado__icone {
+  width: var(--icone-m);
+  height: var(--icone-m);
+}
+
+.estado--tela-cheia {
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.estado--erro {
+  align-items: flex-start;
+  padding: var(--esp-0);
+  text-align: left;
+}
+
+.estado__titulo {
+  font-size: var(--fs-3);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+}
+
+.estado__texto {
+  max-width: var(--medida-texto);
+}
+
+.estado--vazio .botao {
+  margin-top: var(--esp-2);
+}
+
+/* ---------- Página e painel ---------- */
+.pagina {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  max-width: var(--largura-conteudo);
+}
+
+.pagina__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--esp-4);
+}
+
+.pagina__apoio {
+  margin-top: var(--esp-1);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.pagina__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+}
+
+.painel {
+  background: var(--cor-superficie);
+  border: var(--borda);
+  border-radius: var(--raio-m);
+}
+
+.painel__cabecalho {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--esp-4);
+  padding: var(--esp-4) var(--esp-5);
+  border-bottom: var(--borda);
+}
+
+/* Links de texto soltos também respeitam o alvo de toque */
+.painel__cabecalho a,
+.link-acao {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  font-size: var(--fs-2);
+}
+
+/* ---------- Sobreposição, janela de confirmação e gaveta ---------- */
+.sobreposicao {
+  position: fixed;
+  inset: 0;
+  z-index: var(--camada-sobreposicao);
+  background: var(--cor-sobreposicao);
+  animation: aparecer var(--mov-medio) var(--mov-curva);
+}
+
+.dialogo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: var(--camada-sobreposicao);
+  width: min(var(--largura-dialogo), calc(100vw - 2 * var(--esp-4)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding: var(--esp-5);
+  background: var(--cor-superficie);
+  border-radius: var(--raio-m);
+  box-shadow: var(--sombra-flutuante);
+  transform: translate(-50%, -50%);
+  animation: aparecer var(--mov-medio) var(--mov-curva);
+}
+
+.dialogo__titulo {
+  margin: var(--esp-0);
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+}
+
+.dialogo__descricao {
+  margin: var(--esp-0);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.dialogo__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--esp-2);
+  margin-top: var(--esp-2);
+}
+
+/* ---------- Menu suspenso ---------- */
+.suspenso {
+  z-index: var(--camada-sobreposicao);
+  min-width: var(--largura-suspenso);
+  padding: var(--esp-1);
+  background: var(--cor-superficie);
+  border: var(--borda);
+  border-radius: var(--raio-m);
+  box-shadow: var(--sombra-flutuante);
+  animation: aparecer var(--mov-rapido) var(--mov-curva);
+}
+
+.suspenso__cabecalho {
+  padding: var(--esp-2) var(--esp-3);
+}
+
+.suspenso__nome {
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+}
+
+.suspenso__email {
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+  overflow-wrap: anywhere;
+}
+
+.suspenso__separador {
+  height: 1px;
+  margin: var(--esp-1) var(--esp-0);
+  background: var(--cor-borda);
+}
+
+.suspenso__item {
+  display: flex;
+  align-items: center;
+  gap: var(--esp-2);
+  min-height: var(--alvo-min);
+  padding: var(--esp-0) var(--esp-3);
+  border-radius: var(--raio-p);
+  font-size: var(--fs-2);
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--mov-rapido) var(--mov-curva);
+}
+
+.suspenso__item svg {
+  width: var(--icone-p);
+  height: var(--icone-p);
+  color: var(--cor-texto-suave);
+}
+
+.suspenso__item[data-highlighted] {
+  background: var(--cor-hover-neutro);
+}
+
+.suspenso__item:focus-visible {
+  outline: var(--foco-anel);
+  outline-offset: calc(-1 * var(--foco-distancia));
+}
+
+.suspenso__item:active {
+  background: var(--cor-pressionado-neutro);
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}

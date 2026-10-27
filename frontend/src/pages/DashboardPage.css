@@ -1,0 +1,181 @@
+/* ---------- Situação: um painel único dividido pelas etiquetas ---------- */
+.situacoes {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  background: var(--cor-superficie);
+  border: var(--borda);
+  border-left: 0;
+  /* Lado esquerdo reto: é onde ficam as etiquetas */
+  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  overflow: hidden;
+}
+
+.situacao {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+  padding: var(--esp-4) var(--esp-5);
+}
+
+.situacao[data-ativo] {
+  background: var(--etiqueta-fundo);
+}
+
+.situacao__titulo {
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+}
+
+.situacao__valor {
+  font-size: var(--fs-6);
+  font-weight: var(--peso-medio);
+  line-height: var(--lh-numero);
+  color: var(--cor-texto-suave);
+}
+
+.situacao[data-ativo] .situacao__valor {
+  color: var(--etiqueta-texto);
+}
+
+.situacao__descricao {
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Totais discretos ---------- */
+.totais {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--esp-2) var(--esp-5);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.totais__item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-2);
+}
+
+.totais dd {
+  font-size: var(--fs-3);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+}
+
+/* ---------- Últimas movimentações ---------- */
+/* Subgrid: todas as linhas compartilham as mesmas colunas */
+.movimentos {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.movimento {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+  column-gap: var(--esp-5);
+  padding: var(--esp-3) var(--esp-5);
+}
+
+.movimento + .movimento {
+  border-top: var(--borda);
+}
+
+.movimento__tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-2);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.movimento__tipo svg {
+  width: var(--icone-p);
+  height: var(--icone-p);
+}
+
+.movimento__produto {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.movimento__nome {
+  overflow: hidden;
+  font-weight: var(--peso-medio);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movimento__lote {
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+.movimento__quantidade {
+  font-weight: var(--peso-medio);
+  text-align: right;
+}
+
+.movimento__autor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+@media (max-width: 900px) {
+  .situacoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .situacao:nth-child(n + 3) {
+    border-top: var(--borda);
+  }
+
+  .situacao {
+    padding: var(--esp-3) var(--esp-4);
+  }
+}
+
+@media (max-width: 640px) {
+  .movimentos {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .movimento {
+    grid-template-areas:
+      'produto quantidade'
+      'tipo autor';
+    row-gap: var(--esp-1);
+    column-gap: var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .movimento__produto {
+    grid-area: produto;
+  }
+
+  .movimento__quantidade {
+    grid-area: quantidade;
+  }
+
+  .movimento__tipo {
+    grid-area: tipo;
+    font-size: var(--fs-1);
+  }
+
+  .movimento__autor {
+    grid-area: autor;
+    flex-direction: row;
+    gap: var(--esp-2);
+  }
+
+  .painel__cabecalho {
+    padding: var(--esp-3) var(--esp-4);
+  }
+}
