@@ -21,10 +21,23 @@ class ValidadeInvalidaError(Exception):
     """RN-08 e RN-31."""
 
 
+class SaldoInsuficienteError(Exception):
+    """RN-09 e RN-36."""
+
+
 @dataclass
 class ResultadoEntrada:
     movimentacao: StockMovement
     lote: Batch
+    saldo_total: int
+
+
+@dataclass
+class ResultadoSaida:
+    produto_id: int
+    quantidade: int
+    # Pares (movimentação, lote) em ordem FEFO
+    retiradas: list[tuple[StockMovement, Batch]]
     saldo_total: int
 
 
@@ -120,6 +133,78 @@ def registrar_entrada(
         raise
     db.refresh(movimentacao)
     return ResultadoEntrada(movimentacao=movimentacao, lote=lote, saldo_total=saldo)
+
+
+def _travar_lotes_com_saldo(db: Session, produto_id: int) -> list[Batch]:
+    """Trava (FOR UPDATE) os lotes com saldo do produto, sempre por id.
+
+    A ordem fixa evita deadlock entre duas saídas simultâneas do mesmo produto.
+    Em READ COMMITTED, quem esperou a trava reavalia "quantidade > 0" com o valor
+    já confirmado, então um lote zerado pela outra saída fica de fora.
+    """
+    return list(
+        db.scalars(
+            select(Batch)
+            .where(Batch.produto_id == produto_id, Batch.quantidade > 0)
+            .order_by(Batch.id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+    )
+
+
+def _lotes_disponiveis_fefo(lotes: list[Batch]) -> list[Batch]:
+    """RN-36: só lotes dentro da validade (vencer hoje ainda vale).
+    RN-10: validade mais próxima primeiro; empate ou sem validade, por id."""
+    dia = hoje()
+    disponiveis = [lote for lote in lotes if lote.validade is None or lote.validade >= dia]
+    return sorted(disponiveis, key=lambda lote: (lote.validade is None, lote.validade or dia, lote.id))
+
+
+def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: int) -> ResultadoSaida:
+    """RN-32: qualquer usuário logado. Retira em FEFO e grava uma movimentação por lote, numa só transação."""
+    if quantidade <= 0:
+        raise QuantidadeInvalidaError("A quantidade deve ser maior que zero.")
+
+    produto = db.scalars(select(Product).where(Product.codigo_barras == codigo_barras.strip())).one_or_none()
+    if produto is None:
+        raise ProdutoNaoEncontradoError(codigo_barras)
+
+    try:
+        lotes = _lotes_disponiveis_fefo(_travar_lotes_com_saldo(db, produto.id))
+        disponivel = sum(lote.quantidade for lote in lotes)
+        # RN-09: recusa antes de mexer em qualquer lote
+        if disponivel < quantidade:
+            raise SaldoInsuficienteError(f"Saldo insuficiente: disponível {disponivel}, pedido {quantidade}.")
+
+        retiradas: list[tuple[StockMovement, Batch]] = []
+        restante = quantidade
+        for lote in lotes:
+            if restante == 0:
+                break
+            retirar = min(lote.quantidade, restante)
+            # RN-37: o lote que zera continua existindo
+            lote.quantidade -= retirar
+            restante -= retirar
+            # RN-12: o histórico só recebe inserções
+            movimentacao = StockMovement(
+                produto_id=produto.id,
+                lote_id=lote.id,
+                tipo="saida",
+                quantidade=retirar,
+                usuario_id=usuario.id,
+            )
+            db.add(movimentacao)
+            retiradas.append((movimentacao, lote))
+        db.flush()
+        saldo = _saldo_total(db, produto.id)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    for movimentacao, _ in retiradas:
+        db.refresh(movimentacao)
+    return ResultadoSaida(produto_id=produto.id, quantidade=quantidade, retiradas=retiradas, saldo_total=saldo)
 
 
 def consultar_saldo(db: Session, produto_id: int) -> tuple[int, list[Batch]]:

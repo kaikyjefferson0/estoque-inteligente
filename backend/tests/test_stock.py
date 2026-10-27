@@ -231,3 +231,197 @@ def test_banco_recusa_movimentacao_com_lote_de_outro_produto(db, admin, refriger
             )
             db.flush()
     assert erro.value.orig.diag.constraint_name == "fk_stock_movements_lote_id_produto_id_batches"
+
+
+# --- Saídas de estoque (Fase 7) ---
+
+
+def saida(client, token, codigo_barras, quantidade):
+    return client.post(
+        "/stock/exits", headers=auth(token), json={"codigo_barras": codigo_barras, "quantidade": quantidade}
+    )
+
+
+def historico(client, token, produto_id) -> list[dict]:
+    resposta = client.get(f"/products/{produto_id}/movements", headers=auth(token))
+    assert resposta.status_code == 200
+    return resposta.json()
+
+
+def lote_direto(db, produto, quantidade, validade=None) -> Batch:
+    """Cria o lote direto no banco; a entrada recusaria validade vencida (RN-31).
+
+    commit (e não só flush): uma saída recusada faz rollback e desfaria um lote pendente.
+    """
+    lote = Batch(produto_id=produto.id, validade=validade, quantidade=quantidade)
+    db.add(lote)
+    db.commit()
+    return lote
+
+
+def test_ct10_saida_com_saldo_suficiente(client, token_admin, admin, detergente):
+    """CT-10 / RN-09: saldo -3 e saída no histórico."""
+    entrada(client, token_admin, detergente.codigo_barras, 10)
+
+    resposta = saida(client, token_admin, detergente.codigo_barras, 3)
+    assert resposta.status_code == 201
+    corpo = resposta.json()
+    assert corpo["quantidade"] == 3
+    assert corpo["saldo_total"] == 7
+    assert corpo["usuario_id"] == admin.id
+
+    assert saldo(client, token_admin, detergente.id)["saldo_total"] == 7
+    ultima = historico(client, token_admin, detergente.id)[0]
+    assert (ultima["tipo"], ultima["quantidade"], ultima["usuario_nome"]) == ("saida", 3, "Admin")
+
+
+def test_ct11_saida_maior_que_o_saldo(client, token_admin, detergente):
+    """CT-11 / RN-09: 409 e o saldo continua igual."""
+    entrada(client, token_admin, detergente.codigo_barras, 5)
+
+    resposta = saida(client, token_admin, detergente.codigo_barras, 6)
+    assert resposta.status_code == 409
+    assert "Saldo insuficiente" in resposta.json()["detail"]
+    assert saldo(client, token_admin, detergente.id)["saldo_total"] == 5
+
+
+def test_ct12_saida_segue_fefo_entre_dois_lotes(client, db, token_admin, refrigerante):
+    """CT-12 / RN-10: lote B entra antes, mas A vence antes; A zera e B fica com 7."""
+    lote_b = entrada(client, token_admin, refrigerante.codigo_barras, 10, em_dias(60)).json()["lote_id"]
+    lote_a = entrada(client, token_admin, refrigerante.codigo_barras, 5, em_dias(20)).json()["lote_id"]
+
+    resposta = saida(client, token_admin, refrigerante.codigo_barras, 8)
+    assert resposta.status_code == 201
+    retiradas = [(lote["lote_id"], lote["quantidade"], lote["quantidade_lote"]) for lote in resposta.json()["lotes"]]
+    assert retiradas == [(lote_a, 5, 0), (lote_b, 3, 7)]
+
+    assert db.get(Batch, lote_a).quantidade == 0
+    assert db.get(Batch, lote_b).quantidade == 7
+
+
+def test_ct32_saida_de_produto_sem_validade_sai_do_lote_unico(client, db, token_admin, detergente):
+    """CT-32 / RN-27."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["lote_id"]
+
+    resposta = saida(client, token_admin, detergente.codigo_barras, 4)
+    assert resposta.status_code == 201
+    assert [(lote["lote_id"], lote["validade"]) for lote in resposta.json()["lotes"]] == [(lote_id, None)]
+    assert db.query(Batch).filter(Batch.produto_id == detergente.id).count() == 1
+    assert db.get(Batch, lote_id).quantidade == 6
+
+
+def test_ct33_saida_nao_usa_lote_vencido(client, db, token_admin, refrigerante):
+    """CT-33 / RN-36: o lote vencido vem antes no FEFO, mas não sai nem conta como disponível."""
+    vencido = lote_direto(db, refrigerante, 5, service.hoje() - timedelta(days=1))
+    valido = lote_direto(db, refrigerante, 4, service.hoje() + timedelta(days=30))
+
+    # Saldo total é 9, mas só 4 estão disponíveis para saída
+    assert saida(client, token_admin, refrigerante.codigo_barras, 5).status_code == 409
+
+    resposta = saida(client, token_admin, refrigerante.codigo_barras, 3)
+    assert resposta.status_code == 201
+    assert [lote["lote_id"] for lote in resposta.json()["lotes"]] == [valido.id]
+    db.refresh(vencido)
+    db.refresh(valido)
+    assert (vencido.quantidade, valido.quantidade) == (5, 1)
+
+
+def test_ct34_saida_em_dois_lotes_gera_duas_movimentacoes(client, db, token_admin, operador, token_operador, refrigerante):
+    """CT-34: uma movimentação de saída por lote atingido, com o usuário logado."""
+    lote_1 = entrada(client, token_admin, refrigerante.codigo_barras, 2, em_dias(10)).json()["lote_id"]
+    lote_2 = entrada(client, token_admin, refrigerante.codigo_barras, 6, em_dias(40)).json()["lote_id"]
+
+    resposta = saida(client, token_operador, refrigerante.codigo_barras, 5)
+    assert resposta.status_code == 201
+    corpo = resposta.json()
+
+    saidas = db.query(StockMovement).filter(StockMovement.tipo == "saida").order_by(StockMovement.id).all()
+    assert [(mov.lote_id, mov.quantidade, mov.usuario_id) for mov in saidas] == [
+        (lote_1, 2, operador.id),
+        (lote_2, 3, operador.id),
+    ]
+    assert [lote["movimentacao_id"] for lote in corpo["lotes"]] == [mov.id for mov in saidas]
+
+    saidas_no_historico = [mov for mov in historico(client, token_admin, refrigerante.id) if mov["tipo"] == "saida"]
+    assert sorted((mov["lote_id"], mov["quantidade"]) for mov in saidas_no_historico) == [(lote_1, 2), (lote_2, 3)]
+
+
+def test_ct35_saida_com_quantidade_zero_ou_negativa(client, db, token_admin, detergente):
+    """CT-35 / RN-07."""
+    entrada(client, token_admin, detergente.codigo_barras, 10)
+    for quantidade in (0, -3):
+        assert saida(client, token_admin, detergente.codigo_barras, quantidade).status_code == 422
+    assert db.query(StockMovement).filter(StockMovement.tipo == "saida").count() == 0
+    assert saldo(client, token_admin, detergente.id)["saldo_total"] == 10
+
+
+def test_ct35_service_tambem_recusa_quantidade_invalida(db, admin, detergente):
+    with pytest.raises(service.QuantidadeInvalidaError):
+        service.registrar_saida(db, admin, detergente.codigo_barras, 0)
+
+
+def test_ct36_saida_recusada_nao_altera_lotes_nem_cria_movimentacao(client, db, token_admin, refrigerante):
+    """CT-36 / RN-09: o primeiro lote cobriria parte do pedido, mas nada muda."""
+    entrada(client, token_admin, refrigerante.codigo_barras, 3, em_dias(10))
+    entrada(client, token_admin, refrigerante.codigo_barras, 4, em_dias(40))
+    antes = {lote.id: lote.quantidade for lote in db.query(Batch).all()}
+
+    assert saida(client, token_admin, refrigerante.codigo_barras, 8).status_code == 409
+
+    db.expire_all()
+    assert {lote.id: lote.quantidade for lote in db.query(Batch).all()} == antes
+    assert db.query(StockMovement).filter(StockMovement.tipo == "saida").count() == 0
+
+
+def test_operador_registra_saida(client, operador, token_admin, token_operador, detergente):
+    """RN-32."""
+    entrada(client, token_admin, detergente.codigo_barras, 5)
+    resposta = saida(client, token_operador, detergente.codigo_barras, 2)
+    assert resposta.status_code == 201
+    assert resposta.json()["usuario_id"] == operador.id
+
+
+def test_saida_sem_token_devolve_401(client, db, detergente):
+    """RN-18."""
+    resposta = client.post("/stock/exits", json={"codigo_barras": detergente.codigo_barras, "quantidade": 1})
+    assert resposta.status_code == 401
+    assert db.query(StockMovement).count() == 0
+
+
+def test_saida_com_codigo_de_barras_inexistente_devolve_404(client, db, token_admin):
+    assert saida(client, token_admin, "0000000000000", 1).status_code == 404
+    assert db.query(StockMovement).count() == 0
+
+
+def test_lote_que_zera_continua_existindo(client, db, token_admin, detergente):
+    """RN-37: o lote fica com 0, o histórico aponta para ele e ele sai da lista de lotes com saldo."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 4).json()["lote_id"]
+
+    resposta = saida(client, token_admin, detergente.codigo_barras, 4)
+    assert resposta.status_code == 201
+    assert resposta.json()["saldo_total"] == 0
+
+    lote = db.get(Batch, lote_id)
+    assert lote is not None and lote.quantidade == 0
+    assert saldo(client, token_admin, detergente.id) == {"produto_id": detergente.id, "saldo_total": 0, "lotes": []}
+    assert [mov["lote_id"] for mov in historico(client, token_admin, detergente.id)] == [lote_id, lote_id]
+
+    # Nova entrada volta a somar no mesmo lote (RN-27)
+    assert entrada(client, token_admin, detergente.codigo_barras, 2).json()["lote_id"] == lote_id
+
+
+def test_fuso_de_brasilia_decide_se_lote_que_vence_hoje_pode_sair(client, db, token_admin, refrigerante, monkeypatch):
+    """RN-36: lote com validade 26/10 sai até 23:59 de 26/10 em Brasília, mesmo que em UTC já seja 27/10."""
+    lote = lote_direto(db, refrigerante, 10, date(2026, 10, 26))
+
+    # 27/10 02:59 UTC = 26/10 23:59 em Brasília: vence hoje, ainda pode sair
+    monkeypatch.setattr(service, "_agora_utc", lambda: datetime(2026, 10, 27, 2, 59, tzinfo=timezone.utc))
+    resposta = saida(client, token_admin, refrigerante.codigo_barras, 3)
+    assert resposta.status_code == 201
+    assert resposta.json()["lotes"][0]["lote_id"] == lote.id
+
+    # 27/10 03:00 UTC = 27/10 00:00 em Brasília: vencido
+    monkeypatch.setattr(service, "_agora_utc", lambda: datetime(2026, 10, 27, 3, 0, tzinfo=timezone.utc))
+    assert saida(client, token_admin, refrigerante.codigo_barras, 1).status_code == 409
+    db.refresh(lote)
+    assert lote.quantidade == 7

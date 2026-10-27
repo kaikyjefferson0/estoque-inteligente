@@ -54,3 +54,31 @@ class MovementOut(BaseModel):
     usuario_id: int
     usuario_nome: str
     criado_em: datetime
+
+
+class StockExitCreate(BaseModel):
+    """Saída de estoque. FEFO e saldo (RN-09, RN-10, RN-36) são checados no service."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    codigo_barras: CodigoBarras
+    # RN-07: quantidade maior que zero
+    quantidade: Annotated[int, Field(gt=0, le=MAX_INTEGER)]
+
+
+class ExitBatchOut(BaseModel):
+    movimentacao_id: int
+    lote_id: int
+    validade: date | None
+    quantidade: int
+    quantidade_lote: int
+
+
+class StockExitOut(BaseModel):
+    produto_id: int
+    quantidade: int
+    # Uma linha por lote atingido, em ordem FEFO
+    lotes: list[ExitBatchOut]
+    saldo_total: int
+    usuario_id: int
+    criado_em: datetime

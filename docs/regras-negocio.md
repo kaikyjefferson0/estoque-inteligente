@@ -31,6 +31,8 @@
 - RN-30: o campo "controla validade" de um produto não pode ser alterado depois que o produto tem algum lote.
 - RN-31: a entrada não aceita validade já vencida; para produto sem controle de validade, a entrada não pode informar validade.
 - RN-32: admin e operador registram entradas e saídas; só o admin faz ajustes (RN-02, RN-11).
+- RN-36: a saída não usa lotes vencidos; o saldo disponível para saída é a soma dos lotes dentro da validade. O "hoje" segue o fuso America/Sao_Paulo, e um lote que vence hoje ainda pode sair.
+- RN-37: um lote que chega a zero não é apagado, porque o histórico aponta para ele.
 
 ## Alertas
 - RN-13: alerta de estoque baixo quando o saldo é igual ou menor que o mínimo.

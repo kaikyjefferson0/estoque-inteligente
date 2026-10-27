@@ -6,10 +6,18 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User
-from app.schemas.stock import MovementOut, ProductStockOut, StockEntryCreate, StockEntryOut
+from app.schemas.stock import (
+    ExitBatchOut,
+    MovementOut,
+    ProductStockOut,
+    StockEntryCreate,
+    StockEntryOut,
+    StockExitCreate,
+    StockExitOut,
+)
 from app.services import stock as service
 
-# RN-18: tudo exige login. RN-32: admin e operador registram entradas.
+# RN-18: tudo exige login. RN-32: admin e operador registram entradas e saídas.
 router = APIRouter(tags=["stock"], dependencies=[Depends(get_current_user)])
 
 
@@ -38,6 +46,40 @@ def registrar_entrada(
         criado_em=movimentacao.criado_em,
     )
 
+
+
+@router.post("/stock/exits", response_model=StockExitOut, status_code=status.HTTP_201_CREATED)
+def registrar_saida(
+    dados: StockExitCreate,
+    db: Annotated[Session, Depends(get_db)],
+    usuario: Annotated[User, Depends(get_current_user)],
+):
+    try:
+        resultado = service.registrar_saida(db, usuario, **dados.model_dump())
+    except service.ProdutoNaoEncontradoError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado")
+    except service.QuantidadeInvalidaError as erro:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
+    except service.SaldoInsuficienteError as erro:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
+    primeira = resultado.retiradas[0][0]
+    return StockExitOut(
+        produto_id=resultado.produto_id,
+        quantidade=resultado.quantidade,
+        lotes=[
+            ExitBatchOut(
+                movimentacao_id=movimentacao.id,
+                lote_id=lote.id,
+                validade=lote.validade,
+                quantidade=movimentacao.quantidade,
+                quantidade_lote=lote.quantidade,
+            )
+            for movimentacao, lote in resultado.retiradas
+        ],
+        saldo_total=resultado.saldo_total,
+        usuario_id=primeira.usuario_id,
+        criado_em=primeira.criado_em,
+    )
 
 @router.get("/products/{produto_id}/stock", response_model=ProductStockOut)
 def consultar_saldo(produto_id: int, db: Annotated[Session, Depends(get_db)]):
