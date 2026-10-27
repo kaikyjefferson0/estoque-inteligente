@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.routers import auth, users
+from app.routers import auth, products, suppliers, users
 
 app = FastAPI(title="Estoque Inteligente")
 
@@ -8,6 +8,8 @@ app = FastAPI(title="Estoque Inteligente")
 # as demais declaram get_current_user ou require_admin.
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(suppliers.router)
+app.include_router(products.router)
 
 
 @app.get("/health")

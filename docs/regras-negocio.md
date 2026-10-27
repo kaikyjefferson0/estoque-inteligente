@@ -39,3 +39,4 @@
 ## Pontos a confirmar
 - Produto sem controle de validade tem um lote único ou só um saldo total?
 - Como a saída escolhe entre lotes sem validade?
+- Pode-se ligar ou desligar o controle de validade de um produto que já tem lotes ou movimentações? (hoje o PATCH permite; decidir antes das movimentações, Fase 6)

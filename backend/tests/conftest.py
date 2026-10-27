@@ -11,6 +11,8 @@ from app.core.config import settings
 from app.core.database import Base, get_db
 from app.core.security import create_access_token
 from app.main import app
+from app.services.products import criar_produto
+from app.services.suppliers import criar_fornecedor
 from app.services.users import criar_usuario
 
 SENHA_ADMIN = "senha-do-admin-123"
@@ -87,3 +89,29 @@ def token_admin(admin) -> str:
 @pytest.fixture
 def token_operador(operador) -> str:
     return create_access_token(operador.id)
+
+
+# --- Dados de cadastro (cabeçalho do docs\casos-de-teste.md) ---
+
+
+@pytest.fixture
+def fornecedor(db):
+    return criar_fornecedor(db, nome="Distribuidora Central", cnpj="11222333000181")
+
+
+@pytest.fixture
+def refrigerante(db, fornecedor):
+    return criar_produto(
+        db,
+        nome="Refrigerante 2L",
+        codigo_barras="7891000000001",
+        estoque_minimo=10,
+        controla_validade=True,
+        dias_alerta_validade=30,
+        fornecedor_id=fornecedor.id,
+    )
+
+
+@pytest.fixture
+def detergente(db):
+    return criar_produto(db, nome="Detergente", codigo_barras="7891000000002", estoque_minimo=5)
