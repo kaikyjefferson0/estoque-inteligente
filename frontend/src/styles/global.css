@@ -62,7 +62,7 @@ textarea {
 
 a {
   color: var(--cor-primaria);
-  text-underline-offset: 3px;
+  text-underline-offset: var(--sublinhado-distancia);
 }
 
 a:hover {

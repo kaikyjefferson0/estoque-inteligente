@@ -1,0 +1,57 @@
+.detalhe__titulo {
+  overflow-wrap: anywhere;
+}
+
+/* Ficha do cadastro: rótulo à esquerda, valor à direita */
+.ficha {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
+.ficha__item {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: var(--esp-6);
+  padding: var(--esp-3) var(--esp-5);
+}
+
+.ficha__item + .ficha__item {
+  border-top: var(--borda);
+}
+
+.ficha dt {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.ficha dd {
+  overflow-wrap: anywhere;
+}
+
+.ficha__vazio {
+  color: var(--cor-texto-suave);
+}
+
+.detalhe__reservado {
+  padding: var(--esp-4) var(--esp-5);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+/* Celular: rótulo em cima do valor */
+@media (max-width: 640px) {
+  .ficha {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ficha__item {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--esp-1);
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .detalhe__reservado {
+    padding: var(--esp-3) var(--esp-4);
+  }
+}

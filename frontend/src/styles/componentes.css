@@ -236,6 +236,11 @@
   font-size: var(--fs-3);
 }
 
+/* O "×" nativo da busca é pequeno demais para toque e fica fora do tema */
+.campo__entrada::-webkit-search-cancel-button {
+  appearance: none;
+}
+
 .campo__entrada:focus {
   outline: none;
 }
@@ -498,4 +503,166 @@
   from {
     opacity: 0;
   }
+}
+
+/* ---------- Lista de opções (select nativo com a aparência do campo) ---------- */
+/* Seta e select na mesma célula: a seta não rouba o clique do select */
+.campo__caixa--selecao {
+  display: grid;
+}
+
+.campo__selecao {
+  grid-area: 1 / 1;
+  padding-right: var(--esp-7);
+  appearance: none;
+  cursor: pointer;
+}
+
+.campo__seta {
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: end;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  margin-right: var(--esp-3);
+  color: var(--cor-texto-suave);
+  pointer-events: none;
+}
+
+/* ---------- Caixa de marcar ---------- */
+.marcar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
+}
+
+.marcar__linha {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--esp-3);
+  min-height: var(--alvo-min);
+  cursor: pointer;
+}
+
+.marcar__caixa {
+  flex-shrink: 0;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  margin: var(--esp-0);
+  accent-color: var(--cor-primaria);
+  cursor: pointer;
+}
+
+.marcar__rotulo {
+  font-size: var(--fs-3);
+}
+
+/* O rótulo fica em --cor-texto: bloqueado, ele é o único jeito de ler o valor salvo */
+.marcar__caixa:disabled {
+  color: var(--cor-desabilitado-texto);
+  cursor: not-allowed;
+}
+
+.marcar:has(.marcar__caixa:disabled) .marcar__linha {
+  cursor: not-allowed;
+}
+
+.marcar--erro .marcar__caixa {
+  outline: var(--foco-anel);
+  outline-color: var(--cor-critico);
+  outline-offset: var(--foco-distancia);
+}
+
+/* ---------- Formulário de cadastro ---------- */
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-5);
+  max-width: var(--largura-formulario);
+  padding: var(--esp-5);
+}
+
+/* Grupo de campos ligados (ex.: validade e dias de alerta) */
+.formulario__grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-3);
+  padding: var(--esp-4) var(--esp-0) var(--esp-0);
+  border-top: var(--borda);
+}
+
+.formulario__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-2);
+  padding-top: var(--esp-2);
+}
+
+/* ---------- Tabela de cadastros ---------- */
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th {
+  padding: var(--esp-3) var(--esp-5);
+  border-bottom: var(--borda);
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto-suave);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabela td {
+  padding: var(--esp-2) var(--esp-5);
+  vertical-align: middle;
+}
+
+.tabela tbody tr + tr td {
+  border-top: var(--borda);
+}
+
+.tabela .tabela__numero {
+  text-align: right;
+}
+
+.tabela__vazio {
+  color: var(--cor-texto-suave);
+}
+
+/* Links dentro da tabela respeitam o alvo de toque */
+.tabela__link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  font-weight: var(--peso-medio);
+}
+
+.tabela[aria-busy='true'] tbody {
+  opacity: var(--opacidade-ocupado);
+  transition: opacity var(--mov-rapido) var(--mov-curva);
+}
+
+@media (max-width: 640px) {
+  .formulario {
+    padding: var(--esp-4);
+  }
+}
+
+/* Botão com aparência de link, para ações dentro de um texto (ex.: "Tentar de novo" numa dica) */
+.link-botao {
+  padding: var(--esp-0);
+  border: 0;
+  background: none;
+  color: var(--cor-primaria);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-distancia);
+  cursor: pointer;
+}
+
+.link-botao:hover {
+  color: var(--cor-primaria-escura);
 }

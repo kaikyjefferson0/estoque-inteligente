@@ -30,3 +30,18 @@ export function formatarComSinal(valor: number): string {
 export function plural(valor: number, singular: string, varios: string): string {
   return valor === 1 ? singular : varios
 }
+
+export function somenteDigitos(valor: string): string {
+  return valor.replace(/\D/g, '')
+}
+
+/** Formata enquanto a pessoa digita: "12345678000195" -> "12.345.678/0001-95". */
+export function formatarCnpj(valor: string): string {
+  const d = somenteDigitos(valor).slice(0, 14)
+  let texto = d.slice(0, 2)
+  if (d.length > 2) texto += `.${d.slice(2, 5)}`
+  if (d.length > 5) texto += `.${d.slice(5, 8)}`
+  if (d.length > 8) texto += `/${d.slice(8, 12)}`
+  if (d.length > 12) texto += `-${d.slice(12, 14)}`
+  return texto
+}

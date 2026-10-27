@@ -39,6 +39,8 @@
   --cor-desabilitado-texto: #8593a3;
   --cor-foco: #2f5d8a;
   --cor-sobreposicao: rgba(27, 42, 58, 0.45);
+  /* Lista sendo atualizada (ex.: busca): fica mais clara até chegar a resposta */
+  --opacidade-ocupado: 0.6;
 
   /* Espaçamento: escala de 4px. Nenhum margin, padding ou gap fora dela */
   --esp-0: 0;
@@ -74,6 +76,7 @@
   --etiqueta-largura: 4px;
   --foco-anel: 2px solid var(--cor-foco);
   --foco-distancia: 2px;
+  --sublinhado-distancia: 3px;
   --sombra-flutuante: 0 8px 24px rgba(27, 42, 58, 0.14);
 
   /* Movimento: só em resposta a ações do usuário */
@@ -93,6 +96,8 @@
   --largura-dialogo: 440px;
   --largura-suspenso: 240px;
   --largura-nome: 22ch;
+  --largura-formulario: 560px;
+  --largura-busca: 280px;
   --camada-cabecalho: 10;
   --camada-sobreposicao: 50;
   --icone-p: 18px;

@@ -1,0 +1,54 @@
+.fornecedores__nome {
+  font-weight: var(--peso-medio);
+  overflow-wrap: anywhere;
+}
+
+.fornecedores__cnpj {
+  white-space: nowrap;
+}
+
+.fornecedores__acao {
+  text-align: right;
+}
+
+/* Celular: nome e CNPJ empilhados, "Editar" à direita */
+@media (max-width: 640px) {
+  .fornecedores thead {
+    display: none;
+  }
+
+  .fornecedores tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'nome acao'
+      'cnpj acao';
+    align-items: center;
+    column-gap: var(--esp-3);
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .fornecedores tbody tr + tr {
+    border-top: var(--borda);
+  }
+
+  .fornecedores td,
+  .fornecedores tbody tr + tr td {
+    padding: var(--esp-0);
+    border-top: 0;
+  }
+
+  .fornecedores__nome {
+    grid-area: nome;
+  }
+
+  .fornecedores__cnpj {
+    grid-area: cnpj;
+    font-size: var(--fs-2);
+    color: var(--cor-texto-suave);
+  }
+
+  .fornecedores__acao {
+    grid-area: acao;
+  }
+}

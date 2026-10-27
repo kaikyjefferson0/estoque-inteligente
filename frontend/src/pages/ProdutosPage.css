@@ -1,0 +1,96 @@
+/* ---------- Busca ---------- */
+.produtos__busca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--esp-2) var(--esp-4);
+}
+
+.produtos__busca .campo {
+  flex: 1 1 var(--largura-busca);
+  max-width: var(--largura-formulario);
+}
+
+.produtos__lupa {
+  flex-shrink: 0;
+  order: -1;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  margin-left: var(--esp-3);
+  color: var(--cor-texto-suave);
+}
+
+.produtos__contagem {
+  display: flex;
+  align-items: center;
+  min-height: var(--alvo-min);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+/* ---------- Tabela ---------- */
+.produtos__nome {
+  overflow-wrap: anywhere;
+}
+
+.produtos__codigo {
+  white-space: nowrap;
+}
+
+/* No computador o cabeçalho da coluna já diz "Estoque mínimo" */
+.produtos__rotulo-celular {
+  display: none;
+}
+
+/* Celular: nome no topo; código e fornecedor embaixo; mínimo à direita */
+@media (max-width: 640px) {
+  .produtos thead {
+    display: none;
+  }
+
+  .produtos tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'nome nome'
+      'codigo minimo'
+      'fornecedor fornecedor';
+    column-gap: var(--esp-3);
+    padding: var(--esp-2) var(--esp-4) var(--esp-3);
+  }
+
+  .produtos tbody tr + tr {
+    border-top: var(--borda);
+  }
+
+  .produtos td,
+  .produtos tbody tr + tr td {
+    padding: var(--esp-0);
+    border-top: 0;
+  }
+
+  .produtos__nome {
+    grid-area: nome;
+  }
+
+  .produtos__codigo {
+    grid-area: codigo;
+    font-size: var(--fs-2);
+  }
+
+  .produtos__minimo {
+    grid-area: minimo;
+    font-size: var(--fs-2);
+  }
+
+  .produtos__fornecedor {
+    grid-area: fornecedor;
+    font-size: var(--fs-2);
+    color: var(--cor-texto-suave);
+  }
+
+  .produtos__rotulo-celular {
+    display: inline;
+    color: var(--cor-texto-suave);
+  }
+}
