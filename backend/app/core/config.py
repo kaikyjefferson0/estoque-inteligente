@@ -6,6 +6,21 @@ from dotenv import load_dotenv
 # backend\.env
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
+SECRET_KEY_MINIMA = 32
+# Valor de exemplo do .env.example: nunca pode ser usado como chave real
+SECRET_KEY_EXEMPLO = "troque-por-uma-chave-gerada"
+
+
+def validar_secret_key(valor: str) -> None:
+    """Recusa chave curta ou igual ao exemplo, sem mostrar o valor na mensagem."""
+    if valor.strip() == SECRET_KEY_EXEMPLO:
+        raise RuntimeError(
+            "SECRET_KEY ainda é o valor de exemplo do .env.example. "
+            'Gere uma com: py -c "import secrets; print(secrets.token_hex(32))"'
+        )
+    if len(valor.strip()) < SECRET_KEY_MINIMA:
+        raise RuntimeError(f"SECRET_KEY precisa ter pelo menos {SECRET_KEY_MINIMA} caracteres.")
+
 
 class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
@@ -21,6 +36,7 @@ class Settings:
                 f"Variável(is) obrigatória(s) vazia(s) ou ausente(s): {', '.join(faltando)}. "
                 "Preencha no backend\\.env (veja o .env.example)."
             )
+        validar_secret_key(self.SECRET_KEY)
 
 
 settings = Settings()
