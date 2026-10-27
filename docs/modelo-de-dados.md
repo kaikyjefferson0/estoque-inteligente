@@ -24,8 +24,12 @@ id, produto_id, lote_id, tipo (entrada, saida ou ajuste), quantidade, motivo (ob
 - O lote pertence ao mesmo produto da movimentação: chave estrangeira composta (lote_id, produto_id) para batches (id, produto_id).
 
 ## alerts
-id, tipo (estoque_baixo, vencimento_proximo ou vencido), produto_id, lote_id (opcional), criado_em
-- Restrição de unicidade por tipo + produto + lote, para não duplicar alertas.
+id, tipo (estoque_baixo, vencimento_proximo ou vencido), produto_id, lote_id (opcional), criado_em, resolvido_em (opcional)
+- tipo só estoque_baixo, vencimento_proximo ou vencido.
+- lote_id vazio no estoque_baixo e obrigatório nos alertas de validade.
+- Alerta ativo é o que tem resolvido_em vazio; o resolvido não é apagado (RN-39).
+- Unicidade de tipo + produto_id + lote_id só entre os ativos: índice único parcial (WHERE resolvido_em IS NULL) com NULLS NOT DISTINCT, para o estoque_baixo (lote vazio) também não duplicar (RN-16).
+- Chaves estrangeiras com RESTRICT: produto_id para products e (lote_id, produto_id) para batches (id, produto_id), para o lote ser do mesmo produto do alerta.
 
 ## Relações
 - Um fornecedor tem vários produtos; um produto tem no máximo um fornecedor.

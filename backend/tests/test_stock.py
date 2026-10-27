@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError, IntegrityError
 
+from app.core import clock
 from app.main import app
 
 from app.models.batch import Batch
@@ -201,7 +202,7 @@ def test_historico_do_mais_recente_para_o_mais_antigo(client, token_admin, deter
 
 def test_hoje_e_o_dia_em_brasilia_e_nao_em_utc(client, token_admin, refrigerante, monkeypatch):
     """RN-31: 27/10 01:00 UTC ainda é 26/10 22:00 em Brasília; validade 26/10 vence hoje e é aceita."""
-    monkeypatch.setattr(service, "_agora_utc", lambda: datetime(2026, 10, 27, 1, 0, tzinfo=timezone.utc))
+    monkeypatch.setattr(clock, "_agora_utc", lambda: datetime(2026, 10, 27, 1, 0, tzinfo=timezone.utc))
     assert service.hoje() == date(2026, 10, 26)
 
     assert entrada(client, token_admin, refrigerante.codigo_barras, 10, "2026-10-26").status_code == 201
@@ -417,13 +418,13 @@ def test_fuso_de_brasilia_decide_se_lote_que_vence_hoje_pode_sair(client, db, to
     lote = lote_direto(db, refrigerante, 10, date(2026, 10, 26))
 
     # 27/10 02:59 UTC = 26/10 23:59 em Brasília: vence hoje, ainda pode sair
-    monkeypatch.setattr(service, "_agora_utc", lambda: datetime(2026, 10, 27, 2, 59, tzinfo=timezone.utc))
+    monkeypatch.setattr(clock, "_agora_utc", lambda: datetime(2026, 10, 27, 2, 59, tzinfo=timezone.utc))
     resposta = saida(client, token_admin, refrigerante.codigo_barras, 3)
     assert resposta.status_code == 201
     assert resposta.json()["lotes"][0]["lote_id"] == lote.id
 
     # 27/10 03:00 UTC = 27/10 00:00 em Brasília: vencido
-    monkeypatch.setattr(service, "_agora_utc", lambda: datetime(2026, 10, 27, 3, 0, tzinfo=timezone.utc))
+    monkeypatch.setattr(clock, "_agora_utc", lambda: datetime(2026, 10, 27, 3, 0, tzinfo=timezone.utc))
     assert saida(client, token_admin, refrigerante.codigo_barras, 1).status_code == 409
     db.refresh(lote)
     assert lote.quantidade == 7

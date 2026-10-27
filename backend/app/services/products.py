@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.batch import Batch
 from app.models.product import Product
 from app.models.supplier import Supplier
+from app.services import alerts as alertas
 
 CAMPOS_EDITAVEIS = (
     "nome",
@@ -62,12 +63,18 @@ def _codigo_em_uso(db: Session, codigo_barras: str, ignorar_id: int | None = Non
 
 def _salvar(db: Session, produto: Product, codigo_barras: str) -> Product:
     try:
+        db.flush()
+        # RN-40: mínimo ou dias de alerta podem ter mudado; alertas na mesma transação
+        alertas.gerar_alertas_produto(db, produto.id)
         db.commit()
     except IntegrityError as erro:
         db.rollback()
         # Outro cadastro com o mesmo código entrou entre a busca e o commit (RN-04)
         if getattr(getattr(erro.orig, "diag", None), "constraint_name", None) == "ix_products_codigo_barras":
             raise CodigoBarrasJaCadastradoError(codigo_barras)
+        raise
+    except Exception:
+        db.rollback()
         raise
     db.refresh(produto)
     return produto
@@ -128,6 +135,8 @@ def obter_produto(db: Session, produto_id: int, travar: bool = False) -> Product
 
 def atualizar_produto(db: Session, produto_id: int, dados: dict) -> Product:
     """Altera os campos enviados. As regras valem para o estado final do produto."""
+    # Ordem das travas igual à das movimentações: produto (consultiva) -> linha do produto
+    alertas.travar_produto(db, produto_id)
     # FOR UPDATE: espera entradas em andamento (que travam o produto com FOR SHARE) para a RN-30
     produto = obter_produto(db, produto_id, travar=True)
     dados = {campo: valor for campo, valor in dados.items() if campo in CAMPOS_EDITAVEIS}

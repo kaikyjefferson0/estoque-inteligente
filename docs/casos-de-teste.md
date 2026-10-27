@@ -65,6 +65,12 @@
 | CT-17 | Lote vence dentro dos dias de antecedência | Alerta de vencimento próximo criado | Nenhum alerta |
 | CT-18 | Lote com validade já passada | Alerta de vencido criado | Nenhum alerta |
 | CT-19 | Rodar a geração de alertas duas vezes seguidas | Continua com um único alerta | Alertas repetidos |
+| CT-42 | Estoque reposto acima do mínimo | Alerta de estoque baixo resolvido | Alerta continua ativo |
+| CT-43 | Lote vencido baixado por ajuste | Alerta de vencido resolvido | Alerta continua ativo |
+| CT-44 | Lote passa de próximo do vencimento para vencido | Alerta de vencimento próximo resolvido e alerta de vencido criado | Os dois ativos ou nenhuma troca |
+| CT-45 | Condição volta depois de resolvida | Novo alerta ativo, e o resolvido continua no histórico | Nenhum alerta ou o antigo reaberto |
+| CT-46 | Lote com quantidade zero | Nenhum alerta de validade para ele | Alerta de validade para lote zerado |
+| CT-47 | Lote vencido no cálculo do estoque baixo | Lote vencido não conta para o saldo do alerta | Vencido evita o alerta de estoque baixo |
 
 ## Dashboard
 

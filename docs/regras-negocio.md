@@ -43,6 +43,12 @@
 - RN-14: alerta de vencimento próximo quando o lote vence dentro dos dias de antecedência.
 - RN-15: alerta de vencido quando a validade já passou.
 - RN-16: gerar alertas várias vezes não cria alertas repetidos.
+- RN-39: quando a condição de um alerta deixa de existir, o alerta é marcado como resolvido, com data, e não é apagado. Se a condição voltar, nasce um alerta novo.
+- RN-40: a geração de alertas roda depois de cada entrada, saída ou ajuste e ao cadastrar ou editar um produto, só para esse produto, e também por uma geração completa de todos os produtos.
+- RN-41: o alerta de estoque baixo usa o saldo disponível (sem lotes vencidos).
+- RN-42: lote com quantidade zero não gera alerta de validade; quando um lote vence, o alerta de vencimento próximo é resolvido e nasce o de vencido.
+- RN-43: admin e operador veem os alertas.
+- Nos alertas, o "hoje" segue o fuso America/Sao_Paulo, como nas RN-31 e RN-36.
 
 ## Dashboard
 - RN-17: os números do dashboard devem ser iguais aos dados reais do estoque.

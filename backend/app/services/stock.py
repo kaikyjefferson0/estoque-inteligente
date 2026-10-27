@@ -1,15 +1,16 @@
 from dataclasses import dataclass
-from datetime import date, datetime, timezone
-from zoneinfo import ZoneInfo
+from datetime import date
 
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
+from app.core.clock import hoje  # RN-31/RN-36: "hoje" em Brasília
 from app.models.batch import Batch
 from app.models.product import Product
 from app.models.stock_movement import StockMovement
 from app.models.user import User
+from app.services import alerts as alertas
 from app.services.products import ProdutoNaoEncontradoError, obter_produto
 
 
@@ -60,18 +61,6 @@ class ResultadoAjuste:
     saldo_total: int
 
 
-# RN-31: "hoje" é o dia em Brasília, não o do servidor (UTC no Render)
-FUSO_HORARIO = ZoneInfo("America/Sao_Paulo")
-
-
-def _agora_utc() -> datetime:
-    return datetime.now(timezone.utc)
-
-
-def hoje() -> date:
-    return _agora_utc().astimezone(FUSO_HORARIO).date()
-
-
 def _validar_validade_da_entrada(produto: Product, validade: date | None) -> None:
     if produto.controla_validade:
         # RN-08
@@ -103,7 +92,7 @@ def _travar_lote(db: Session, produto_id: int, validade: date | None) -> Batch:
     return db.scalars(
         select(Batch)
         .where(Batch.produto_id == produto_id, Batch.validade.is_not_distinct_from(validade))
-        .with_for_update()
+        .with_for_update(key_share=True)
         .execution_options(populate_existing=True)
     ).one()
 
@@ -119,20 +108,24 @@ def registrar_entrada(
     if quantidade <= 0:
         raise QuantidadeInvalidaError("A quantidade deve ser maior que zero.")
 
-    # FOR SHARE: impede que o PATCH mude "controla validade" (RN-30) no meio da entrada.
-    # populate_existing: relê do banco mesmo se o produto já estiver na sessão,
-    # para validar com o valor atual, e não com um antigo
-    produto = db.scalars(
-        select(Product)
-        .where(Product.codigo_barras == codigo_barras.strip())
-        .with_for_update(read=True)
-        .execution_options(populate_existing=True)
-    ).one_or_none()
-    if produto is None:
+    produto_id = db.scalar(select(Product.id).where(Product.codigo_barras == codigo_barras.strip()))
+    if produto_id is None:
         raise ProdutoNaoEncontradoError(codigo_barras)
-    _validar_validade_da_entrada(produto, validade)
 
     try:
+        # Ordem das travas: produto (consultiva) -> linha do produto -> lotes
+        alertas.travar_produto(db, produto_id)
+        # FOR SHARE: impede que o PATCH mude "controla validade" (RN-30) no meio da entrada.
+        # populate_existing: relê do banco mesmo se o produto já estiver na sessão,
+        # para validar com o valor atual, e não com um antigo
+        produto = db.scalars(
+            select(Product)
+            .where(Product.id == produto_id)
+            .with_for_update(read=True)
+            .execution_options(populate_existing=True)
+        ).one()
+        _validar_validade_da_entrada(produto, validade)
+
         lote = _travar_lote(db, produto.id, validade)
         lote.quantidade += quantidade
         # RN-12: o histórico só recebe inserções
@@ -146,6 +139,8 @@ def registrar_entrada(
         db.add(movimentacao)
         db.flush()
         saldo = _saldo_total(db, produto.id)
+        # RN-40: alertas do produto na mesma transação da movimentação
+        alertas.gerar_alertas_produto(db, produto.id)
         db.commit()
     except Exception:
         db.rollback()
@@ -166,7 +161,7 @@ def _travar_lotes_com_saldo(db: Session, produto_id: int) -> list[Batch]:
             select(Batch)
             .where(Batch.produto_id == produto_id, Batch.quantidade > 0)
             .order_by(Batch.id)
-            .with_for_update()
+            .with_for_update(key_share=True)
             .execution_options(populate_existing=True)
         )
     )
@@ -190,6 +185,8 @@ def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: 
         raise ProdutoNaoEncontradoError(codigo_barras)
 
     try:
+        # Ordem das travas: produto (consultiva) -> lotes
+        alertas.travar_produto(db, produto.id)
         lotes = _lotes_disponiveis_fefo(_travar_lotes_com_saldo(db, produto.id))
         disponivel = sum(lote.quantidade for lote in lotes)
         # RN-09: recusa antes de mexer em qualquer lote
@@ -217,6 +214,8 @@ def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: 
             retiradas.append((movimentacao, lote))
         db.flush()
         saldo = _saldo_total(db, produto.id)
+        # RN-40: alertas do produto na mesma transação da movimentação
+        alertas.gerar_alertas_produto(db, produto.id)
         db.commit()
     except Exception:
         db.rollback()
@@ -240,10 +239,15 @@ def registrar_ajuste(
         raise MotivoObrigatorioError("Informe o motivo do ajuste.")
 
     try:
-        # FOR UPDATE: uma entrada ou saída simultânea no lote espera o ajuste terminar,
+        produto_id = db.scalar(select(Batch.produto_id).where(Batch.id == lote_id))
+        if produto_id is None:
+            raise LoteNaoEncontradoError(lote_id)
+        # Ordem das travas: produto (consultiva) -> lote. O produto do lote nunca muda
+        alertas.travar_produto(db, produto_id)
+        # FOR NO KEY UPDATE: uma entrada ou saída simultânea no lote espera o ajuste terminar,
         # e o saldo anterior é o valor atual do banco
         lote = db.scalars(
-            select(Batch).where(Batch.id == lote_id).with_for_update().execution_options(populate_existing=True)
+            select(Batch).where(Batch.id == lote_id).with_for_update(key_share=True).execution_options(populate_existing=True)
         ).one_or_none()
         if lote is None:
             raise LoteNaoEncontradoError(lote_id)
@@ -269,6 +273,8 @@ def registrar_ajuste(
         db.add(movimentacao)
         db.flush()
         saldo = _saldo_total(db, lote.produto_id)
+        # RN-40: alertas do produto na mesma transação da movimentação
+        alertas.gerar_alertas_produto(db, lote.produto_id)
         db.commit()
     except Exception:
         db.rollback()
