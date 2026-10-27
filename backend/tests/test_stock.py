@@ -2,7 +2,9 @@ from datetime import date, datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy import text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError
+
+from app.main import app
 
 from app.models.batch import Batch
 from app.models.stock_movement import StockMovement
@@ -425,3 +427,205 @@ def test_fuso_de_brasilia_decide_se_lote_que_vence_hoje_pode_sair(client, db, to
     assert saida(client, token_admin, refrigerante.codigo_barras, 1).status_code == 409
     db.refresh(lote)
     assert lote.quantidade == 7
+
+
+# --- Ajustes e histórico imutável (Fase 8) ---
+
+
+def ajuste(client, token, lote_id, saldo_contado, motivo="Contagem do inventário"):
+    dados = {"lote_id": lote_id, "saldo_contado": saldo_contado}
+    if motivo is not None:
+        dados["motivo"] = motivo
+    return client.post("/stock/adjustments", headers=auth(token), json=dados)
+
+
+def test_ct13_admin_ajusta_estoque_com_motivo(client, db, token_admin, admin, detergente):
+    """CT-13 / RN-11, RN-33: saldo corrigido para o contado e ajuste registrado."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["lote_id"]
+
+    resposta = ajuste(client, token_admin, lote_id, 7, "Quebra na prateleira")
+    assert resposta.status_code == 201
+    corpo = resposta.json()
+    assert (corpo["saldo_anterior"], corpo["saldo_novo"], corpo["quantidade"]) == (10, 7, -3)
+    assert corpo["saldo_total"] == 7
+    assert corpo["usuario_id"] == admin.id
+
+    assert db.get(Batch, lote_id).quantidade == 7
+    mov = db.get(StockMovement, corpo["movimentacao_id"])
+    assert (mov.tipo, mov.quantidade, mov.motivo, mov.lote_id) == ("ajuste", -3, "Quebra na prateleira", lote_id)
+
+
+def test_ct14_ajuste_sem_motivo(client, db, token_admin, detergente):
+    """CT-14 / RN-11: sem motivo, vazio, só espaços ou longo demais é recusado e nada muda."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["lote_id"]
+
+    for motivo in (None, "", "   ", "x" * 256):
+        assert ajuste(client, token_admin, lote_id, 7, motivo).status_code == 422
+    assert db.get(Batch, lote_id).quantidade == 10
+    assert db.query(StockMovement).filter(StockMovement.tipo == "ajuste").count() == 0
+
+
+def test_ct14_service_tambem_recusa_motivo_vazio(db, admin, detergente):
+    lote = lote_direto(db, detergente, 10)
+    with pytest.raises(service.MotivoObrigatorioError):
+        service.registrar_ajuste(db, admin, lote.id, 7, "   ")
+
+
+def test_ct15_nao_existe_rota_para_editar_ou_apagar_movimentacao(client, db, token_admin, detergente):
+    """CT-15 / RN-12: nenhuma rota altera ou apaga movimentações, e a movimentação continua igual."""
+    mov_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["movimentacao_id"]
+
+    for caminho in (
+        f"/stock/movements/{mov_id}",
+        f"/stock/entries/{mov_id}",
+        f"/stock/exits/{mov_id}",
+        f"/stock/adjustments/{mov_id}",
+        f"/products/{detergente.id}/movements/{mov_id}",
+        f"/products/{detergente.id}/movements",
+    ):
+        for metodo in ("PUT", "PATCH", "DELETE"):
+            resposta = client.request(metodo, caminho, headers=auth(token_admin), json={"quantidade": 999})
+            assert resposta.status_code in (404, 405), (metodo, caminho)
+
+    # Nenhuma rota de movimentações aceita outro método além de GET
+    for rota in app.routes:
+        if "movement" in getattr(rota, "path", ""):
+            assert rota.methods <= {"GET", "HEAD"}, rota.path
+
+    linhas = historico(client, token_admin, detergente.id)
+    assert [(linha["id"], linha["quantidade"]) for linha in linhas] == [(mov_id, 10)]
+
+
+def test_ct37_operador_tenta_fazer_ajuste(client, db, token_admin, token_operador, detergente):
+    """CT-37 / RN-02, RN-32: 403 e nada muda."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["lote_id"]
+
+    resposta = ajuste(client, token_operador, lote_id, 7)
+    assert resposta.status_code == 403
+    assert db.get(Batch, lote_id).quantidade == 10
+    assert db.query(StockMovement).filter(StockMovement.tipo == "ajuste").count() == 0
+
+
+def test_ct38_ajuste_com_saldo_contado_igual_ao_atual(client, db, token_admin, detergente):
+    """CT-38 / RN-35: 409 e nenhuma movimentação."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["lote_id"]
+
+    resposta = ajuste(client, token_admin, lote_id, 10)
+    assert resposta.status_code == 409
+    assert "nada a ajustar" in resposta.json()["detail"]
+    assert db.query(StockMovement).filter(StockMovement.tipo == "ajuste").count() == 0
+
+
+def test_ct39_ajuste_zero_da_baixa_em_lote_vencido(client, db, token_admin, refrigerante):
+    """CT-39 / RN-38, RN-37: o lote vencido zera, continua existindo e o ajuste vai para o histórico."""
+    vencido = lote_direto(db, refrigerante, 5, service.hoje() - timedelta(days=3))
+
+    resposta = ajuste(client, token_admin, vencido.id, 0, "vencido")
+    assert resposta.status_code == 201
+    assert resposta.json()["quantidade"] == -5
+
+    db.refresh(vencido)
+    assert vencido.quantidade == 0
+    linha = historico(client, token_admin, refrigerante.id)[0]
+    assert (linha["tipo"], linha["lote_id"], linha["quantidade"], linha["motivo"]) == ("ajuste", vencido.id, -5, "vencido")
+
+
+def test_ct40_historico_mostra_saldos_e_motivo_do_ajuste(client, token_admin, detergente):
+    """CT-40 / RN-34: a linha de ajuste traz saldo anterior, saldo novo e motivo; as outras ficam sem saldos."""
+    lote_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["lote_id"]
+    ajuste(client, token_admin, lote_id, 12, "Sobra na contagem")
+
+    linhas = historico(client, token_admin, detergente.id)
+    assert [linha["tipo"] for linha in linhas] == ["ajuste", "entrada"]
+    linha_ajuste, linha_entrada = linhas
+    assert linha_ajuste["saldo_anterior"] == 10
+    assert linha_ajuste["saldo_novo"] == 12
+    assert linha_ajuste["motivo"] == "Sobra na contagem"
+    assert linha_ajuste["quantidade"] == 2
+    assert (linha_entrada["saldo_anterior"], linha_entrada["saldo_novo"], linha_entrada["motivo"]) == (None, None, None)
+
+
+def test_ct41_banco_recusa_update_e_delete_em_movimentacoes(client, db, token_admin, detergente):
+    """CT-41 / RN-12: o trigger recusa UPDATE e DELETE, mesmo com SQL direto."""
+    mov_id = entrada(client, token_admin, detergente.codigo_barras, 10).json()["movimentacao_id"]
+
+    for sql in (
+        "UPDATE stock_movements SET quantidade = 999 WHERE id = :id",
+        "DELETE FROM stock_movements WHERE id = :id",
+    ):
+        with pytest.raises(DBAPIError) as erro:
+            with db.begin_nested():
+                db.execute(text(sql), {"id": mov_id})
+        assert "imutável" in str(erro.value.orig)
+
+    quantidade = db.execute(text("SELECT quantidade FROM stock_movements WHERE id = :id"), {"id": mov_id})
+    assert quantidade.scalar_one() == 10
+
+
+# --- Testes extras da Fase 8 ---
+
+
+def test_ajuste_que_aumenta_o_saldo(client, db, token_admin, refrigerante):
+    """RN-33: a diferença positiva soma no lote."""
+    lote_id = entrada(client, token_admin, refrigerante.codigo_barras, 4, em_dias(60)).json()["lote_id"]
+
+    corpo = ajuste(client, token_admin, lote_id, 9, "Caixa achada no depósito").json()
+    assert (corpo["saldo_anterior"], corpo["saldo_novo"], corpo["quantidade"]) == (4, 9, 5)
+    assert db.get(Batch, lote_id).quantidade == 9
+
+
+def test_ajuste_sem_token_devolve_401(client, db, detergente):
+    """RN-18."""
+    lote = lote_direto(db, detergente, 10)
+    resposta = client.post("/stock/adjustments", json={"lote_id": lote.id, "saldo_contado": 5, "motivo": "x"})
+    assert resposta.status_code == 401
+    db.refresh(lote)
+    assert lote.quantidade == 10
+
+
+def test_saldo_do_produto_reflete_o_ajuste(client, token_admin, refrigerante):
+    """O GET /products/{id}/stock soma os lotes já com o ajuste."""
+    lote_a = entrada(client, token_admin, refrigerante.codigo_barras, 5, em_dias(30)).json()["lote_id"]
+    entrada(client, token_admin, refrigerante.codigo_barras, 10, em_dias(60))
+
+    ajuste(client, token_admin, lote_a, 2, "Avaria")
+    estoque = saldo(client, token_admin, refrigerante.id)
+    assert estoque["saldo_total"] == 12
+    assert (estoque["lotes"][0]["id"], estoque["lotes"][0]["quantidade"]) == (lote_a, 2)
+
+
+def test_ajuste_em_lote_inexistente_devolve_404(client, db, token_admin):
+    assert ajuste(client, token_admin, 999999, 5).status_code == 404
+    assert db.query(StockMovement).count() == 0
+
+
+def test_ajuste_com_saldo_contado_negativo(client, db, admin, token_admin, detergente):
+    """RN-35: recusado no schema (422) e no service."""
+    lote = lote_direto(db, detergente, 10)
+    assert ajuste(client, token_admin, lote.id, -1).status_code == 422
+    with pytest.raises(service.QuantidadeInvalidaError):
+        service.registrar_ajuste(db, admin, lote.id, -1, "Contagem")
+    db.refresh(lote)
+    assert lote.quantidade == 10
+
+
+def test_banco_recusa_ajuste_com_saldos_incoerentes(db, admin, detergente):
+    """RN-34/RN-35 no banco: no ajuste, saldos obrigatórios, não negativos e coerentes com a diferença.
+    Entrada e saída continuam exigindo quantidade > 0."""
+    lote = lote_direto(db, detergente, 10)
+    saldos = "ck_stock_movements_saldos_ajuste"
+    quantidade = "ck_stock_movements_quantidade"
+    invalidos = [
+        (saldos, dict(tipo="ajuste", quantidade=-3, motivo="x", saldo_anterior=10, saldo_novo=8)),
+        (saldos, dict(tipo="ajuste", quantidade=-3, motivo="x")),
+        (saldos, dict(tipo="ajuste", quantidade=-3, motivo="x", saldo_anterior=2, saldo_novo=-1)),
+        (quantidade, dict(tipo="ajuste", quantidade=0, motivo="x", saldo_anterior=10, saldo_novo=10)),
+        (quantidade, dict(tipo="entrada", quantidade=-1)),
+        (quantidade, dict(tipo="saida", quantidade=0)),
+    ]
+    for constraint, campos in invalidos:
+        with pytest.raises(IntegrityError) as erro:
+            with db.begin_nested():
+                db.add(StockMovement(produto_id=detergente.id, lote_id=lote.id, usuario_id=admin.id, **campos))
+                db.flush()
+        assert erro.value.orig.diag.constraint_name == constraint, campos

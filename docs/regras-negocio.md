@@ -33,6 +33,10 @@
 - RN-32: admin e operador registram entradas e saídas; só o admin faz ajustes (RN-02, RN-11).
 - RN-36: a saída não usa lotes vencidos; o saldo disponível para saída é a soma dos lotes dentro da validade. O "hoje" segue o fuso America/Sao_Paulo, e um lote que vence hoje ainda pode sair.
 - RN-37: um lote que chega a zero não é apagado, porque o histórico aponta para ele.
+- RN-33: no ajuste, o admin informa o saldo contado de um lote e o motivo; o sistema calcula a diferença, atualiza o lote e registra a movimentação.
+- RN-34: o ajuste guarda o saldo anterior e o saldo novo do lote e aparece no histórico do produto como as outras movimentações.
+- RN-35: ajuste que não muda o saldo é recusado, e o saldo contado nunca pode ser negativo.
+- RN-38: o ajuste também vale para lotes vencidos; contar 0 com o motivo "vencido" é a forma de dar baixa num lote vencido.
 
 ## Alertas
 - RN-13: alerta de estoque baixo quando o saldo é igual ou menor que o mínimo.
@@ -44,4 +48,4 @@
 - RN-17: os números do dashboard devem ser iguais aos dados reais do estoque.
 
 ## Pontos a confirmar
-- Ajuste de estoque: como indicar se ele aumenta ou diminui o saldo? (hoje a quantidade da movimentação é sempre maior que zero; decidir antes da Fase 6, parte B)
+- Nenhum no momento.

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 from app.schemas.products import MAX_INTEGER, CodigoBarras
 
@@ -51,6 +51,9 @@ class MovementOut(BaseModel):
     lote_id: int
     validade: date | None
     motivo: str | None
+    # RN-34: preenchidos só nas linhas de ajuste
+    saldo_anterior: int | None
+    saldo_novo: int | None
     usuario_id: int
     usuario_nome: str
     criado_em: datetime
@@ -79,6 +82,36 @@ class StockExitOut(BaseModel):
     quantidade: int
     # Uma linha por lote atingido, em ordem FEFO
     lotes: list[ExitBatchOut]
+    saldo_total: int
+    usuario_id: int
+    criado_em: datetime
+
+
+# RN-11: motivo obrigatório; só espaços vira vazio e é recusado. 255 = tamanho da coluna
+Motivo = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
+
+
+class StockAdjustmentCreate(BaseModel):
+    """Ajuste de estoque (RN-33): o admin informa o saldo contado do lote."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    lote_id: Annotated[int, Field(ge=1, le=MAX_INTEGER)]
+    # RN-35: o saldo contado nunca é negativo
+    saldo_contado: Annotated[int, Field(ge=0, le=MAX_INTEGER)]
+    motivo: Motivo
+
+
+class StockAdjustmentOut(BaseModel):
+    movimentacao_id: int
+    produto_id: int
+    lote_id: int
+    validade: date | None
+    # Diferença aplicada (saldo_novo - saldo_anterior); negativa quando o saldo diminui
+    quantidade: int
+    saldo_anterior: int
+    saldo_novo: int
+    motivo: str
     saldo_total: int
     usuario_id: int
     criado_em: datetime

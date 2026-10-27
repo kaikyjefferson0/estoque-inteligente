@@ -25,6 +25,18 @@ class SaldoInsuficienteError(Exception):
     """RN-09 e RN-36."""
 
 
+class LoteNaoEncontradoError(Exception):
+    pass
+
+
+class MotivoObrigatorioError(Exception):
+    """RN-11."""
+
+
+class AjusteSemDiferencaError(Exception):
+    """RN-35."""
+
+
 @dataclass
 class ResultadoEntrada:
     movimentacao: StockMovement
@@ -38,6 +50,13 @@ class ResultadoSaida:
     quantidade: int
     # Pares (movimentação, lote) em ordem FEFO
     retiradas: list[tuple[StockMovement, Batch]]
+    saldo_total: int
+
+
+@dataclass
+class ResultadoAjuste:
+    movimentacao: StockMovement
+    lote: Batch
     saldo_total: int
 
 
@@ -207,6 +226,57 @@ def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: 
     return ResultadoSaida(produto_id=produto.id, quantidade=quantidade, retiradas=retiradas, saldo_total=saldo)
 
 
+def registrar_ajuste(
+    db: Session, usuario: User, lote_id: int, saldo_contado: int, motivo: str
+) -> ResultadoAjuste:
+    """RN-02/RN-32: só o admin (checado na rota). RN-33: grava o saldo contado do lote
+    e a diferença como movimentação, numa só transação. RN-38: vale também para lote vencido."""
+    # RN-35
+    if saldo_contado < 0:
+        raise QuantidadeInvalidaError("O saldo contado não pode ser negativo.")
+    # RN-11
+    motivo = (motivo or "").strip()
+    if not motivo:
+        raise MotivoObrigatorioError("Informe o motivo do ajuste.")
+
+    try:
+        # FOR UPDATE: uma entrada ou saída simultânea no lote espera o ajuste terminar,
+        # e o saldo anterior é o valor atual do banco
+        lote = db.scalars(
+            select(Batch).where(Batch.id == lote_id).with_for_update().execution_options(populate_existing=True)
+        ).one_or_none()
+        if lote is None:
+            raise LoteNaoEncontradoError(lote_id)
+        saldo_anterior = lote.quantidade
+        diferenca = saldo_contado - saldo_anterior
+        # RN-35
+        if diferenca == 0:
+            raise AjusteSemDiferencaError(f"O lote já tem {saldo_anterior} unidade(s): nada a ajustar.")
+
+        # RN-37: o lote zerado continua existindo
+        lote.quantidade = saldo_contado
+        # RN-12 e RN-34: o histórico só recebe inserções, com os saldos antes e depois
+        movimentacao = StockMovement(
+            produto_id=lote.produto_id,
+            lote_id=lote.id,
+            tipo="ajuste",
+            quantidade=diferenca,
+            motivo=motivo,
+            saldo_anterior=saldo_anterior,
+            saldo_novo=saldo_contado,
+            usuario_id=usuario.id,
+        )
+        db.add(movimentacao)
+        db.flush()
+        saldo = _saldo_total(db, lote.produto_id)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    db.refresh(movimentacao)
+    return ResultadoAjuste(movimentacao=movimentacao, lote=lote, saldo_total=saldo)
+
+
 def consultar_saldo(db: Session, produto_id: int) -> tuple[int, list[Batch]]:
     """Saldo total e lotes com quantidade, em ordem FEFO (lote sem validade por último)."""
     obter_produto(db, produto_id)
@@ -239,6 +309,8 @@ def listar_movimentacoes(db: Session, produto_id: int) -> list[dict]:
             "lote_id": mov.lote_id,
             "validade": validade,
             "motivo": mov.motivo,
+            "saldo_anterior": mov.saldo_anterior,
+            "saldo_novo": mov.saldo_novo,
             "usuario_id": mov.usuario_id,
             "usuario_nome": usuario_nome,
             "criado_em": mov.criado_em,

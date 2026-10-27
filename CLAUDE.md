@@ -30,3 +30,19 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Rodar a API: `uvicorn app.main:app --reload` (dentro de `backend`)
 - Testes: `pytest` (dentro de `backend`)
 - Migrations: `alembic upgrade head`
+
+## Roteiro de fases
+- [x] Fase 0: ambiente — concluída
+- [x] Fase 1: documentação — concluída
+- [x] Fase 2: CLAUDE.md, skills e agentes — concluída
+- [x] Fase 3: backend base, Postgres e Alembic — concluída
+- [x] Fase 4: usuários, login e perfis (CT-01 a 03) — concluída
+- [x] Fase 5: produtos e fornecedores (CT-04 a 06, CT-21 a 26) — concluída
+- [x] Fase 6: lotes e entradas (CT-07 a 09, CT-27 a 31) — concluída
+- [x] Fase 7: saídas com FEFO (CT-10 a 12, CT-32 a 36) — concluída
+- [~] Fase 8: ajustes e histórico imutável (CT-13 a 15) — em andamento
+- [ ] Fase 9: alertas (CT-16 a 19)
+- [ ] Fase 10: dashboard (CT-20)
+- [ ] Fase 11: frontend React
+- [ ] Fase 12: revisão final e segurança
+- [ ] Fase 13: deploy no Render e README

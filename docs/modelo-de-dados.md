@@ -15,9 +15,11 @@ id, produto_id, validade (opcional), quantidade, criado_em
 - Um lote por produto + validade, valendo também para validade vazia (NULLS NOT DISTINCT): produto sem controle de validade tem um único lote sem validade (RN-27, RN-28).
 
 ## stock_movements
-id, produto_id, lote_id, tipo (entrada, saida ou ajuste), quantidade, motivo (obrigatório no ajuste), usuario_id, criado_em
-- Só se inserem linhas novas, nunca se altera nem apaga.
-- tipo só entrada, saida ou ajuste; quantidade maior que zero; motivo obrigatório quando o tipo é ajuste.
+id, produto_id, lote_id, tipo (entrada, saida ou ajuste), quantidade, motivo (obrigatório no ajuste), saldo_anterior e saldo_novo (só no ajuste), usuario_id, criado_em
+- Só se inserem linhas novas, nunca se altera nem apaga: um trigger no banco recusa UPDATE e DELETE (RN-12).
+- tipo só entrada, saida ou ajuste; motivo obrigatório quando o tipo é ajuste.
+- Em entrada e saída, quantidade maior que zero. No ajuste, quantidade é a diferença (saldo_novo - saldo_anterior), diferente de zero e podendo ser negativa.
+- No ajuste, saldo_anterior e saldo_novo são obrigatórios e maiores ou iguais a zero (RN-34, RN-35).
 - Uma saída que consome vários lotes (FEFO) gera uma movimentação por lote.
 - O lote pertence ao mesmo produto da movimentação: chave estrangeira composta (lote_id, produto_id) para batches (id, produto_id).
 

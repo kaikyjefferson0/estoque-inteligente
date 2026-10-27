@@ -7,3 +7,6 @@ node_modules/
 .pytest_cache/
 *.log
 dist/
+*.db
+*.sqlite
+*.sqlite3
