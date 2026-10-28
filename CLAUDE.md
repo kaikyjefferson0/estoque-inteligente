@@ -62,4 +62,4 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - [x] Fase 10: dashboard (CT-20) — concluída
 - [x] Fase 11: frontend React — concluída
 - [x] Fase 12: revisão final e segurança — concluída (A: limite de login, troca de senha e auditoria; B: menor privilégio no banco, testes pelas migrations e concorrência; C: paginação, testes do frontend e teste de ponta a ponta)
-- [ ] Fase 13: deploy no Render e README
+- [ ] Fase 13: deploy no Render e README — em andamento (A: ajustes de segurança antes do deploy concluída)

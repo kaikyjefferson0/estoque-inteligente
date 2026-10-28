@@ -1,4 +1,5 @@
 from app.models.user import User
+from app.schemas.users import MENSAGEM_EMAIL_INVALIDO
 from app.services import auth as auth_service
 from app.services.users import buscar_por_email
 
@@ -132,6 +133,20 @@ def test_admin_cria_usuario(client, token_admin):
     assert corpo["ativo"] is True
 
     assert login(client, "novo@teste.com", "senha-nova-123").status_code == 200
+
+
+def test_email_invalido_tem_mensagem_em_portugues(client, token_admin):
+    """Inclusive o domínio reservado (.local), que o validador recusa com mensagem própria em inglês."""
+    for email in ("sem-arroba", "nome@empresa.local"):
+        resposta = client.post(
+            "/users",
+            headers=auth(token_admin),
+            json={"nome": "Novo", "email": email, "senha": "senha-nova-123", "perfil": "operador"},
+        )
+        assert resposta.status_code == 422
+        erro = resposta.json()["detail"][0]
+        assert erro["loc"] == ["body", "email"]
+        assert erro["msg"] == MENSAGEM_EMAIL_INVALIDO
 
 
 def test_email_duplicado_devolve_409(client, token_admin, operador):

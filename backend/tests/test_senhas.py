@@ -104,7 +104,43 @@ def test_ct59_operador_nao_define_senha_de_outro_usuario(client, db, admin, oper
     assert admin.senha_alterada_em is None
 
 
-# --- Testes extras (RN-47, RN-48, RN-49) ---
+def test_ct67_6a_troca_de_senha_no_minuto_devolve_429(client, operador, token_operador):
+    """CT-67 / RN-52: 5 tentativas de troca passam; a 6ª no mesmo minuto recebe 429 e a senha não muda."""
+    for _ in range(5):
+        assert trocar(client, token_operador, "senha-atual-errada", SENHA_NOVA).status_code == 422
+
+    resposta = trocar(client, token_operador, SENHA_OPERADOR, SENHA_NOVA)  # mesmo com a senha atual certa
+    assert resposta.status_code == 429
+    assert resposta.json() == {"detail": MENSAGEM_LIMITE}
+    assert login(client, operador.email, SENHA_OPERADOR).status_code == 200
+
+
+# --- Testes extras (RN-47, RN-48, RN-49, RN-52) ---
+
+
+def test_limite_da_troca_de_senha_e_por_usuario(client, admin, token_admin, token_operador, monkeypatch):
+    """RN-52: trocar de IP não dá tentativas novas, e outro usuário tem a própria contagem."""
+    monkeypatch.setattr(settings, "TRUST_PROXY_HEADERS", True)
+    for i in range(5):
+        resposta = client.post(
+            "/auth/change-password",
+            headers={**auth(token_operador), "X-Forwarded-For": f"200.1.1.{i}"},
+            json={"senha_atual": "senha-atual-errada", "senha_nova": SENHA_NOVA},
+        )
+        assert resposta.status_code == 422
+    assert trocar(client, token_operador, "senha-atual-errada", SENHA_NOVA).status_code == 429
+
+    assert trocar(client, token_admin, SENHA_ADMIN, SENHA_NOVA).status_code == 204
+    # O limite da troca não gasta as tentativas de login
+    assert login(client, admin.email, SENHA_NOVA).status_code == 200
+
+
+def test_troca_de_senha_sem_login_nao_gasta_o_limite(client, token_operador):
+    """Sem token válido a resposta é 401 e nada é contado."""
+    for _ in range(6):
+        resposta = client.post("/auth/change-password", json={"senha_atual": "x", "senha_nova": SENHA_NOVA})
+        assert resposta.status_code == 401
+    assert trocar(client, token_operador, SENHA_OPERADOR, SENHA_NOVA).status_code == 204
 
 
 def test_limite_ignora_x_forwarded_for_quando_desligado(client, admin, monkeypatch):

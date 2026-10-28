@@ -35,6 +35,29 @@ def ler_booleano(valor: str | None) -> bool:
     return (valor or "").strip().lower() in ("true", "1", "sim", "yes", "on")
 
 
+AMBIENTES = ("development", "production")
+
+
+def ler_ambiente(valor: str | None) -> str:
+    """development (padrão) ou production. Valor desconhecido derruba a API ao subir, para um
+    erro de digitação ("prod") não deixar a produção com /docs aberto e sem HSTS."""
+    ambiente = (valor or "").strip().lower() or "development"
+    if ambiente not in AMBIENTES:
+        raise RuntimeError("APP_ENV precisa ser development ou production.")
+    return ambiente
+
+
+def validar_ambiente(app_env: str, no_render: bool, confia_no_proxy: bool) -> None:
+    """Travas de produção, conferidas ao subir a API."""
+    # O Render define RENDER sozinho: esquecer o APP_ENV lá deixaria /docs aberto e sem HSTS
+    if no_render and app_env != "production":
+        raise RuntimeError("A API está rodando no Render, mas APP_ENV não é production. Defina APP_ENV=production.")
+    # Atrás do proxy, sem ler o X-Forwarded-For todos os clientes teriam o IP do proxy e
+    # dividiriam o mesmo limite de login (RN-47): 10 tentativas de qualquer um travariam todos
+    if app_env == "production" and not confia_no_proxy:
+        raise RuntimeError("Em production, defina TRUST_PROXY_HEADERS=true (a API fica atrás do proxy do Render).")
+
+
 class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     # RN-50: as migrations usam o usuário dono; sem a variável, caem na DATABASE_URL
@@ -53,6 +76,14 @@ class Settings:
     # RN-47: só ligar quando a API estiver atrás de um proxy confiável (Render);
     # desligada, o X-Forwarded-For é ignorado e vale o IP da conexão
     TRUST_PROXY_HEADERS: bool = ler_booleano(os.getenv("TRUST_PROXY_HEADERS"))
+    # production desliga /docs, /redoc e /openapi.json e liga o HSTS
+    APP_ENV: str = ler_ambiente(os.getenv("APP_ENV"))
+    # Definida pelo próprio Render em todos os serviços dele
+    NO_RENDER: bool = bool(os.getenv("RENDER", "").strip())
+
+    @property
+    def em_producao(self) -> bool:
+        return self.APP_ENV == "production"
 
     def __init__(self) -> None:
         faltando = [nome for nome in ("DATABASE_URL", "SECRET_KEY") if not getattr(self, nome).strip()]
@@ -62,6 +93,7 @@ class Settings:
                 "Preencha no backend\\.env (veja o .env.example)."
             )
         validar_secret_key(self.SECRET_KEY)
+        validar_ambiente(self.APP_ENV, self.NO_RENDER, self.TRUST_PROXY_HEADERS)
 
 
 settings = Settings()

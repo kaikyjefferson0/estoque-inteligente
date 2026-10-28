@@ -110,6 +110,7 @@
 | CT-57 | Admin define nova senha para um operador | O operador entra com a nova senha e o token antigo dele deixa de valer | Senha antiga continua entrando ou o token antigo vale |
 | CT-58 | Admin tenta definir a própria senha pela rota de admin | Sistema recusa | Senha do admin trocada sem informar a senha atual |
 | CT-59 | Operador tenta definir a senha de outro usuário | Acesso bloqueado (403) | Senha do outro usuário trocada |
+| CT-67 | Fazer a 6ª tentativa de troca de senha no mesmo minuto, com o mesmo usuário (mesmo com a senha atual certa) | Sistema responde 429 "Muitas tentativas. Aguarde um minuto e tente de novo." e a senha continua a mesma | Troca processada normalmente |
 
 ## Banco de dados
 

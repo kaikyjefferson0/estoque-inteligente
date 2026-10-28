@@ -1,21 +1,33 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, model_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, WrapValidator, model_validator
+from pydantic_core import PydanticCustomError, ValidationError
 
 SENHA_MINIMA = 8
 SENHA_MAXIMA = 128
+MENSAGEM_EMAIL_INVALIDO = "Informe um e-mail válido, como nome@empresa.com.br."
+
+
+def _email_em_portugues(valor, handler):
+    """Troca a mensagem em inglês do EmailStr (inclusive a de domínio reservado, como .local)."""
+    try:
+        return handler(valor)
+    except ValidationError:
+        raise PydanticCustomError("value_error", MENSAGEM_EMAIL_INVALIDO) from None
+
 
 Nome = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 Perfil = Literal["admin", "operador"]  # RN-01
 SenhaNova = Annotated[str, Field(min_length=SENHA_MINIMA, max_length=SENHA_MAXIMA)]
+Email = Annotated[EmailStr, WrapValidator(_email_em_portugues)]
 
 
 class UserCreate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     nome: Nome
-    email: EmailStr
+    email: Email
     senha: SenhaNova
     perfil: Perfil
 

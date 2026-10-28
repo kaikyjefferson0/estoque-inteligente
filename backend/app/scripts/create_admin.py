@@ -4,9 +4,8 @@ import sys
 from getpass import getpass
 
 from app.core.database import SessionLocal
+from app.schemas.users import SENHA_MAXIMA, SENHA_MINIMA
 from app.services.users import EmailJaCadastradoError, buscar_por_email, criar_usuario
-
-SENHA_MINIMA = 8
 
 
 def main() -> int:
@@ -16,9 +15,13 @@ def main() -> int:
         print("Nome e e-mail são obrigatórios.")
         return 1
 
-    senha = getpass("Senha (mínimo 8 caracteres): ")
+    senha = getpass(f"Senha ({SENHA_MINIMA} a {SENHA_MAXIMA} caracteres): ")
     if len(senha) < SENHA_MINIMA:
         print(f"A senha precisa ter pelo menos {SENHA_MINIMA} caracteres.")
+        return 1
+    # O login recusa senha acima do máximo: um admin com senha maior nunca conseguiria entrar
+    if len(senha) > SENHA_MAXIMA:
+        print(f"A senha pode ter no máximo {SENHA_MAXIMA} caracteres.")
         return 1
     if getpass("Confirme a senha: ") != senha:
         print("As senhas não conferem.")

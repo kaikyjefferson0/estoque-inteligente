@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
-from app.core.limiter import LIMITE_LOGIN, limiter
+from app.core.limiter import LIMITE_LOGIN, LIMITE_TROCA_SENHA, limiter, usuario_do_token
 from app.core.security import create_access_token
 from app.models.user import User
 from app.schemas.auth import ChangePasswordIn, TokenOut
@@ -49,7 +49,9 @@ def me(usuario: Annotated[User, Depends(get_current_user)]):
 
 
 @router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+@limiter.limit(LIMITE_TROCA_SENHA, key_func=usuario_do_token)  # RN-52
 def trocar_senha(
+    request: Request,  # usado pelo limiter para ler o token
     dados: ChangePasswordIn,
     usuario: Annotated[User, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db)],

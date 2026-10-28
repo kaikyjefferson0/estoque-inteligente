@@ -11,6 +11,7 @@
 - RN-47: o login aceita no máximo 10 tentativas por minuto por IP; acima disso responde 429 "Muitas tentativas. Aguarde um minuto e tente de novo." O IP vem do cabeçalho X-Forwarded-For quando a API está atrás de um proxy confiável (Render).
 - RN-48: cada usuário pode trocar a própria senha informando a senha atual; a nova tem no mínimo 8 caracteres e precisa ser diferente da atual. A troca invalida todos os tokens emitidos antes dela.
 - RN-49: o admin pode definir uma nova senha para outro usuário (não para si mesmo), o que também invalida os tokens desse usuário.
+- RN-52: a troca da própria senha aceita no máximo 5 tentativas por minuto por usuário (contadas pelo dono do token, não pelo IP); acima disso responde 429 "Muitas tentativas. Aguarde um minuto e tente de novo." Assim, quem tiver um token roubado não consegue testar a senha atual sem parar. Requisição sem token válido recebe 401 e não conta.
 
 ## Cadastros
 - RN-04: o código de barras do produto é único.
