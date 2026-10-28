@@ -21,8 +21,10 @@ if config.config_file_name is not None:
 # Metadata dos models, usada pelo --autogenerate
 target_metadata = Base.metadata
 
-# A URL vem do backend\.env via settings (nunca do alembic.ini)
-DATABASE_URL = settings.DATABASE_URL
+# A URL vem do backend\.env via settings (nunca do alembic.ini).
+# RN-50: as migrations usam o usuário dono (MIGRATIONS_DATABASE_URL, que cai na
+# DATABASE_URL se não existir). O conftest passa a URL do banco _test em attributes.
+DATABASE_URL = config.attributes.get("url") or settings.MIGRATIONS_DATABASE_URL
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

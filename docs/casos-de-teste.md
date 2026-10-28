@@ -110,3 +110,13 @@
 | CT-57 | Admin define nova senha para um operador | O operador entra com a nova senha e o token antigo dele deixa de valer | Senha antiga continua entrando ou o token antigo vale |
 | CT-58 | Admin tenta definir a própria senha pela rota de admin | Sistema recusa | Senha do admin trocada sem informar a senha atual |
 | CT-59 | Operador tenta definir a senha de outro usuário | Acesso bloqueado (403) | Senha do outro usuário trocada |
+
+## Banco de dados
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-60 | Com o usuário da aplicação, tentar UPDATE e DELETE no histórico (stock_movements) e desligar o trigger de imutabilidade | O banco recusa as três operações por falta de permissão | Histórico alterado, apagado ou trigger desligado |
+| CT-61 | Com o usuário da aplicação, tentar criar uma tabela e alterar uma tabela existente | O banco recusa por falta de permissão | Tabela criada ou alterada |
+| CT-62 | Duas entradas simultâneas no mesmo lote | O lote soma as duas quantidades e há duas entradas no histórico | Quantidade perdida ou lote duplicado |
+| CT-63 | Duas saídas simultâneas que juntas passam do saldo | Uma é atendida e a outra recusada com 409; o saldo nunca fica negativo | As duas atendidas ou saldo negativo |
+| CT-64 | Entrada e saída simultâneas no mesmo produto | O saldo final é o inicial + entrada − saída | Saldo final diferente |

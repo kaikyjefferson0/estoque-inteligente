@@ -37,10 +37,17 @@ def ler_booleano(valor: str | None) -> bool:
 
 class Settings:
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    # RN-50: as migrations usam o usuário dono; sem a variável, caem na DATABASE_URL
+    # (instalação com um usuário só)
+    MIGRATIONS_DATABASE_URL: str = os.getenv("MIGRATIONS_DATABASE_URL", "").strip() or DATABASE_URL
+    # RN-50: opcional; com valor, a migration de permissões concede a esse usuário só o necessário
+    APP_DB_ROLE: str = os.getenv("APP_DB_ROLE", "").strip()
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
     # Opcional: só os testes usam (o conftest exige que o banco termine em _test)
     TEST_DATABASE_URL: str = os.getenv("TEST_DATABASE_URL", "")
+    # Opcional: o mesmo banco _test, mas com o usuário da aplicação (testes CT-60 e CT-61)
+    TEST_APP_DATABASE_URL: str = os.getenv("TEST_APP_DATABASE_URL", "").strip()
     # Opcional: origens do frontend autorizadas a chamar a API
     CORS_ORIGINS: list[str] = ler_cors_origins(os.getenv("CORS_ORIGINS"))
     # RN-47: só ligar quando a API estiver atrás de um proxy confiável (Render);

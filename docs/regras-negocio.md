@@ -59,5 +59,8 @@
 - RN-45: o dashboard mostra: total de produtos, produtos com estoque baixo, produtos sem estoque (saldo disponível zero), lotes a vencer, lotes vencidos com quantidade, alertas ativos e as 5 últimas movimentações.
 - RN-46: admin e operador veem o dashboard e a lista de estoque.
 
+## Banco de dados
+- RN-50: a API usa um usuário de banco sem poder de alterar a estrutura; no histórico (stock_movements) ele só lê e insere. Só as migrations usam o usuário dono.
+
 ## Pontos a confirmar
 - Nenhum no momento.
