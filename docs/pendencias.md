@@ -34,9 +34,4 @@ Itens levantados nas revisões que ficaram para fases futuras.
 | Auditoria da Fase 12, parte A (sugestão) | RN-49: registrar quem redefiniu a senha de outro usuário (ou limitar a redefinição a operadores). |
 | Auditoria da Fase 12, parte A (sugestão) | Corrida entre login e troca de senha pelo admin: marcar o `iat` do token no início do login. |
 | Fase 12, parte C (resto dos testes do frontend) | Cenários extras do teste de ponta a ponta (`npm run test:e2e`): gaveta do menu no celular, estados de carregando, erro e vazio, e no cadastro de usuários desativar um usuário e a RN-22 (o admin não desativa a si mesmo). |
-
-## A decidir
-
-| Origem | Pendência |
-|---|---|
-| Auditoria da Fase 12, parte A (sugestão) | CNPJ alfanumérico da Receita (RN-25). |
+| Auditoria da Fase 12, parte A (sugestão) | Aceitar o CNPJ no formato alfanumérico da Receita (em uso desde 31/07/2026); hoje a RN-25 aceita só 14 números. **Citar no README como limitação conhecida.** |
