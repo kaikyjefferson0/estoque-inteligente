@@ -27,3 +27,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Saída do Playwright (teste de ponta a ponta)
+test-results/
+playwright-report/

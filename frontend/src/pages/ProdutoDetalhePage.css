@@ -217,10 +217,8 @@
   font-size: var(--fs-2);
 }
 
-.historico__mais {
-  display: flex;
-  justify-content: center;
-  padding: var(--esp-2);
+.historico__paginacao {
+  padding: var(--esp-3) var(--esp-4);
   border-top: var(--borda);
 }
 

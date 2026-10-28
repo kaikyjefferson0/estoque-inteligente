@@ -6,6 +6,7 @@ from app.models.batch import Batch
 from app.models.product import Product
 from app.models.supplier import Supplier
 from app.services import alerts as alertas
+from app.services.paginacao import padrao_de_busca, paginar
 
 CAMPOS_EDITAVEIS = (
     "nome",
@@ -116,23 +117,20 @@ def obter_por_codigo(db: Session, codigo_barras: str) -> Product:
     return produto
 
 
-def _escapar_like(texto: str) -> str:
-    return texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-
-
-def listar_produtos(db: Session, busca: str | None = None) -> list[Product]:
-    """Lista os produtos; `busca` filtra por parte do nome ou do código de barras."""
+def listar_produtos(db: Session, limite: int, deslocamento: int, busca: str | None = None) -> dict:
+    """Uma página de produtos (RN-51); `busca` filtra por parte do nome ou do código de barras."""
     consulta = select(Product).order_by(Product.id)
     termo = (busca or "").strip()
     if termo:
-        padrao = f"%{_escapar_like(termo)}%"
+        padrao = padrao_de_busca(termo)
         consulta = consulta.where(
             or_(
                 Product.nome.ilike(padrao, escape="\\"),
                 Product.codigo_barras.ilike(padrao, escape="\\"),
             )
         )
-    return list(db.scalars(consulta))
+    pagina = paginar(db, consulta, limite, deslocamento)
+    return pagina.com_itens([linha[0] for linha in pagina.linhas])
 
 
 def obter_produto(db: Session, produto_id: int, travar: bool = False) -> Product:

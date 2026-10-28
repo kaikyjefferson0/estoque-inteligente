@@ -1,15 +1,19 @@
 import { IconBellCheck, IconBellRinging, IconBuildingWarehouse } from '@tabler/icons-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api, mensagemDeErro } from '../api/client'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { useAlertasAtivos } from '../alertas/useAlertasAtivos'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { CaixaDeMarcar } from '../components/CaixaDeMarcar'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Paginacao } from '../components/Paginacao'
+import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Alerta, GeracaoDeAlertas, TipoAlerta } from '../types/alerta'
+import type { Pagina } from '../types/pagina'
 import type { Situacao } from '../types/situacao'
 import { formatarDataHora, formatarNumero, formatarTempoDecorrido, plural } from '../utils/formato'
 import { descreverLote } from '../utils/situacao'
@@ -84,11 +88,14 @@ export function AlertasPage() {
   const [filtro, setFiltro] = useState(() => lerFiltro(parametros.get('tipo')))
   const [resolvidos, setResolvidos] = useState(() => parametros.get('resolvidos') === 'sim')
 
-  const consulta = new URLSearchParams()
-  if (filtro !== 'todos') consulta.set('tipo', filtro)
-  if (resolvidos) consulta.set('incluir_resolvidos', 'true')
-  const caminho = consulta.toString() ? `/alerts?${consulta}` : '/alerts'
-  const { dados, erro, carregando, recarregar } = useRecurso<Alerta[]>(caminho)
+  const { limite, deslocamento, irPara } = usePaginaNaUrl()
+  const caminho = montarCaminho('/alerts', {
+    tipo: filtro === 'todos' ? null : filtro,
+    incluir_resolvidos: resolvidos,
+    limite,
+    deslocamento: deslocamento || null,
+  })
+  const { dados, erro, carregando, recarregar } = useRecurso<Pagina<Alerta>>(caminho)
 
   const [verificando, setVerificando] = useState(false)
   const [resultado, setResultado] = useState<{ situacao: Situacao; texto: string } | null>(null)
@@ -102,6 +109,7 @@ export function AlertasPage() {
         const novos = new URLSearchParams(atuais)
         if (valor && valor !== 'todos' && valor !== 'nao') novos.set(chave, valor)
         else novos.delete(chave)
+        novos.delete(PARAMETRO_PAGINA)
         return novos
       },
       { replace: true },
@@ -123,12 +131,9 @@ export function AlertasPage() {
     }
   }
 
-  // Ativos primeiro; dentro de cada grupo, a ordem da API (do mais recente ao mais antigo)
-  const alertas = useMemo(
-    () => [...(dados ?? [])].sort((a, b) => Number(a.resolvido_em !== null) - Number(b.resolvido_em !== null)),
-    [dados],
-  )
-  const ativos = alertas.filter((a) => a.resolvido_em === null).length
+  // A API já manda os ativos primeiro e, em cada grupo, do mais recente ao mais antigo
+  const alertas = dados?.itens ?? []
+  const total = dados?.total ?? 0
   const trocando = carregando && dados !== null
 
   return (
@@ -182,9 +187,13 @@ export function AlertasPage() {
           checked={resolvidos}
           onChange={(e) => mudar('resolvidos', e.target.checked ? 'sim' : 'nao')}
         />
-        {dados && (trocando || alertas.length > 0) && (
+        {dados && (trocando || total > 0) && (
           <p className="alertas__contagem" role="status">
-            {trocando ? 'Carregando…' : `${formatarNumero(ativos)} ${plural(ativos, 'alerta ativo', 'alertas ativos')}`}
+            {trocando
+              ? 'Carregando…'
+              : resolvidos
+                ? `${formatarNumero(total)} ${plural(total, 'alerta', 'alertas')}, entre ativos e resolvidos`
+                : `${formatarNumero(total)} ${plural(total, 'alerta ativo', 'alertas ativos')}`}
           </p>
         )}
       </div>
@@ -192,7 +201,7 @@ export function AlertasPage() {
       {!dados && carregando && <Carregando texto="Carregando os alertas…" />}
       {erro && <ErroEstado mensagem={erro} aoTentarDeNovo={recarregar} />}
 
-      {dados && !trocando && alertas.length === 0 && (
+      {dados && !trocando && total === 0 && (
         <div className="painel">
           {filtro === 'todos' ? (
             <Vazio
@@ -226,6 +235,10 @@ export function AlertasPage() {
             ))}
           </ul>
         </div>
+      )}
+
+      {total > 0 && (
+        <Paginacao total={total} limite={limite} deslocamento={deslocamento} aoMudar={irPara} nomeDaLista="alertas" />
       )}
     </div>
   )

@@ -1,10 +1,11 @@
 import re
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.models.supplier import Supplier
+from app.services.paginacao import padrao_de_busca, paginar
 
 PONTUACAO_CNPJ = re.compile(r"[.\-/\s]")
 CNPJ_14_DIGITOS = re.compile(r"[0-9]{14}")
@@ -68,8 +69,19 @@ def criar_fornecedor(db: Session, nome: str, cnpj: str | None = None) -> Supplie
     return _salvar(db, fornecedor, cnpj)
 
 
-def listar_fornecedores(db: Session) -> list[Supplier]:
-    return list(db.scalars(select(Supplier).order_by(Supplier.id)))
+def listar_fornecedores(db: Session, limite: int, deslocamento: int, busca: str | None = None) -> dict:
+    """Uma página de fornecedores (RN-51); `busca` filtra por parte do nome ou do CNPJ
+    (o CNPJ é comparado só pelos números, com ou sem pontuação na busca)."""
+    consulta = select(Supplier).order_by(Supplier.id)
+    termo = (busca or "").strip()
+    if termo:
+        condicoes = [Supplier.nome.ilike(padrao_de_busca(termo), escape="\\")]
+        digitos = PONTUACAO_CNPJ.sub("", termo)
+        if digitos.isascii() and digitos.isdigit():
+            condicoes.append(Supplier.cnpj.contains(digitos))
+        consulta = consulta.where(or_(*condicoes))
+    pagina = paginar(db, consulta, limite, deslocamento)
+    return pagina.com_itens([linha[0] for linha in pagina.linhas])
 
 
 def obter_fornecedor(db: Session, fornecedor_id: int) -> Supplier:

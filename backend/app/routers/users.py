@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import require_admin
 from app.models.user import User
+from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.users import UserCreate, UserOut, UserPasswordIn, UserUpdate
 from app.services import users as service
 
@@ -13,9 +14,9 @@ from app.services import users as service
 router = APIRouter(prefix="/users", tags=["users"], dependencies=[Depends(require_admin)])
 
 
-@router.get("", response_model=list[UserOut])
-def listar(db: Annotated[Session, Depends(get_db)]):
-    return service.listar_usuarios(db)
+@router.get("", response_model=Pagina[UserOut])
+def listar(db: Annotated[Session, Depends(get_db)], pagina: Annotated[Paginacao, Depends(paginacao)]):
+    return service.listar_usuarios(db, pagina.limite, pagina.deslocamento)
 
 
 @router.post("", response_model=UserOut, status_code=status.HTTP_201_CREATED)

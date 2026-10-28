@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, false, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, false, func, select
+from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from app.core.database import Base
+from app.models.supplier import Supplier
 
 
 class Product(Base):
@@ -32,3 +33,7 @@ class Product(Base):
         index=True,
     )
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # Só leitura (não é coluna): nome do fornecedor, para as telas não buscarem a lista de fornecedores
+    fornecedor_nome: Mapped[str | None] = column_property(
+        select(Supplier.nome).where(Supplier.id == fornecedor_id).correlate_except(Supplier).scalar_subquery()
+    )

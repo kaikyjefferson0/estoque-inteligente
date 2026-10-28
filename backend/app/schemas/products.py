@@ -59,4 +59,5 @@ class ProductOut(BaseModel):
     controla_validade: bool
     dias_alerta_validade: int | None
     fornecedor_id: int | None
+    fornecedor_nome: str | None
     criado_em: datetime

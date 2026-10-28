@@ -1,14 +1,17 @@
 import { IconBox, IconPlus, IconSearch } from '@tabler/icons-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
+import { usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
-import type { Fornecedor } from '../types/fornecedor'
+import type { Pagina } from '../types/pagina'
 import type { Produto } from '../types/produto'
 import { formatarNumero, plural } from '../utils/formato'
 import { useAtraso } from '../utils/useAtraso'
@@ -26,23 +29,22 @@ export function ProdutosPage() {
   const [busca, setBusca] = useState(buscaNaUrl)
   const termo = useAtraso(busca.trim(), ATRASO_BUSCA_MS)
 
-  // A busca fica no endereço para sobreviver ao "voltar" do navegador
+  const { limite, deslocamento, irPara } = usePaginaNaUrl()
+
+  // A busca fica no endereço para sobreviver ao "voltar" do navegador; trocar a busca volta à página 1
   useEffect(() => {
     if (termo !== buscaNaUrl) setParametros(termo ? { busca: termo } : {}, { replace: true })
   }, [termo, buscaNaUrl, setParametros])
 
-  const caminho = termo ? `/products?busca=${encodeURIComponent(termo)}` : '/products'
-  const { dados, erro, carregando, recarregar } = useRecurso<Produto[]>(caminho)
-  const fornecedores = useRecurso<Fornecedor[]>('/suppliers')
+  const caminho = montarCaminho('/products', { busca: termo, limite, deslocamento: deslocamento || null })
+  const recurso = useRecurso<Pagina<Produto>>(caminho)
+  const { erro, carregando, recarregar } = recurso
+  const dados = recurso.dados?.itens ?? null
+  const total = recurso.dados?.total ?? 0
   const mensagem = useMensagemDaNavegacao()
 
-  const nomeDoFornecedor = useMemo(
-    () => new Map((fornecedores.dados ?? []).map((f) => [f.id, f.nome])),
-    [fornecedores.dados],
-  )
-
   // Sem nenhum produto (e sem busca), a página vira só o convite para cadastrar
-  const semProdutos = dados?.length === 0 && !termo && !busca.trim()
+  const semProdutos = total === 0 && dados !== null && !termo && !busca.trim()
   const buscando = carregando && dados !== null
 
   return (
@@ -84,8 +86,8 @@ export function ProdutosPage() {
             {buscando
               ? 'Buscando…'
               : termo
-                ? `${formatarNumero(dados.length)} ${plural(dados.length, 'produto encontrado', 'produtos encontrados')}`
-                : `${formatarNumero(dados.length)} ${plural(dados.length, 'produto cadastrado', 'produtos cadastrados')}`}
+                ? `${formatarNumero(total)} ${plural(total, 'produto encontrado', 'produtos encontrados')}`
+                : `${formatarNumero(total)} ${plural(total, 'produto cadastrado', 'produtos cadastrados')}`}
           </p>
         </div>
       )}
@@ -109,7 +111,7 @@ export function ProdutosPage() {
         </div>
       )}
 
-      {dados && !semProdutos && dados.length === 0 && !buscando && (
+      {dados && !semProdutos && total === 0 && !buscando && (
         <div className="painel">
           <Vazio
             icone={IconSearch}
@@ -145,10 +147,10 @@ export function ProdutosPage() {
                   </td>
                   <td className="produtos__codigo numero">{p.codigo_barras}</td>
                   <td className="produtos__fornecedor">
-                    {p.fornecedor_id === null ? (
+                    {p.fornecedor_nome === null ? (
                       <span className="tabela__vazio">Sem fornecedor</span>
                     ) : (
-                      (nomeDoFornecedor.get(p.fornecedor_id) ?? <span className="tabela__vazio">Fornecedor {p.fornecedor_id}</span>)
+                      p.fornecedor_nome
                     )}
                   </td>
                   <td className="produtos__minimo tabela__numero numero">
@@ -160,6 +162,10 @@ export function ProdutosPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {total > 0 && (
+        <Paginacao total={total} limite={limite} deslocamento={deslocamento} aoMudar={irPara} nomeDaLista="produtos" />
       )}
     </div>
   )

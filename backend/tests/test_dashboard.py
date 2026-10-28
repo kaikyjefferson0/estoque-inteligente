@@ -57,7 +57,7 @@ def lote_direto(db, produto, quantidade, validade=None) -> Batch:
 def estoque(client, token, **filtros) -> list[dict]:
     resposta = client.get("/stock", headers=auth(token), params=filtros)
     assert resposta.status_code == 200, resposta.text
-    return resposta.json()
+    return resposta.json()["itens"]
 
 
 def saldo_produto(client, token, produto_id) -> dict:
@@ -99,7 +99,7 @@ def test_ct20_dashboard_bate_com_a_lista_de_estoque(client, db, token_admin, ref
     # ainda são os da última movimentação (exceção da RN-44): falta o "vencido" do lote curto
     antes = dashboard(client, token_admin)
     assert (antes["lotes_vencidos"], antes["lotes_a_vencer"], antes["alertas_ativos"]) == (1, 1, 4)
-    alertas_antes = client.get("/alerts", headers=auth(token_admin)).json()
+    alertas_antes = client.get("/alerts", headers=auth(token_admin)).json()["itens"]
     assert ("vencido", lote_curto) not in {(a["tipo"], a["lote_id"]) for a in alertas_antes}
 
     # RN-40: a geração completa (Cron diário) põe os alertas em dia
@@ -141,7 +141,7 @@ def test_ct20_dashboard_bate_com_a_lista_de_estoque(client, db, token_admin, ref
     assert painel["lotes_a_vencer"] == len(a_vencer)
 
     # Alertas: os mesmos que o GET /alerts mostra, e nas mesmas condições (RN-44)
-    alertas = client.get("/alerts", headers=auth(token_admin)).json()
+    alertas = client.get("/alerts", headers=auth(token_admin)).json()["itens"]
     assert painel["alertas_ativos"] == len(alertas) == 4
     assert {(a["tipo"], a["lote_id"]) for a in alertas if a["tipo"] != "estoque_baixo"} == {
         ("vencido", lote_curto),

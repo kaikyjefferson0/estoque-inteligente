@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ from app.models.stock_movement import StockMovement
 from app.models.user import User
 from app.services import alerts as alertas
 from app.services import condicoes
+from app.services.paginacao import padrao_de_busca, paginar
 from app.services.products import ProdutoNaoEncontradoError, obter_produto
 
 
@@ -328,11 +329,13 @@ def consultar_saldo(db: Session, produto_id: int) -> SaldoProduto:
     return SaldoProduto(saldo_fisico=saldos.saldo_fisico, saldo_disponivel=saldos.saldo_disponivel, lotes=lotes)
 
 
-def listar_estoque(db: Session, situacao: str | None = None) -> list[dict]:
-    """RN-44 e CT-48: todos os produtos com saldos e situação, numa só consulta agregada.
+def listar_estoque(
+    db: Session, limite: int, deslocamento: int, situacao: str | None = None, busca: str | None = None
+) -> dict:
+    """RN-44 e CT-48: uma página (RN-51) dos produtos com saldos e situação, numa só consulta agregada.
 
     CT-50: o filtro "baixo" traz todos com estoque baixo, inclusive os "sem_estoque",
-    para bater com o número do dashboard.
+    para bater com o número do dashboard. `busca` filtra por parte do nome ou do código de barras.
     """
     saldos = condicoes.saldos_por_produto(hoje()).subquery()
     situacao_col = condicoes.situacao(saldos.c.saldo_disponivel, saldos.c.estoque_minimo).label("situacao")
@@ -341,21 +344,31 @@ def listar_estoque(db: Session, situacao: str | None = None) -> list[dict]:
         consulta = consulta.where(condicoes.estoque_baixo(saldos.c.saldo_disponivel, saldos.c.estoque_minimo))
     elif situacao is not None:
         consulta = consulta.where(situacao_col == situacao)
-    return [dict(linha) for linha in db.execute(consulta).mappings()]
+    termo = (busca or "").strip()
+    if termo:
+        padrao = padrao_de_busca(termo)
+        consulta = consulta.where(
+            or_(saldos.c.nome.ilike(padrao, escape="\\"), saldos.c.codigo_barras.ilike(padrao, escape="\\"))
+        )
+    pagina = paginar(db, consulta, limite, deslocamento)
+    return pagina.com_itens([dict(linha._mapping) for linha in pagina.linhas])
 
 
-def listar_movimentacoes(db: Session, produto_id: int) -> list[dict]:
-    """Histórico do produto, do mais recente para o mais antigo."""
+def listar_movimentacoes(db: Session, produto_id: int, limite: int, deslocamento: int) -> dict:
+    """Uma página (RN-51) do histórico do produto, do mais recente para o mais antigo."""
     obter_produto(db, produto_id)
-    linhas = db.execute(
+    pagina = paginar(
+        db,
         select(StockMovement, Batch.validade, User.nome)
         .join(Batch, Batch.id == StockMovement.lote_id)
         .join(User, User.id == StockMovement.usuario_id)
         .where(StockMovement.produto_id == produto_id)
         # Movimentações da mesma transação têm o mesmo criado_em; o id desempata
-        .order_by(StockMovement.criado_em.desc(), StockMovement.id.desc())
+        .order_by(StockMovement.criado_em.desc(), StockMovement.id.desc()),
+        limite,
+        deslocamento,
     )
-    return [
+    return pagina.com_itens([
         {
             "id": mov.id,
             "tipo": mov.tipo,
@@ -369,5 +382,5 @@ def listar_movimentacoes(db: Session, produto_id: int) -> list[dict]:
             "usuario_nome": usuario_nome,
             "criado_em": mov.criado_em,
         }
-        for mov, validade, usuario_nome in linhas
-    ]
+        for mov, validade, usuario_nome in pagina.linhas
+    ])

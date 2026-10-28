@@ -37,7 +37,7 @@ def test_ct04_admin_cadastra_produto_visivel_na_lista(client, token_admin, forne
 
     lista = client.get("/products", headers=headers)
     assert lista.status_code == 200
-    assert produto["id"] in [p["id"] for p in lista.json()]
+    assert produto["id"] in [p["id"] for p in lista.json()["itens"]]
 
 
 def test_ct05_codigo_de_barras_repetido(client, db, token_admin, refrigerante):
@@ -108,7 +108,7 @@ def test_busca_por_nome_ou_codigo(client, token_operador, refrigerante, detergen
     def ids(busca):
         resposta = client.get("/products", headers=headers, params={"busca": busca})
         assert resposta.status_code == 200
-        return {p["id"] for p in resposta.json()}
+        return {p["id"] for p in resposta.json()["itens"]}
 
     assert ids("refriger") == {refrigerante.id}  # parte do nome, sem diferenciar maiúsculas
     assert ids("7891000000002") == {detergente.id}  # código de barras completo

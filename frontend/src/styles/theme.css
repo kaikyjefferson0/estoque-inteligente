@@ -107,6 +107,9 @@
   --largura-coluna-situacao: 160px;
   --largura-coluna-tempo: 224px;
   --camada-cabecalho: 10;
+  /* Lista de opções do campo com busca: acima da página, abaixo das janelas */
+  --camada-lista: 20;
+  --altura-lista-opcoes: 320px;
   --camada-sobreposicao: 50;
   /* Elemento só para leitor de tela: 1px, o mínimo que ele ainda lê */
   --tamanho-oculto: 1px;

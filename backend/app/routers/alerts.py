@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.schemas.alerts import AlertGenerationOut, AlertOut, TipoAlerta
+from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.products import MAX_INTEGER
 from app.services import alerts as service
 
@@ -14,14 +15,17 @@ from app.services import alerts as service
 router = APIRouter(prefix="/alerts", tags=["alerts"], dependencies=[Depends(get_current_user)])
 
 
-@router.get("", response_model=list[AlertOut])
+@router.get("", response_model=Pagina[AlertOut])
 def listar_alertas(
     db: Annotated[Session, Depends(get_db)],
+    pagina: Annotated[Paginacao, Depends(paginacao)],
     tipo: TipoAlerta | None = None,
     produto_id: Annotated[int | None, Query(ge=1, le=MAX_INTEGER)] = None,
     incluir_resolvidos: bool = False,
 ):
-    return service.listar_alertas(db, tipo=tipo, produto_id=produto_id, incluir_resolvidos=incluir_resolvidos)
+    return service.listar_alertas(
+        db, pagina.limite, pagina.deslocamento, tipo=tipo, produto_id=produto_id, incluir_resolvidos=incluir_resolvidos
+    )
 
 
 @router.post("/generate", response_model=AlertGenerationOut)

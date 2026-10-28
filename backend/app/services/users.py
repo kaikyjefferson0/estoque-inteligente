@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.models.user import User
+from app.services.paginacao import paginar
 
 PERFIS = ("admin", "operador")  # RN-01
 
@@ -56,8 +57,10 @@ def gravar_senha(usuario: User, senha: str) -> None:
     usuario.senha_alterada_em = datetime.now(timezone.utc)
 
 
-def listar_usuarios(db: Session) -> list[User]:
-    return list(db.scalars(select(User).order_by(User.id)))
+def listar_usuarios(db: Session, limite: int, deslocamento: int) -> dict:
+    """Uma página de usuários (RN-51)."""
+    pagina = paginar(db, select(User).order_by(User.id), limite, deslocamento)
+    return pagina.com_itens([linha[0] for linha in pagina.linhas])
 
 
 def obter_usuario(db: Session, usuario_id: int) -> User:

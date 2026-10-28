@@ -83,12 +83,26 @@ const FORNECEDORES = [
   { id: 2, nome: 'Laticínios Serra Azul', cnpj: null, criado_em: '2026-09-02T12:00:00Z' },
   { id: 3, nome: 'Atacado Central de Ferragens e Materiais de Construção Ltda', cnpj: '98765432000110', criado_em: '2026-09-03T12:00:00Z' },
 ]
-const PRODUTOS = [
+const PRODUTOS_SEM_FORNECEDOR = [
   { id: 1, nome: 'Arroz tipo 1, pacote de 5 kg', codigo_barras: '7891000100103', estoque_minimo: 20, controla_validade: false, dias_alerta_validade: null, fornecedor_id: 1, criado_em: '2026-09-10T13:30:00Z' },
   { id: 2, nome: 'Leite integral UHT 1 L', codigo_barras: '7896051111016', estoque_minimo: 48, controla_validade: true, dias_alerta_validade: 10, fornecedor_id: 2, criado_em: '2026-09-11T09:00:00Z' },
   { id: 3, nome: 'Parafuso sextavado zincado M8 x 40 mm, caixa com 100 unidades', codigo_barras: '7899999000123', estoque_minimo: 1200, controla_validade: false, dias_alerta_validade: null, fornecedor_id: null, criado_em: '2026-09-12T10:00:00Z' },
   { id: 4, nome: 'Café torrado e moído 500 g', codigo_barras: '7896005800018', estoque_minimo: 12, controla_validade: true, dias_alerta_validade: 30, fornecedor_id: 3, criado_em: '2026-09-13T15:45:00Z' },
 ]
+// A API manda o nome do fornecedor junto com o produto
+const PRODUTOS = PRODUTOS_SEM_FORNECEDOR.map((p) => ({ ...p, fornecedor_nome: FORNECEDORES.find((f) => f.id === p.fornecedor_id)?.nome ?? null }))
+// RN-51: as listas da API vêm paginadas; a simulação corta a lista como a API faria
+function pagina(url, itens) {
+  const limite = Number(url.searchParams.get('limite') ?? 50)
+  const deslocamento = Number(url.searchParams.get('deslocamento') ?? 0)
+  return { itens: itens.slice(deslocamento, deslocamento + limite), total: itens.length, limite, deslocamento }
+}
+
+function filtrarFornecedores(url, lista) {
+  const busca = (url.searchParams.get('busca') ?? '').toLowerCase()
+  return lista.filter((f) => !busca || f.nome.toLowerCase().includes(busca) || (f.cnpj ?? '').includes(busca.replace(/\D/g, '') || '§'))
+}
+
 const CAMINHO_API = /^\/(auth|dashboard|products|suppliers|alerts)(\/|$)/
 
 async function simularApi(page, cenario) {
@@ -108,15 +122,15 @@ async function simularApi(page, cenario) {
         return json(rota, 200, { total_produtos: 4, produtos_estoque_baixo: 0, produtos_sem_estoque: 0, lotes_a_vencer: 0, lotes_vencidos: 0, alertas_ativos: 0, ultimas_movimentacoes: [] })
       }
       // Contagem do menu: sem alertas nos cadastros
-      if (partes[0] === 'alerts') return json(rota, 200, [])
+      if (partes[0] === 'alerts') return json(rota, 200, pagina(url, []))
       const estado = cenario[partes[0]]
       if (metodo === 'GET' && partes.length === 1) {
         if (estado === 'carregando') return new Promise(() => {})
         if (estado === 'erro') return json(rota, 500, {})
-        if (estado === 'vazio') return json(rota, 200, [])
+        if (estado === 'vazio') return json(rota, 200, pagina(url, []))
       }
       if (partes[0] === 'suppliers') {
-        if (metodo === 'GET' && partes.length === 1) return json(rota, 200, FORNECEDORES)
+        if (metodo === 'GET' && partes.length === 1) return json(rota, 200, pagina(url, filtrarFornecedores(url, FORNECEDORES)))
         if (metodo === 'GET') {
           const f = FORNECEDORES.find((x) => x.id === Number(partes[1]))
           return f ? json(rota, 200, f) : json(rota, 404, { detail: 'Fornecedor não encontrado' })
@@ -129,7 +143,7 @@ async function simularApi(page, cenario) {
       cenario.chamadasProdutos = (cenario.chamadasProdutos ?? 0) + (metodo === 'GET' && partes.length === 1 ? 1 : 0)
       if (metodo === 'GET' && partes.length === 1) {
         const busca = (url.searchParams.get('busca') ?? '').toLowerCase()
-        return json(rota, 200, PRODUTOS.filter((p) => !busca || p.nome.toLowerCase().includes(busca) || p.codigo_barras.includes(busca)))
+        return json(rota, 200, pagina(url, PRODUTOS.filter((p) => !busca || p.nome.toLowerCase().includes(busca) || p.codigo_barras.includes(busca))))
       }
       const produto = PRODUTOS.find((x) => x.id === Number(partes[1]))
       if (metodo === 'GET' && partes[2] === 'stock') {
@@ -250,7 +264,9 @@ async function capturarCadastros(rotulo, largura) {
   await page.getByLabel('Nome').fill('Iogurte natural 170 g')
   await page.getByLabel('Código de barras').fill('7891000100103')
   await page.getByLabel('Estoque mínimo').fill('24')
-  await page.getByLabel('Fornecedor (opcional)').selectOption('2')
+  // Campo com busca (RN-51): digita parte do nome e escolhe na lista
+  await page.getByRole('combobox', { name: 'Fornecedor (opcional)' }).fill('serra')
+  await page.getByRole('option', { name: /Laticínios Serra Azul/ }).click()
   await page.getByLabel('Controla validade').check()
   await page.getByRole('button', { name: 'Cadastrar produto' }).click()
   await capturar(page, r('produto-validade-marcada'), largura, { verificarPagina: false })
@@ -404,21 +420,21 @@ async function simularEstoque(page, cenario, perfil) {
       if (partes[0] === 'dashboard') {
         return json(rota, 200, { total_produtos: 4, produtos_estoque_baixo: 2, produtos_sem_estoque: 1, lotes_a_vencer: 1, lotes_vencidos: 1, alertas_ativos: 4, ultimas_movimentacoes: [] })
       }
-      if (partes[0] === 'suppliers') return json(rota, 200, FORNECEDORES)
+      if (partes[0] === 'suppliers') return json(rota, 200, pagina(url, filtrarFornecedores(url, FORNECEDORES)))
 
       if (partes[0] === 'alerts') {
         if (partes[1] === 'generate') {
           if (cenario.gerar === 'erro') return json(rota, 500, {})
           return json(rota, 200, { criados: 1, resolvidos: 2 })
         }
-        // A contagem do menu (sem filtro) não entra nos estados simulados da lista
-        const daLista = url.search !== ''
+        // A contagem do menu (limite=1) não entra nos estados simulados da lista
+        const daLista = url.searchParams.get('limite') !== '1'
         if (cenario.alerts === 'carregando' && daLista) return new Promise(() => {})
         if (cenario.alerts === 'erro' && daLista) return json(rota, 500, {})
-        if (cenario.alerts === 'vazio') return json(rota, 200, [])
+        if (cenario.alerts === 'vazio') return json(rota, 200, pagina(url, []))
         const tipo = url.searchParams.get('tipo')
         const comResolvidos = url.searchParams.get('incluir_resolvidos') === 'true'
-        return json(rota, 200, ALERTAS.filter((a) => (!tipo || a.tipo === tipo) && (comResolvidos || !a.resolvido_em)))
+        return json(rota, 200, pagina(url, ALERTAS.filter((a) => (!tipo || a.tipo === tipo) && (comResolvidos || !a.resolvido_em))))
       }
       if (partes[0] === 'users') {
         const id = Number(partes[1])
@@ -426,7 +442,7 @@ async function simularEstoque(page, cenario, perfil) {
         if (metodo === 'GET' && !partes[1]) {
           if (cenario.users === 'carregando') return new Promise(() => {})
           if (cenario.users === 'erro') return json(rota, 500, {})
-          return json(rota, 200, lista)
+          return json(rota, 200, pagina(url, lista))
         }
         // RN-49: o admin define a senha de outro usuário
         if (partes[2] === 'password') return rota.fulfill({ status: 204 })
@@ -445,10 +461,15 @@ async function simularEstoque(page, cenario, perfil) {
       if (partes[0] === 'stock' && metodo === 'GET') {
         if (cenario.stock === 'carregando') return new Promise(() => {})
         if (cenario.stock === 'erro') return json(rota, 500, {})
-        if (cenario.stock === 'vazio') return json(rota, 200, [])
+        if (cenario.stock === 'vazio') return json(rota, 200, pagina(url, []))
         const situacao = url.searchParams.get('situacao')
-        const filtrado = ESTOQUE.filter((i) => !situacao || (situacao === 'baixo' ? i.situacao !== 'ok' : i.situacao === situacao))
-        return json(rota, 200, filtrado)
+        const busca = (url.searchParams.get('busca') ?? '').toLowerCase()
+        const filtrado = ESTOQUE.filter(
+          (i) =>
+            (!situacao || (situacao === 'baixo' ? i.situacao !== 'ok' : i.situacao === situacao)) &&
+            (!busca || i.nome.toLowerCase().includes(busca) || i.codigo_barras.includes(busca)),
+        )
+        return json(rota, 200, pagina(url, filtrado))
       }
       if (partes[0] === 'stock' && partes[1] === 'entries') {
         const corpo = req.postDataJSON()
@@ -494,7 +515,7 @@ async function simularEstoque(page, cenario, perfil) {
       // products
       if (metodo === 'GET' && partes.length === 1) {
         const busca = (url.searchParams.get('busca') ?? '').toLowerCase()
-        return json(rota, 200, PRODUTOS.filter((p) => !busca || p.nome.toLowerCase().includes(busca) || p.codigo_barras.includes(busca)))
+        return json(rota, 200, pagina(url, PRODUTOS.filter((p) => !busca || p.nome.toLowerCase().includes(busca) || p.codigo_barras.includes(busca))))
       }
       if (partes[1] === 'by-barcode') {
         cenario.buscasPorCodigo = (cenario.buscasPorCodigo ?? 0) + 1
@@ -513,7 +534,7 @@ async function simularEstoque(page, cenario, perfil) {
       if (partes[2] === 'movements') {
         if (cenario.movimentos === 'carregando') return new Promise(() => {})
         if (cenario.movimentos === 'erro') return json(rota, 500, {})
-        return json(rota, 200, MOVIMENTOS[id] ?? [])
+        return json(rota, 200, pagina(url, MOVIMENTOS[id] ?? []))
       }
       return json(rota, 200, produto)
     },
@@ -655,9 +676,11 @@ async function capturarEstoque(rotulo, largura) {
 
   // Ajustes: produto, lote, contado e motivo; sem diferença e confirmação
   await page.goto(`${site}/ajustes`)
-  await page.getByLabel('Produto').waitFor()
+  await page.getByRole('combobox', { name: 'Produto' }).waitFor()
   await capturar(page, r('ajustes-inicial'), largura)
-  await page.getByLabel('Produto').selectOption('2')
+  await page.getByRole('combobox', { name: 'Produto' }).fill('leite')
+  await capturar(page, r('ajustes-busca-produto'), largura, { verificarPagina: false })
+  await page.getByRole('option', { name: /Leite integral/ }).click()
   await page.locator('.lote-opcao').first().waitFor()
   await capturar(page, r('ajustes-lotes'), largura)
   await page.getByRole('button', { name: 'Revisar ajuste' }).click()
@@ -984,7 +1007,7 @@ try {
       await page.route('**/auth/me', (rota) =>
         json(rota, { id: 1, nome: 'Carla Administradora', email: 'carla@exemplo.com', perfil: 'admin', ativo: true, criado_em: '2026-01-01T00:00:00Z' }),
       )
-      await page.route(/\/alerts(\?|$)/, (rota) => json(rota, dadosDosAlertas().filter((a) => !a.resolvido_em)))
+      await page.route(/\/alerts(\?|$)/, (rota) => json(rota, pagina(new URL(rota.request().url()), dadosDosAlertas().filter((a) => !a.resolvido_em))))
       await page.route('**/dashboard', (rota) =>
         json(rota, { total_produtos: 0, produtos_estoque_baixo: 0, produtos_sem_estoque: 0, lotes_a_vencer: 0, lotes_vencidos: 0, alertas_ativos: 0, ultimas_movimentacoes: [] }),
       )

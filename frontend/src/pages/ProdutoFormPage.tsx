@@ -1,18 +1,20 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ApiError, api, mensagemDeErro } from '../api/client'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { CaixaDeMarcar } from '../components/CaixaDeMarcar'
 import { Campo } from '../components/Campo'
-import { CampoSelecao } from '../components/CampoSelecao'
 import { Carregando, ErroEstado } from '../components/Estados'
+import { SelecaoComBusca, type OpcaoEscolhida } from '../components/SelecaoComBusca'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import type { Produto, SaldoProduto } from '../types/produto'
+import { formatarCnpj } from '../utils/formato'
 
 // Ordem dos campos na tela: o foco vai para o primeiro inválido
 const CAMPOS = [
@@ -29,12 +31,16 @@ const MAX_NOME = 120
 const MAX_CODIGO = 50
 const MAX_INTEIRO = 2_147_483_647 // limite da coluna INTEGER do banco
 const INTEIRO = /^\d+$/
+// Opções por busca no campo de fornecedor; o resto aparece digitando
+const OPCOES_POR_BUSCA = 20
 
 interface Valores {
   nome: string
   codigoBarras: string
   estoqueMinimo: string
   fornecedorId: string
+  // Só para mostrar no campo; não vai para a API
+  fornecedorNome: string
   controlaValidade: boolean
   diasAlerta: string
 }
@@ -81,6 +87,7 @@ function valoresIniciais(p?: Produto): Valores {
     codigoBarras: p?.codigo_barras ?? '',
     estoqueMinimo: p ? String(p.estoque_minimo) : '',
     fornecedorId: p?.fornecedor_id ? String(p.fornecedor_id) : '',
+    fornecedorNome: p?.fornecedor_nome ?? '',
     controlaValidade: p?.controla_validade ?? false,
     diasAlerta: p?.dias_alerta_validade ? String(p.dias_alerta_validade) : '',
   }
@@ -94,49 +101,24 @@ function SelecaoDeFornecedor({
   erro,
   aoMudar,
 }: {
-  valor: string
+  valor: OpcaoEscolhida | null
   erro?: string
-  aoMudar: (valor: string) => void
+  aoMudar: (fornecedor: Fornecedor | null) => void
 }) {
-  const { dados, erro: erroLista, carregando, recarregar } = useRecurso<Fornecedor[]>('/suppliers')
-
-  let dica
-  if (!dados && carregando) dica = 'Carregando fornecedores…'
-  else if (erroLista)
-    dica = (
-      <>
-        Não foi possível carregar os fornecedores.{' '}
-        <button type="button" className="link-botao" onClick={recarregar}>
-          Tentar de novo
-        </button>
-      </>
-    )
-  else if (dados?.length === 0)
-    dica = (
-      <>
-        Nenhum fornecedor cadastrado. <Link to="/fornecedores/novo">Cadastrar fornecedor</Link>
-      </>
-    )
-
+  // A busca é no próprio campo: a lista de fornecedores pode ser grande (RN-51)
   return (
-    <CampoSelecao
+    <SelecaoComBusca<Fornecedor>
       rotulo="Fornecedor (opcional)"
       name="fornecedor_id"
-      value={valor}
-      onChange={(e) => aoMudar(e.target.value)}
-      disabled={!dados}
+      placeholder="Digite o nome ou o CNPJ"
+      opcaoVazia="Sem fornecedor"
+      textoSemItens="Nenhum fornecedor cadastrado."
+      caminho={(termo) => montarCaminho('/suppliers', { busca: termo, limite: OPCOES_POR_BUSCA })}
+      paraOpcao={(f) => ({ id: f.id, texto: f.nome, detalhe: f.cnpj ? formatarCnpj(f.cnpj) : undefined })}
+      valor={valor}
+      aoEscolher={aoMudar}
       erro={erro}
-      dica={dica}
-    >
-      <option value="">Sem fornecedor</option>
-      {dados?.map((f) => (
-        <option key={f.id} value={f.id}>
-          {f.nome}
-        </option>
-      ))}
-      {/* Mantém a opção salva visível enquanto a lista não chega */}
-      {!dados && valor && <option value={valor}>Fornecedor atual</option>}
-    </CampoSelecao>
+    />
   )
 }
 
@@ -255,9 +237,16 @@ function FormularioProduto({
         erro={erros.estoque_minimo}
       />
       <SelecaoDeFornecedor
-        valor={valores.fornecedorId}
+        valor={valores.fornecedorId ? { id: Number(valores.fornecedorId), texto: valores.fornecedorNome } : null}
         erro={erros.fornecedor_id}
-        aoMudar={(valor) => alterar('fornecedorId', valor, 'fornecedor_id')}
+        aoMudar={(fornecedor) => {
+          setValores((atuais) => ({
+            ...atuais,
+            fornecedorId: fornecedor ? String(fornecedor.id) : '',
+            fornecedorNome: fornecedor?.nome ?? '',
+          }))
+          limpar('fornecedor_id')
+        }}
       />
 
       <div className="formulario__grupo">

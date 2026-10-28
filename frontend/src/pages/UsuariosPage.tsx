@@ -1,20 +1,26 @@
 import { IconKey, IconPencil, IconPlus, IconUsers } from '@tabler/icons-react'
 import { useState } from 'react'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
+import { usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import { NOME_DO_PERFIL, type Usuario } from '../types/auth'
+import type { Pagina } from '../types/pagina'
 import { formatarNumero, plural } from '../utils/formato'
 import { DefinirSenhaDialogo } from './DefinirSenhaDialogo'
 import './UsuariosPage.css'
 
-function resumo(usuarios: Usuario[]): string {
-  const inativos = usuarios.filter((u) => !u.ativo).length
-  const total = `${formatarNumero(usuarios.length)} ${plural(usuarios.length, 'usuário', 'usuários')}`
+function resumo(pagina: Pagina<Usuario>): string {
+  const total = `${formatarNumero(pagina.total)} ${plural(pagina.total, 'usuário', 'usuários')}`
+  // Os inativos só dá para contar quando a lista inteira cabe numa página
+  if (pagina.itens.length < pagina.total) return total
+  const inativos = pagina.itens.filter((u) => !u.ativo).length
   return inativos > 0 ? `${total}, ${formatarNumero(inativos)} ${plural(inativos, 'inativo', 'inativos')}` : total
 }
 
@@ -56,11 +62,14 @@ function Acoes({ usuario, proprio, aoDefinirSenha }: { usuario: Usuario; proprio
 export function UsuariosPage() {
   useTituloDaPagina('Usuários')
   const { usuario: logado } = useAuth()
-  const { dados, erro, carregando, recarregar } = useRecurso<Usuario[]>('/users')
+  const { limite, deslocamento, irPara } = usePaginaNaUrl()
+  const recurso = useRecurso<Pagina<Usuario>>(montarCaminho('/users', { limite, deslocamento: deslocamento || null }))
+  const { erro, carregando, recarregar } = recurso
+  const dados = recurso.dados?.itens ?? null
   const mensagemDaNavegacao = useMensagemDaNavegacao()
   const [definindoSenha, setDefinindoSenha] = useState<Usuario | null>(null)
   const [mensagem, setMensagem] = useState<string | null>(null)
-  const vazio = dados?.length === 0
+  const vazio = recurso.dados?.total === 0
   const aviso = mensagem ?? mensagemDaNavegacao
 
   return (
@@ -68,7 +77,7 @@ export function UsuariosPage() {
       <header className="pagina__cabecalho">
         <div>
           <h1>Usuários</h1>
-          <p className="pagina__apoio">{dados && !vazio ? resumo(dados) : 'Quem pode entrar no sistema'}</p>
+          <p className="pagina__apoio">{recurso.dados && !vazio ? resumo(recurso.dados) : 'Quem pode entrar no sistema'}</p>
         </div>
         {dados && !vazio && (
           <div className="pagina__acoes">
@@ -155,6 +164,16 @@ export function UsuariosPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {recurso.dados && !vazio && (
+        <Paginacao
+          total={recurso.dados.total}
+          limite={limite}
+          deslocamento={deslocamento}
+          aoMudar={irPara}
+          nomeDaLista="usuários"
+        />
       )}
 
       <DefinirSenhaDialogo

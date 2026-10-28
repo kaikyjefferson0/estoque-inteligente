@@ -1,14 +1,19 @@
 import { IconBox, IconCircleCheck, IconPackageImport, IconRefresh, IconSearch } from '@tabler/icons-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Paginacao } from '../components/Paginacao'
+import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { ItemEstoque, SituacaoEstoque } from '../types/estoque'
+import type { Pagina } from '../types/pagina'
 import { formatarHora, formatarNumero, plural } from '../utils/formato'
 import { SITUACAO_DO_ESTOQUE } from '../utils/situacao'
+import { useAtraso } from '../utils/useAtraso'
 import './EstoquePage.css'
 
 type Filtro = 'todos' | Exclude<SituacaoEstoque, 'ok'>
@@ -25,6 +30,8 @@ const VAZIO_DO_FILTRO: Record<Exclude<Filtro, 'todos'>, { titulo: string; texto:
 }
 
 const MAX_BUSCA = 120
+// Espera a pessoa parar de digitar antes de chamar a API
+const ATRASO_BUSCA_MS = 300
 
 function lerFiltro(valor: string | null): Filtro {
   return valor === 'baixo' || valor === 'sem_estoque' ? valor : 'todos'
@@ -74,10 +81,22 @@ export function EstoquePage() {
   const [filtro, setFiltro] = useState(() => lerFiltro(parametros.get('situacao')))
   const [busca, setBusca] = useState(() => parametros.get('busca') ?? '')
 
-  const caminho = filtro === 'todos' ? '/stock' : `/stock?situacao=${filtro}`
-  const { dados, erro, carregando, atualizadoEm, recarregar } = useRecurso<ItemEstoque[]>(caminho)
+  const termo = useAtraso(busca.trim(), ATRASO_BUSCA_MS)
+  const { limite, deslocamento, irPara } = usePaginaNaUrl()
 
-  // Filtro e busca ficam no endereço para sobreviver ao "voltar" do navegador
+  const caminho = montarCaminho('/stock', {
+    situacao: filtro === 'todos' ? null : filtro,
+    busca: termo,
+    limite,
+    deslocamento: deslocamento || null,
+  })
+  const recurso = useRecurso<Pagina<ItemEstoque>>(caminho)
+  const { erro, carregando, atualizadoEm, recarregar } = recurso
+  const itens = recurso.dados?.itens ?? []
+  const total = recurso.dados?.total ?? 0
+  const dados = recurso.dados
+
+  // Filtro e busca ficam no endereço para sobreviver ao "voltar" do navegador; trocar qualquer um volta à página 1
   function mudar(chave: 'situacao' | 'busca', valor: string) {
     if (chave === 'situacao') setFiltro(lerFiltro(valor))
     else setBusca(valor)
@@ -86,20 +105,15 @@ export function EstoquePage() {
         const novos = new URLSearchParams(atuais)
         if (valor && valor !== 'todos') novos.set(chave, valor)
         else novos.delete(chave)
+        novos.delete(PARAMETRO_PAGINA)
         return novos
       },
       { replace: true },
     )
   }
 
-  // A lista inteira já vem da API; a busca filtra na tela, sem nova chamada
-  const termo = busca.trim().toLowerCase()
-  const itens = useMemo(
-    () => (dados ?? []).filter((i) => !termo || i.nome.toLowerCase().includes(termo) || i.codigo_barras.includes(termo)),
-    [dados, termo],
-  )
-
-  const semProdutos = dados?.length === 0 && filtro === 'todos'
+  // Sem produto nenhum: sem filtro, sem busca e total zero
+  const semProdutos = dados !== null && total === 0 && filtro === 'todos' && !termo && !busca.trim()
   const trocando = carregando && dados !== null
 
   return (
@@ -156,7 +170,7 @@ export function EstoquePage() {
           </div>
           {dados && (
             <p className="estoque__contagem" role="status">
-              {trocando ? 'Carregando…' : `${formatarNumero(itens.length)} ${plural(itens.length, 'produto', 'produtos')}`}
+              {trocando ? 'Carregando…' : `${formatarNumero(total)} ${plural(total, 'produto', 'produtos')}`}
             </p>
           )}
         </div>
@@ -181,7 +195,7 @@ export function EstoquePage() {
         </div>
       )}
 
-      {dados && !semProdutos && !trocando && dados.length === 0 && filtro !== 'todos' && (
+      {dados && !semProdutos && !trocando && total === 0 && filtro !== 'todos' && !termo && (
         <div className="painel">
           <Vazio
             icone={IconCircleCheck}
@@ -193,10 +207,10 @@ export function EstoquePage() {
         </div>
       )}
 
-      {dados && dados.length > 0 && itens.length === 0 && (
+      {dados && !trocando && total === 0 && termo && (
         <div className="painel">
           <Vazio icone={IconSearch} titulo="Nenhum produto encontrado" acao={<Botao onClick={() => mudar('busca', '')}>Limpar busca</Botao>}>
-            Nada com “{busca.trim()}” no nome ou no código de barras. Confira a digitação.
+            Nada com “{termo}” no nome ou no código de barras{filtro !== 'todos' && ' neste filtro'}. Confira a digitação.
           </Vazio>
         </div>
       )}
@@ -226,6 +240,10 @@ export function EstoquePage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {total > 0 && (
+        <Paginacao total={total} limite={limite} deslocamento={deslocamento} aoMudar={irPara} nomeDaLista="produtos do estoque" />
       )}
     </div>
   )

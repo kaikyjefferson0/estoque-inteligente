@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
 from app.models.user import User
+from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.stock import (
     ExitBatchOut,
     MovementOut,
@@ -26,9 +27,14 @@ from app.services import stock as service
 router = APIRouter(tags=["stock"], dependencies=[Depends(get_current_user)])
 
 
-@router.get("/stock", response_model=list[StockItemOut])
-def listar_estoque(db: Annotated[Session, Depends(get_db)], situacao: Situacao | None = None):
-    return service.listar_estoque(db, situacao=situacao)
+@router.get("/stock", response_model=Pagina[StockItemOut])
+def listar_estoque(
+    db: Annotated[Session, Depends(get_db)],
+    pagina: Annotated[Paginacao, Depends(paginacao)],
+    situacao: Situacao | None = None,
+    busca: Annotated[str | None, Query(max_length=120, description="Parte do nome ou do código de barras")] = None,
+):
+    return service.listar_estoque(db, pagina.limite, pagina.deslocamento, situacao=situacao, busca=busca)
 
 
 @router.post("/stock/entries", response_model=StockEntryOut, status_code=status.HTTP_201_CREATED)
@@ -135,9 +141,13 @@ def consultar_saldo(produto_id: int, db: Annotated[Session, Depends(get_db)]):
     )
 
 
-@router.get("/products/{produto_id}/movements", response_model=list[MovementOut])
-def listar_movimentacoes(produto_id: int, db: Annotated[Session, Depends(get_db)]):
+@router.get("/products/{produto_id}/movements", response_model=Pagina[MovementOut])
+def listar_movimentacoes(
+    produto_id: int,
+    db: Annotated[Session, Depends(get_db)],
+    pagina: Annotated[Paginacao, Depends(paginacao)],
+):
     try:
-        return service.listar_movimentacoes(db, produto_id)
+        return service.listar_movimentacoes(db, produto_id, pagina.limite, pagina.deslocamento)
     except service.ProdutoNaoEncontradoError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")

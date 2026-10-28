@@ -800,3 +800,107 @@
   outline-color: var(--cor-texto-inverso);
   outline-offset: calc(-2 * var(--foco-distancia) - var(--borda-largura));
 }
+
+/* ---------- Paginação (RN-51) ---------- */
+.paginacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--esp-3);
+}
+
+.paginacao__texto {
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.paginacao__botoes {
+  display: flex;
+  gap: var(--esp-2);
+}
+
+/* ---------- Seleção com busca (combobox) ---------- */
+.selecao-busca__ancora {
+  position: relative;
+}
+
+.selecao-busca__abrir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  padding: var(--esp-0) var(--esp-3);
+  border: 0;
+  background: transparent;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+}
+
+.selecao-busca__abrir svg {
+  width: var(--icone-p);
+  height: var(--icone-p);
+}
+
+.selecao-busca__painel {
+  position: absolute;
+  top: calc(100% + var(--esp-1));
+  left: var(--esp-0);
+  right: var(--esp-0);
+  z-index: var(--camada-lista);
+  background: var(--cor-superficie);
+  border: var(--borda);
+  border-radius: var(--raio-p);
+  box-shadow: var(--sombra-flutuante);
+  overflow: hidden;
+}
+
+.selecao-busca__lista {
+  max-height: var(--altura-lista-opcoes);
+  overflow-y: auto;
+  margin: var(--esp-0);
+  padding: var(--esp-1) var(--esp-0);
+  list-style: none;
+}
+
+.selecao-busca__opcao {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  min-height: var(--alvo-min);
+  padding: var(--esp-1) var(--esp-3);
+  cursor: pointer;
+}
+
+.selecao-busca__opcao:hover {
+  background: var(--cor-hover-neutro);
+}
+
+.selecao-busca__opcao[aria-selected='true'] {
+  background: var(--cor-primaria-clara);
+}
+
+.selecao-busca__opcao[data-escolhida] {
+  font-weight: var(--peso-medio);
+}
+
+.selecao-busca__detalhe {
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+.selecao-busca__situacao {
+  padding: var(--esp-2) var(--esp-3);
+  border-top: var(--borda);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+}
+
+.selecao-busca__lista:empty {
+  display: none;
+}
+
+.selecao-busca__lista:empty + .selecao-busca__situacao {
+  border-top: 0;
+}

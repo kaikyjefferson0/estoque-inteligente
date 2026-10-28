@@ -8,6 +8,8 @@ export interface Produto {
   // Preenchido só quando controla validade (RN-26)
   dias_alerta_validade: number | null
   fornecedor_id: number | null
+  // Só leitura: nome do fornecedor, para a tela não buscar a lista de fornecedores
+  fornecedor_nome: string | null
   criado_em: string
 }
 

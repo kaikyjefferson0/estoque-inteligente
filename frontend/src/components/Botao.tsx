@@ -1,5 +1,5 @@
 import { IconLoader2, type Icon } from '@tabler/icons-react'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, ReactNode, Ref } from 'react'
 import { Link, type LinkProps } from 'react-router-dom'
 
 type Variante = 'primaria' | 'secundaria' | 'fantasma' | 'perigo'
@@ -19,6 +19,7 @@ interface BotaoProps extends PropsComuns, Omit<ButtonHTMLAttributes<HTMLButtonEl
   carregando?: boolean
   // Texto mostrado enquanto carrega, por exemplo "Entrando…"
   textoCarregando?: string
+  ref?: Ref<HTMLButtonElement>
 }
 
 export function Botao({

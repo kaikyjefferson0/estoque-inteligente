@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { useLocation } from 'react-router-dom'
 import { api } from '../api/client'
 import type { Alerta } from '../types/alerta'
+import type { Pagina } from '../types/pagina'
 import { AlertasAtivosContext } from './contexto'
 
 /**
@@ -16,9 +17,10 @@ export function AlertasAtivosProvider({ children }: { children: ReactNode }) {
 
   const atualizarAlertas = useCallback(() => {
     const atual = ++pedido.current
-    api<Alerta[]>('/alerts')
-      .then((alertas) => {
-        if (atual === pedido.current) setAtivos(alertas.length)
+    // Só o total interessa (RN-51): a página pode ter um item só
+    api<Pagina<Alerta>>('/alerts?limite=1')
+      .then((pagina) => {
+        if (atual === pedido.current) setAtivos(pagina.total)
       })
       // Falha na contagem não atrapalha a página; o número anterior continua
       .catch(() => {})

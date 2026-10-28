@@ -5,20 +5,22 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.products import ProductCreate, ProductOut, ProductUpdate
 from app.services import products as service
 
-# RN-18: tudo exige login. RN-19: qualquer perfil cadastra, só o admin edita.
+# RN-18: tudo exige login. RN-19: admin e operador cadastram e editam.
 # RN-23: não existe rota de exclusão.
 router = APIRouter(prefix="/products", tags=["products"], dependencies=[Depends(get_current_user)])
 
 
-@router.get("", response_model=list[ProductOut])
+@router.get("", response_model=Pagina[ProductOut])
 def listar(
     db: Annotated[Session, Depends(get_db)],
+    pagina: Annotated[Paginacao, Depends(paginacao)],
     busca: Annotated[str | None, Query(max_length=120, description="Parte do nome ou do código de barras")] = None,
 ):
-    return service.listar_produtos(db, busca)
+    return service.listar_produtos(db, pagina.limite, pagina.deslocamento, busca)
 
 
 @router.post("", response_model=ProductOut, status_code=status.HTTP_201_CREATED)

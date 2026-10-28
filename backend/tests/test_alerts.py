@@ -55,7 +55,7 @@ def ajuste(client, token, lote_id, saldo_contado, motivo="contagem") -> dict:
 def alertas(client, token, **filtros) -> list[dict]:
     resposta = client.get("/alerts", headers=auth(token), params=filtros)
     assert resposta.status_code == 200, resposta.text
-    return resposta.json()
+    return resposta.json()["itens"]
 
 
 def gerar(client, token) -> dict:

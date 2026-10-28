@@ -8,29 +8,25 @@ import {
 } from '@tabler/icons-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
-import { Botao, BotaoLink } from '../components/Botao'
+import { BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { TipoMovimentacao } from '../types/dashboard'
 import type { Movimentacao } from '../types/estoque'
-import type { Fornecedor } from '../types/fornecedor'
+import type { Pagina } from '../types/pagina'
 import type { Produto, SaldoProduto } from '../types/produto'
 import { formatarComSinal, formatarDataHora, formatarNumero, hojeIso, plural } from '../utils/formato'
 import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import './ProdutoDetalhePage.css'
 
 function Ficha({ produto }: { produto: Produto }) {
-  const fornecedores = useRecurso<Fornecedor[]>('/suppliers')
-  let fornecedor: string
-  if (produto.fornecedor_id === null) fornecedor = 'Sem fornecedor'
-  else
-    fornecedor =
-      fornecedores.dados?.find((f) => f.id === produto.fornecedor_id)?.nome ??
-      (fornecedores.carregando ? 'Carregando…' : `Fornecedor ${produto.fornecedor_id}`)
+  const fornecedor = produto.fornecedor_nome ?? 'Sem fornecedor'
 
   const dias = produto.dias_alerta_validade ?? 0
   return (
@@ -45,7 +41,7 @@ function Ficha({ produto }: { produto: Produto }) {
         </div>
         <div className="ficha__item">
           <dt>Fornecedor</dt>
-          <dd className={produto.fornecedor_id === null ? 'ficha__vazio' : undefined}>{fornecedor}</dd>
+          <dd className={produto.fornecedor_nome === null ? 'ficha__vazio' : 'texto-inteiro'}>{fornecedor}</dd>
         </div>
         <div className="ficha__item">
           <dt>Estoque mínimo</dt>
@@ -153,31 +149,36 @@ const TIPO: Record<TipoMovimentacao, { rotulo: string; icone: typeof IconPackage
 const POR_PAGINA = 20
 
 function Historico({ produtoId }: { produtoId: number }) {
-  const { dados, erro, carregando, recarregar } = useRecurso<Movimentacao[]>(`/products/${produtoId}/movements`)
-  const [mostrando, setMostrando] = useState(POR_PAGINA)
+  const [deslocamento, setDeslocamento] = useState(0)
+  const recurso = useRecurso<Pagina<Movimentacao>>(
+    montarCaminho(`/products/${produtoId}/movements`, { limite: POR_PAGINA, deslocamento: deslocamento || null }),
+  )
+  const { erro, carregando, recarregar } = recurso
+  const dados = recurso.dados?.itens ?? null
+  const total = recurso.dados?.total ?? 0
 
   return (
     <section className="painel" aria-labelledby="titulo-historico">
       <div className="painel__cabecalho">
         <h2 id="titulo-historico">Histórico</h2>
-        {dados && dados.length > 0 && (
+        {total > 0 && (
           <span className="historico__total">
-            {formatarNumero(dados.length)} {plural(dados.length, 'movimentação', 'movimentações')}
+            {formatarNumero(total)} {plural(total, 'movimentação', 'movimentações')}
           </span>
         )}
       </div>
       {!dados && carregando && <Carregando texto="Carregando o histórico…" />}
       {erro && <ErroEstado mensagem={erro} aoTentarDeNovo={recarregar} />}
-      {dados?.length === 0 && (
+      {dados && total === 0 && (
         <Vazio icone={IconArrowsExchange} titulo="Nenhuma movimentação ainda">
           As entradas, saídas e ajustes deste produto ficam registrados aqui.
         </Vazio>
       )}
-      {dados && dados.length > 0 && (
+      {dados && total > 0 && (
         // RN-12: histórico só para leitura, sem editar nem apagar
         <>
-          <ul className="historico">
-            {dados.slice(0, mostrando).map((m) => {
+          <ul className="historico" aria-busy={carregando}>
+            {dados.map((m) => {
               const { rotulo, icone: Icone } = TIPO[m.tipo] ?? TIPO.ajuste
               // Entrada soma, saída subtrai; o ajuste já vem com sinal
               const quantidade = m.tipo === 'saida' ? -m.quantidade : m.quantidade
@@ -215,13 +216,15 @@ function Historico({ produtoId }: { produtoId: number }) {
               )
             })}
           </ul>
-          {dados.length > mostrando && (
-            <div className="historico__mais">
-              <Botao variante="fantasma" onClick={() => setMostrando((n) => n + POR_PAGINA)}>
-                Mostrar mais {formatarNumero(Math.min(POR_PAGINA, dados.length - mostrando))}
-              </Botao>
-            </div>
-          )}
+          <div className="historico__paginacao">
+            <Paginacao
+              total={total}
+              limite={POR_PAGINA}
+              deslocamento={deslocamento}
+              aoMudar={setDeslocamento}
+              nomeDaLista="movimentações"
+            />
+          </div>
         </>
       )}
     </section>

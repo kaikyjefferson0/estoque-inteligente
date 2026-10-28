@@ -59,6 +59,9 @@
 - RN-45: o dashboard mostra: total de produtos, produtos com estoque baixo, produtos sem estoque (saldo disponível zero), lotes a vencer, lotes vencidos com quantidade, alertas ativos e as 5 últimas movimentações.
 - RN-46: admin e operador veem o dashboard e a lista de estoque.
 
+## Listas
+- RN-51: as listas da API (produtos, fornecedores, estoque, alertas, usuários e histórico do produto) são paginadas: recebem `limite` (padrão 50, máximo 200; acima disso a API recusa com 422) e `deslocamento` (padrão 0), e devolvem `{ itens, total, limite, deslocamento }`. Os filtros e a busca valem antes da paginação, e o `total` conta todos os itens que passam neles. A ordem de cada lista é fixa (com o id desempatando), para as páginas não repetirem nem pularem itens. Produtos, estoque e fornecedores aceitam `busca` (nome ou código de barras; no fornecedor, nome ou CNPJ).
+
 ## Banco de dados
 - RN-50: a API usa um usuário de banco sem poder de alterar a estrutura; no histórico (stock_movements) ele só lê e insere. Só as migrations usam o usuário dono.
 

@@ -72,7 +72,7 @@ def test_listar_e_obter_fornecedor(client, token_operador, fornecedor):
     headers = auth(token_operador)
     lista = client.get("/suppliers", headers=headers)
     assert lista.status_code == 200
-    assert fornecedor.id in [f["id"] for f in lista.json()]
+    assert fornecedor.id in [f["id"] for f in lista.json()["itens"]]
 
     obtido = client.get(f"/suppliers/{fornecedor.id}", headers=headers)
     assert obtido.status_code == 200

@@ -3,18 +3,20 @@ import { useRef, useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { ApiError, api, mensagemDeErro } from '../api/client'
 import { useAlertasAtivos } from '../alertas/useAlertasAtivos'
+import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
-import { CampoSelecao } from '../components/CampoSelecao'
 import { ConfirmarDialogo } from '../components/ConfirmarDialogo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { SelecaoComBusca, type OpcaoEscolhida } from '../components/SelecaoComBusca'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
-import type { AjusteRegistrado, ItemEstoque } from '../types/estoque'
-import type { Lote, SaldoProduto } from '../types/produto'
+import type { AjusteRegistrado } from '../types/estoque'
+import type { Pagina } from '../types/pagina'
+import type { Lote, Produto, SaldoProduto } from '../types/produto'
 import { formatarComSinal, formatarNumero, hojeIso } from '../utils/formato'
 import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import { validarSaldoContado } from '../utils/validacao'
@@ -253,17 +255,81 @@ function FormularioAjuste({ produtoId, aoRegistrar }: { produtoId: number; aoReg
   )
 }
 
+const OPCOES_POR_BUSCA = 20
+
+/** Produto a ajustar, com a busca no próprio campo: a lista de produtos pode ser grande (RN-51). */
+function EscolhaDoProduto({
+  valor,
+  aoEscolher,
+  focar,
+}: {
+  valor: OpcaoEscolhida | null
+  aoEscolher: (produto: Produto | null) => void
+  focar: boolean
+}) {
+  return (
+    <div className="ajuste__produto">
+      <SelecaoComBusca<Produto>
+        rotulo="Produto"
+        name="produto"
+        placeholder="Digite o nome ou o código de barras"
+        textoSemItens="Nenhum produto cadastrado."
+        caminho={(termo) => montarCaminho('/products', { busca: termo, limite: OPCOES_POR_BUSCA })}
+        paraOpcao={(p) => ({ id: p.id, texto: p.nome, detalhe: p.codigo_barras })}
+        valor={valor}
+        aoEscolher={aoEscolher}
+        autoFocus={focar}
+      />
+    </div>
+  )
+}
+
+function ProdutoParaAjustar({
+  produtoId,
+  aoEscolher,
+  focar,
+  aoRegistrar,
+}: {
+  produtoId: number
+  aoEscolher: (produto: Produto | null) => void
+  focar: boolean
+  aoRegistrar: (nome: string, resultado: AjusteRegistrado) => void
+}) {
+  const { dados, erro, statusErro, carregando, recarregar } = useRecurso<Produto>(`/products/${produtoId}`)
+  return (
+    <>
+      <EscolhaDoProduto valor={dados ? { id: dados.id, texto: dados.nome } : null} aoEscolher={aoEscolher} focar={focar} />
+      {!dados && carregando && <Carregando texto="Carregando o produto…" />}
+      {erro && (
+        <ErroEstado
+          mensagem={statusErro === 404 ? 'Produto não encontrado. Escolha outro produto na lista acima.' : erro}
+          aoTentarDeNovo={recarregar}
+        />
+      )}
+      {dados && (
+        <FormularioAjuste key={dados.id} produtoId={dados.id} aoRegistrar={(resultado) => aoRegistrar(dados.nome, resultado)} />
+      )}
+    </>
+  )
+}
+
 // RN-02, RN-32 e RN-33: só o admin ajusta. A rota fica em <RotaAdmin>; quem garante é o backend (require_admin)
 export function AjustesPage() {
   useTituloDaPagina('Ajustes')
   const [parametros, setParametros] = useSearchParams()
   const produtoId = Number(parametros.get('produto')) || null
-  const estoque = useRecurso<ItemEstoque[]>('/stock')
+  // Só o total importa: sem nenhum produto, a página vira o convite para cadastrar
+  const cadastrados = useRecurso<Pagina<Produto>>('/products?limite=1')
   const [ultimo, setUltimo] = useState<{ nome: string; resultado: AjusteRegistrado } | null>(null)
   const { atualizarAlertas } = useAlertasAtivos()
+  // Escolher o produto troca o trecho da tela; o campo novo recebe o foco para ele não se perder
+  const [focarEscolha, setFocarEscolha] = useState(false)
 
-  const produtos = estoque.dados ?? []
-  const selecionado = produtos.find((p) => p.produto_id === produtoId)
+  function escolher(produto: Produto | null) {
+    setUltimo(null)
+    setFocarEscolha(true)
+    setParametros(produto ? { produto: String(produto.id) } : {}, { replace: true })
+  }
 
   return (
     <div className="pagina">
@@ -288,10 +354,10 @@ export function AjustesPage() {
         </Aviso>
       )}
 
-      {!estoque.dados && estoque.carregando && <Carregando texto="Carregando os produtos…" />}
-      {estoque.erro && <ErroEstado mensagem={estoque.erro} aoTentarDeNovo={estoque.recarregar} />}
+      {!cadastrados.dados && cadastrados.carregando && <Carregando texto="Carregando os produtos…" />}
+      {cadastrados.erro && <ErroEstado mensagem={cadastrados.erro} aoTentarDeNovo={cadastrados.recarregar} />}
 
-      {estoque.dados && produtos.length === 0 && (
+      {cadastrados.dados?.total === 0 && (
         <div className="painel">
           <Vazio
             icone={IconBox}
@@ -307,41 +373,27 @@ export function AjustesPage() {
         </div>
       )}
 
-      {produtos.length > 0 && (
+      {!!cadastrados.dados?.total && (
         <div className="painel ajuste">
-          <div className="ajuste__produto">
-            <CampoSelecao
-              rotulo="Produto"
-              name="produto"
-              value={selecionado ? String(selecionado.produto_id) : ''}
-              onChange={(e) => {
-                setUltimo(null)
-                setParametros(e.target.value ? { produto: e.target.value } : {}, { replace: true })
-              }}
-            >
-              <option value="">Escolha o produto</option>
-              {produtos.map((p) => (
-                <option key={p.produto_id} value={p.produto_id}>
-                  {p.nome} ({p.codigo_barras})
-                </option>
-              ))}
-            </CampoSelecao>
-          </div>
-          {selecionado ? (
-            <FormularioAjuste
-              key={selecionado.produto_id}
-              produtoId={selecionado.produto_id}
-              aoRegistrar={(resultado) => {
-                setUltimo({ nome: selecionado.nome, resultado })
-                estoque.recarregar()
+          {produtoId ? (
+            <ProdutoParaAjustar
+              key={produtoId}
+              produtoId={produtoId}
+              aoEscolher={escolher}
+              focar={focarEscolha}
+              aoRegistrar={(nome, resultado) => {
+                setUltimo({ nome, resultado })
                 // RN-40: o ajuste já gerou os alertas do produto; o menu mostra a nova contagem
                 atualizarAlertas()
               }}
             />
           ) : (
-            <Vazio icone={IconAdjustmentsHorizontal} titulo="Escolha o produto contado">
-              Depois escolha o lote, informe quantas unidades contou e o motivo.
-            </Vazio>
+            <>
+              <EscolhaDoProduto valor={null} aoEscolher={escolher} focar={focarEscolha} />
+              <Vazio icone={IconAdjustmentsHorizontal} titulo="Escolha o produto contado">
+                Depois escolha o lote, informe quantas unidades contou e o motivo.
+              </Vazio>
+            </>
           )}
         </div>
       )}

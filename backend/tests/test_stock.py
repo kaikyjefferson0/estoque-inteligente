@@ -45,7 +45,7 @@ def test_ct07_entrada_pelo_codigo_aumenta_saldo_e_aparece_no_historico(client, t
     assert resposta.json()["saldo_total"] == 10
 
     assert saldo(client, token_admin, refrigerante.id)["saldo_fisico"] == 10
-    historico = client.get(f"/products/{refrigerante.id}/movements", headers=auth(token_admin)).json()
+    historico = client.get(f"/products/{refrigerante.id}/movements", headers=auth(token_admin)).json()["itens"]
     assert len(historico) == 1
     assert historico[0]["tipo"] == "entrada"
     assert historico[0]["quantidade"] == 10
@@ -201,7 +201,7 @@ def test_saldo_fisico_e_soma_dos_lotes_em_ordem_fefo(client, token_admin, refrig
 
 def test_historico_do_mais_recente_para_o_mais_antigo(client, token_admin, detergente):
     ids = [entrada(client, token_admin, detergente.codigo_barras, q).json()["movimentacao_id"] for q in (1, 2, 3)]
-    historico = client.get(f"/products/{detergente.id}/movements", headers=auth(token_admin)).json()
+    historico = client.get(f"/products/{detergente.id}/movements", headers=auth(token_admin)).json()["itens"]
     assert [mov["id"] for mov in historico] == list(reversed(ids))
     assert [mov["quantidade"] for mov in historico] == [3, 2, 1]
 
@@ -254,7 +254,7 @@ def saida(client, token, codigo_barras, quantidade):
 def historico(client, token, produto_id) -> list[dict]:
     resposta = client.get(f"/products/{produto_id}/movements", headers=auth(token))
     assert resposta.status_code == 200
-    return resposta.json()
+    return resposta.json()["itens"]
 
 
 def lote_direto(db, produto, quantidade, validade=None) -> Batch:

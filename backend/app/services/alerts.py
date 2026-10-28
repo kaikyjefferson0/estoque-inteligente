@@ -10,6 +10,7 @@ from app.models.alert import Alert
 from app.models.batch import Batch
 from app.models.product import Product
 from app.services import condicoes
+from app.services.paginacao import paginar
 
 # Primeira chave do pg_advisory_xact_lock(chave, produto_id): separa as travas de
 # alertas de qualquer outra trava consultiva que o sistema venha a usar
@@ -139,17 +140,20 @@ def gerar_alertas(db: Session) -> ResultadoGeracao:
 
 def listar_alertas(
     db: Session,
+    limite: int,
+    deslocamento: int,
     tipo: str | None = None,
     produto_id: int | None = None,
     incluir_resolvidos: bool = False,
-) -> list[dict]:
-    """RN-43: ativos por padrão, do mais recente para o mais antigo, com o nome do produto
-    e a validade do lote (quando houver)."""
+) -> dict:
+    """RN-43: uma página (RN-51) dos alertas, ativos por padrão, com o nome do produto
+    e a validade do lote (quando houver). Com os resolvidos, os ativos vêm primeiro."""
     consulta = (
         select(Alert, Product.nome, Batch.validade)
         .join(Product, Product.id == Alert.produto_id)
         .outerjoin(Batch, Batch.id == Alert.lote_id)
-        .order_by(Alert.criado_em.desc(), Alert.id.desc())
+        # Ativos antes dos resolvidos (quando incluídos), cada grupo do mais recente ao mais antigo
+        .order_by(Alert.resolvido_em.is_not(None), Alert.criado_em.desc(), Alert.id.desc())
     )
     if not incluir_resolvidos:
         consulta = consulta.where(Alert.resolvido_em.is_(None))
@@ -157,7 +161,8 @@ def listar_alertas(
         consulta = consulta.where(Alert.tipo == tipo)
     if produto_id is not None:
         consulta = consulta.where(Alert.produto_id == produto_id)
-    return [
+    pagina = paginar(db, consulta, limite, deslocamento)
+    return pagina.com_itens([
         {
             "id": alerta.id,
             "tipo": alerta.tipo,
@@ -168,5 +173,5 @@ def listar_alertas(
             "criado_em": alerta.criado_em,
             "resolvido_em": alerta.resolvido_em,
         }
-        for alerta, produto_nome, validade in db.execute(consulta)
-    ]
+        for alerta, produto_nome, validade in pagina.linhas
+    ])
