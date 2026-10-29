@@ -43,6 +43,9 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Testes de unidade (Vitest): `npm run test` (arquivos `src\**\*.test.ts(x)`; rodam com o computador no fuso de Tóquio, para provar que as datas seguem America/Sao_Paulo)
 - Capturas para o ui-reviewer: `node scripts\capturas-ui.mjs <pasta>`
 
+## Deploy (Render)
+- Blueprint em `render.yaml` (banco, API e site, plano free); passo a passo, variáveis do painel e conferências em `docs\deploy.md`.
+
 ## Teste de ponta a ponta (Playwright contra a API real)
 - Comando: `npm run test:e2e` (dentro de `frontend`). Não precisa subir nada antes.
 - Pré-requisitos: banco `estoque_e2e` criado (dono `estoque`, CONNECT para `estoque_app`) e, no `backend\.env`, `E2E_DATABASE_URL` (dono), `E2E_APP_DATABASE_URL` (usuário da aplicação) e `APP_DB_ROLE`. Os scripts recusam banco cujo nome não termine em `_e2e`.
@@ -63,4 +66,4 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - [x] Fase 10: dashboard (CT-20) — concluída
 - [x] Fase 11: frontend React — concluída
 - [x] Fase 12: revisão final e segurança — concluída (A: limite de login, troca de senha e auditoria; B: menor privilégio no banco, testes pelas migrations e concorrência; C: paginação, testes do frontend e teste de ponta a ponta)
-- [ ] Fase 13: deploy no Render e README — em andamento (A: ajustes de segurança antes do deploy concluída; B: modo de demonstração com dados de exemplo concluída)
+- [ ] Fase 13: deploy no Render e README — em andamento (A: ajustes de segurança antes do deploy concluída; B: modo de demonstração com dados de exemplo concluída; C: Blueprint do Render e guia de deploy concluída)

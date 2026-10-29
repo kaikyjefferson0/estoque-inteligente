@@ -15,6 +15,14 @@ def test_cors_lista_separada_por_virgula():
     assert ler_cors_origins(" https://a.com , https://b.com/ ,, ") == ["https://a.com", "https://b.com"]
 
 
+def test_cors_endereco_sem_esquema_ganha_https():
+    """Endereço do site vindo do Render sem o esquema (ex.: só o host)."""
+    assert ler_cors_origins("estoque-site.onrender.com/, http://localhost:5173") == [
+        "https://estoque-site.onrender.com",
+        "http://localhost:5173",
+    ]
+
+
 def test_cors_preflight_de_origem_permitida():
     origem = settings.CORS_ORIGINS[0]
     response = client.options(

@@ -1,6 +1,7 @@
 import { apagarToken, lerToken } from '../auth/token'
+import { normalizarEnderecoApi } from './enderecoApi'
 
-const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
+const BASE_URL = normalizarEnderecoApi(import.meta.env.VITE_API_URL)
 
 // Disparado quando a API recusa o token (401); o AuthProvider escuta e manda para o login
 export const EVENTO_SESSAO_EXPIRADA = 'estoque:sessao-expirada'

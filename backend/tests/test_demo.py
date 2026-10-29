@@ -7,6 +7,7 @@ fixtures `db` e `client`: uma transação aberta seguraria as tabelas e o DROP e
 
 from collections.abc import Generator, Iterator
 from contextlib import contextmanager
+from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
@@ -177,6 +178,13 @@ def test_ct70_recriacao_recusada_sem_configuracao_completa(valores, mensagem):
         demo.ler_config_demo(_settings(**valores))
 
 
+def test_um_usuario_so_aceita_a_mesma_url_nas_duas_variaveis():
+    """Render: um usuário só, sem APP_DB_ROLE; DATABASE_URL e MIGRATIONS_DATABASE_URL vêm do mesmo banco."""
+    url = "postgresql+psycopg://estoque:x@dpg-abc-a/estoque_inteligente"
+    config = demo.ler_config_demo(_settings(MIGRATIONS_DATABASE_URL=url, APP_DB_ROLE=""))
+    assert config.url_dono == url and config.app_db_role == ""
+
+
 def test_ct70_mensagem_e_repr_nao_mostram_segredos():
     config = demo.ler_config_demo(_settings())
     assert SENHA_DONO not in repr(config) and "dono:x" not in repr(config)
@@ -257,6 +265,19 @@ def test_ct69_recriacao_deixa_so_as_duas_contas_e_os_dados_de_exemplo(engine, re
             .order_by(Batch.validade)
         ).all()
         assert leite == [18, 40]
+
+
+def test_ao_iniciar_com_um_usuario_so_recria_sem_o_revisor_ui(engine, recriacao):
+    """Render: sem APP_DB_ROLE, a migration de permissões não faz nada e a recriação ao iniciar
+    funciona com o dono. Só as duas contas existem; o revisor-ui@estoque.local, nunca (RN-55)."""
+    # Primeira subida no Render: banco vazio, nenhuma recriação ainda
+    migracoes.apagar_estrutura(engine)
+
+    assert demo.recriar_se_preciso(replace(recriacao, app_db_role="")) is True
+
+    with Session(engine) as db:
+        emails = db.scalars(select(User.email).order_by(User.id)).all()
+    assert emails == ["dono@exemplo.com.br", "demo@exemplo.com.br"]
 
 
 def test_ct71_ao_iniciar_so_recria_depois_de_24_horas(engine, recriacao):

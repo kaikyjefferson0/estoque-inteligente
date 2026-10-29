@@ -24,9 +24,24 @@ def validar_secret_key(valor: str) -> None:
         raise RuntimeError(f"SECRET_KEY precisa ter pelo menos {SECRET_KEY_MINIMA} caracteres.")
 
 
+def normalizar_url_banco(valor: str) -> str:
+    """O Render entrega a URL como postgresql:// (ou postgres://), que no SQLAlchemy cai no
+    driver psycopg2; o projeto usa o psycopg 3 (postgresql+psycopg://)."""
+    url = valor.strip()
+    for prefixo in ("postgresql://", "postgres://"):
+        if url.startswith(prefixo):
+            return "postgresql+psycopg://" + url.removeprefix(prefixo)
+    return url
+
+
+def com_https(endereco: str) -> str:
+    """Endereço sem esquema (ex.: estoque-site.onrender.com) ganha https://, o único que o Render serve."""
+    return endereco if "://" in endereco else f"https://{endereco}"
+
+
 def ler_cors_origins(valor: str | None) -> list[str]:
     """Lista separada por vírgula; vazia ou ausente cai no padrão do Vite."""
-    origens = [o.strip().rstrip("/") for o in (valor or "").split(",") if o.strip()]
+    origens = [com_https(o.strip().rstrip("/")) for o in (valor or "").split(",") if o.strip()]
     return origens or [CORS_ORIGINS_PADRAO]
 
 
@@ -59,10 +74,10 @@ def validar_ambiente(app_env: str, no_render: bool, confia_no_proxy: bool) -> No
 
 
 class Settings:
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    DATABASE_URL: str = normalizar_url_banco(os.getenv("DATABASE_URL", ""))
     # RN-50: as migrations usam o usuário dono; sem a variável, caem na DATABASE_URL
     # (instalação com um usuário só)
-    MIGRATIONS_DATABASE_URL: str = os.getenv("MIGRATIONS_DATABASE_URL", "").strip() or DATABASE_URL
+    MIGRATIONS_DATABASE_URL: str = normalizar_url_banco(os.getenv("MIGRATIONS_DATABASE_URL", "")) or DATABASE_URL
     # RN-54: a recriação do demo exige a URL do dono escrita de propósito, sem cair na DATABASE_URL
     MIGRATIONS_DATABASE_URL_DEFINIDA: bool = bool(os.getenv("MIGRATIONS_DATABASE_URL", "").strip())
     # RN-50: opcional; com valor, a migration de permissões concede a esse usuário só o necessário
@@ -70,9 +85,9 @@ class Settings:
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
     # Opcional: só os testes usam (o conftest exige que o banco termine em _test)
-    TEST_DATABASE_URL: str = os.getenv("TEST_DATABASE_URL", "")
+    TEST_DATABASE_URL: str = normalizar_url_banco(os.getenv("TEST_DATABASE_URL", ""))
     # Opcional: o mesmo banco _test, mas com o usuário da aplicação (testes CT-60 e CT-61)
-    TEST_APP_DATABASE_URL: str = os.getenv("TEST_APP_DATABASE_URL", "").strip()
+    TEST_APP_DATABASE_URL: str = normalizar_url_banco(os.getenv("TEST_APP_DATABASE_URL", ""))
     # Opcional: origens do frontend autorizadas a chamar a API
     CORS_ORIGINS: list[str] = ler_cors_origins(os.getenv("CORS_ORIGINS"))
     # RN-47: só ligar quando a API estiver atrás de um proxy confiável (Render);
