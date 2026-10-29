@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:e2e": "node e2e/rodar.mjs",
     "preview": "vite preview",
-    "capturas": "node scripts/capturas-ui.mjs"
+    "capturas": "node scripts/capturas-ui.mjs",
+    "capturas:readme": "node scripts/capturas-readme-rodar.mjs"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.2.1",
