@@ -28,7 +28,9 @@ O sistema roda em **modo de demonstração** (`DEMO_MODE=true`): a cada subida d
 
 ### Variáveis que você preenche no painel
 
-Nenhum valor fica no git. As outras variáveis já vêm do `render.yaml`: a URL do banco, a `SECRET_KEY` (o Render gera uma chave aleatória), `APP_ENV`, `TRUST_PROXY_HEADERS`, `DEMO_MODE`, `PYTHON_VERSION`, `CORS_ORIGINS`, `NODE_VERSION`, `VITE_API_URL` e `VITE_DEMO`.
+Nenhum valor fica no git. As outras variáveis já vêm do `render.yaml`: a URL do banco, a `SECRET_KEY` (o Render gera uma chave aleatória), `APP_ENV`, `TRUST_PROXY_HEADERS`, `DEMO_MODE`, `PYTHON_VERSION`, `NODE_VERSION` e `VITE_DEMO`.
+
+Os endereços públicos (`CORS_ORIGINS` e `VITE_API_URL`) também são preenchidos aqui, e não saem do nome dos serviços. Veja "Endereços com sufixo e o risco de apontar para outra pessoa", abaixo.
 
 **API (`estoque-api`)**
 
@@ -38,23 +40,35 @@ Nenhum valor fica no git. As outras variáveis já vêm do `render.yaml`: a URL 
 | `ADMIN_PASSWORD` | Senha desse admin (8 a 128 caracteres). **Secreta**: só você sabe. |
 | `DEMO_EMAIL` | E-mail da conta de demonstração (operador), usada pelos visitantes. É pública (vai no README e no botão do login). |
 | `DEMO_PASSWORD` | Senha da conta de demonstração (8 a 128 caracteres). Também é pública, então não reaproveite uma senha sua. |
+| `CORS_ORIGINS` | Endereço público **real** do site, com `https://` e sem barra no final (hoje `https://estoque-site-4qap.onrender.com`). É a única origem que a API aceita. |
 
 **Site (`estoque-site`)**
 
 | Variável | Para que serve |
 |---|---|
+| `VITE_API_URL` | Endereço público **real** da API, com `https://` e sem barra no final (hoje `https://estoque-api-pqbo.onrender.com`). É para onde o site manda o login e todas as chamadas. |
 | `VITE_DEMO_EMAIL` | E-mail que o botão "Entrar como demonstração" usa. Precisa ser **igual** ao `DEMO_EMAIL` da API. |
 | `VITE_DEMO_SENHA` | Senha que esse botão usa. Precisa ser **igual** ao `DEMO_PASSWORD` da API. Sem as duas, o botão não aparece. |
 
 As variáveis `VITE_` entram no site **na hora do build**. Se mudar alguma, faça um novo deploy do site (**Manual Deploy** → **Deploy latest commit**).
 
-### Se o Render der outro endereço aos serviços
+### Endereços com sufixo e o risco de apontar para outra pessoa
 
-O `render.yaml` supõe os endereços `https://estoque-api.onrender.com` e `https://estoque-site.onrender.com`. Se um desses nomes já estiver em uso por outra pessoa, o Render acrescenta um sufixo (ex.: `estoque-api-x1y2.onrender.com`). O endereço real aparece no topo da página de cada serviço. Se for diferente:
+O endereço público de um serviço do Render vem do nome dele (`estoque-api` → `estoque-api.onrender.com`). Esses endereços são **globais**: se o nome já é de outra conta, o Render acrescenta um sufixo aleatório ao nosso. Foi o que aconteceu aqui:
 
-1. Na API, em **Environment**, troque `CORS_ORIGINS` pelo endereço real do site (com `https://`, sem barra no final).
-2. No site, em **Environment**, troque `VITE_API_URL` pelo endereço real da API e faça um novo deploy do site.
-3. Corrija também os dois valores no `render.yaml` e faça commit, para o arquivo continuar igual ao que está no ar.
+| Serviço | Endereço atual |
+|---|---|
+| Site (`estoque-site`) | `https://estoque-site-4qap.onrender.com` |
+| API (`estoque-api`) | `https://estoque-api-pqbo.onrender.com` |
+
+O endereço sem sufixo (`estoque-api.onrender.com`) existe, mas **é de outra pessoa**. No primeiro deploy, o `VITE_API_URL` foi escrito no `render.yaml` a partir do nome do serviço. Com isso, o nosso site mandava o login (e-mail e senha digitados) para a API dessa outra conta. Por isso:
+
+- **`VITE_API_URL` e `CORS_ORIGINS` não ficam no `render.yaml`.** Eles são `sync: false`: o Render pede o valor na criação do Blueprint, e as sincronizações seguintes não mexem nele.
+- **O endereço real** aparece no topo da página de cada serviço no painel. Copie de lá, com `https://` e sem barra no final.
+- **Num Blueprint novo** (ex.: outra conta ou serviços recriados), o sufixo pode ser outro. Crie o Blueprint, anote os dois endereços reais e preencha:
+  1. na API, `CORS_ORIGINS` com o endereço real do site;
+  2. no site, `VITE_API_URL` com o endereço real da API. Como ele entra no build, faça um novo deploy do site (**Manual Deploy** → **Deploy latest commit**).
+- **Depois de cada sincronização do Blueprint**, confira em **Environment** que os dois valores continuam os do painel.
 
 (Um endereço sem `https://` também funciona: a API e o site acrescentam o `https://` sozinhos.)
 
@@ -82,18 +96,23 @@ Para saber de onde veio um 503, olhe o cabeçalho `x-render-routing` da resposta
 
 ## O que conferir depois do deploy
 
-Use o endereço real de cada serviço. Os comandos abaixo funcionam no `cmd` do Windows (o `curl` já vem instalado).
+Os endereços abaixo são os atuais (veja "Endereços com sufixo"); num Blueprint novo, troque pelos reais. Os comandos funcionam no `cmd` do Windows (o `curl` já vem instalado).
 
-1. **Health**: `curl https://estoque-api.onrender.com/health` deve responder `{"status":"ok"}`.
-2. **Login demo**: abra `https://estoque-site.onrender.com`, clique em **Entrar como demonstração** e confira se o painel aparece com os produtos de exemplo. Tente trocar a senha da conta demo: deve ser recusado (RN-53).
-3. **/docs desligado**: `https://estoque-api.onrender.com/docs`, `/redoc` e `/openapi.json` devem responder **404** (em produção a documentação interativa fica desligada).
-4. **Cabeçalhos de segurança**:
-   - `curl -I https://estoque-api.onrender.com/health`
-   - `curl -I https://estoque-site.onrender.com`
+1. **Health**: `curl https://estoque-api-pqbo.onrender.com/health` deve responder `{"status":"ok"}`.
+2. **Para onde o site chama (Request URL)**: é a conferência mais importante depois de cada deploy do site, porque um `VITE_API_URL` errado manda o login digitado para outro servidor sem nenhum erro aparente.
+   1. Abra `https://estoque-site-4qap.onrender.com` e as ferramentas do navegador (**F12**) → aba **Network** (Rede).
+   2. Entre com qualquer e-mail e senha errados (não use uma senha de verdade nesta conferência).
+   3. Clique na requisição `login` → aba **Headers** (Cabeçalhos) → **Request URL**. Ela precisa ser exatamente `https://estoque-api-pqbo.onrender.com/auth/login`. Se aparecer outro endereço (por exemplo, `estoque-api.onrender.com`, sem o sufixo), corrija o `VITE_API_URL` no painel do site e faça um novo deploy dele.
+   4. A resposta deve ser **401** com o JSON da API ("E-mail ou senha incorretos"), e não um erro de CORS no console. Um erro de CORS indica que o `CORS_ORIGINS` da API não é o endereço real do site.
+3. **Login demo**: abra `https://estoque-site-4qap.onrender.com`, clique em **Entrar como demonstração** e confira se o painel aparece com os produtos de exemplo. Tente trocar a senha da conta demo: deve ser recusado (RN-53).
+4. **/docs desligado**: `https://estoque-api-pqbo.onrender.com/docs`, `/redoc` e `/openapi.json` devem responder **404** (em produção a documentação interativa fica desligada).
+5. **Cabeçalhos de segurança**:
+   - `curl -I https://estoque-api-pqbo.onrender.com/health`
+   - `curl -I https://estoque-site-4qap.onrender.com`
 
    As duas respostas devem ter `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `X-Frame-Options: DENY` e `Strict-Transport-Security: max-age=31536000; includeSubDomains`.
-5. **X-Forwarded-For (limite de login, RN-47)**: o limite precisa contar o IP de cada visitante, e não o IP do proxy do Render. Errar a senha do admin 11 vezes no mesmo minuto deve dar (o limite é de 10 tentativas por minuto por IP) "Muitas tentativas" (429) para você. Logo depois, de outra rede (ex.: o 4G do celular, sem Wi-Fi), o login com a conta demo precisa continuar funcionando. Se o celular também receber 429, o `TRUST_PROXY_HEADERS` não está valendo: confira a variável e os logs.
-6. **Sem o revisor-ui**: entre como admin (`ADMIN_EMAIL`) e abra **Usuários**. Devem existir só duas contas: o admin e a conta demo (operador). O `revisor-ui@estoque.local` nunca pode aparecer: ele existe só no banco de desenvolvimento (RN-55), e nenhum script do deploy o cria.
+6. **X-Forwarded-For (limite de login, RN-47)**: o limite precisa contar o IP de cada visitante, e não o IP do proxy do Render. Errar a senha do admin 11 vezes no mesmo minuto deve dar (o limite é de 10 tentativas por minuto por IP) "Muitas tentativas" (429) para você. Logo depois, de outra rede (ex.: o 4G do celular, sem Wi-Fi), o login com a conta demo precisa continuar funcionando. Se o celular também receber 429, o `TRUST_PROXY_HEADERS` não está valendo: confira a variável e os logs.
+7. **Sem o revisor-ui**: entre como admin (`ADMIN_EMAIL`) e abra **Usuários**. Devem existir só duas contas: o admin e a conta demo (operador). O `revisor-ui@estoque.local` nunca pode aparecer: ele existe só no banco de desenvolvimento (RN-55), e nenhum script do deploy o cria.
 
 ## Recriar a demo na hora
 
@@ -105,6 +124,6 @@ A recriação acontece sozinha quando a API sobe e a última foi há mais de 24 
 
 ## Limitações do plano gratuito
 
-- O banco Postgres gratuito **expira 30 dias** depois de criado (o Render avisa por e-mail). Antes disso, crie um banco novo pelo painel e atualize o Blueprint, ou passe para um plano pago.
+- O banco Postgres gratuito **expira 30 dias** depois de criado (o Render avisa por e-mail). O atual foi criado em 29/10/2026 e expira em 28/11/2026; o passo a passo para recriar está em `docs\pendencias.md`.
 - A API dorme sem acesso, e a primeira visita depois disso pode demorar até um minuto (veja "Primeira visita depois de um tempo parado", acima).
 - Há um usuário só no banco (o dono). A separação entre dono e usuário da aplicação (RN-50, `APP_DB_ROLE`) fica para depois.

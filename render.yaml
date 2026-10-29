@@ -1,6 +1,7 @@
 # Blueprint do Render: banco, API e site. Passo a passo em docs\deploy.md.
 # Nenhum segredo neste arquivo: a URL do banco vem do próprio banco, a SECRET_KEY é gerada
-# pelo Render e as contas (sync: false) são preenchidas no painel na criação do Blueprint.
+# pelo Render e as contas e os endereços públicos (sync: false) são preenchidos no painel na
+# criação do Blueprint. Um sync: false nunca é sobrescrito por uma sincronização do Blueprint.
 
 databases:
   - name: estoque-db
@@ -45,10 +46,12 @@ services:
         value: "true"
       - key: DEMO_MODE
         value: "true"
-      # Endereço público do site (o fromService só devolve o nome interno, que o navegador
-      # não alcança). Se o Render der outro nome ao site, corrija aqui e no painel.
+      # Endereço público do site, preenchido no painel (ex.: https://estoque-site-4qap.onrender.com).
+      # Não sai do nome do serviço: quando o nome já é de outra conta, o Render acrescenta um
+      # sufixo (-4qap), e um valor escrito aqui pelo nome liberaria o site de outra pessoa.
+      # O fromService também não serve: devolve o nome interno, que o navegador não alcança.
       - key: CORS_ORIGINS
-        value: https://estoque-site.onrender.com
+        sync: false
       # Preenchidas no painel (nunca no git)
       - key: ADMIN_EMAIL
         sync: false
@@ -88,9 +91,12 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 24.21.0
-      # Lidas no build (npm run build): mudar qualquer uma exige um novo deploy do site
+      # Lidas no build (npm run build): mudar qualquer uma exige um novo deploy do site.
+      # Endereço público da API, preenchido no painel (ex.: https://estoque-api-pqbo.onrender.com).
+      # Não sai do nome do serviço: com o sufixo que o Render acrescenta quando o nome já é de
+      # outra conta, um valor escrito aqui pelo nome mandaria o login para a API de outra pessoa.
       - key: VITE_API_URL
-        value: https://estoque-api.onrender.com
+        sync: false
       - key: VITE_DEMO
         value: "true"
       # RN-53: conta pública do botão "Entrar como demonstração"; iguais a DEMO_EMAIL e

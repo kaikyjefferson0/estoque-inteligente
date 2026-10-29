@@ -11,12 +11,28 @@ Itens levantados nas revisões que ficaram para fases futuras.
 | Auditoria da Fase 13, parte A (sugestões) | Avaliar: cabeçalhos também no erro 500 (middleware ASGI puro ou handler de `Exception`); 422 sem repetir o `input` (a senha digitada volta na resposta); limite com `moving-window`; `Cache-Control: no-store` e CSP na API em produção; `create_admin` validar o e-mail com o mesmo tipo do `UserCreate`; `.gitignore` com `*.p12`, `*.pfx` e `*.crt`. |
 | Fase 12, parte B (RN-50) | Conferir se o Postgres do Render permite criar o usuário da aplicação (`CREATE ROLE ... LOGIN` e `GRANT CONNECT`). Se permitir: API com a `DATABASE_URL` desse usuário, migrations com a `MIGRATIONS_DATABASE_URL` do dono e `APP_DB_ROLE` definida antes do `alembic upgrade head`. Se não permitir: registrar a limitação em `docs\modelo-de-dados.md` (com um usuário só, o dono consegue desligar o trigger da RN-12). |
 | Fase 9 (RN-40) | Agendar a geração completa de alertas (`POST /alerts/generate`) uma vez por dia no Render (Cron Job), para que lotes que passam a vencer sem nenhuma movimentação tenham o alerta atualizado. |
-| Fase 11, parte A (revisão de UI) | O usuário `revisor-ui@estoque.local` (admin, usado pelo ui-reviewer para as capturas) existe só no banco de desenvolvimento e **nunca** pode ser criado em produção. No deploy, conferir que ele não existe no banco do Render e não incluir nenhum script ou seed que o crie. Conferência descrita em `docs\deploy.md` (item 6). |
+| Fase 11, parte A (revisão de UI) | O usuário `revisor-ui@estoque.local` (admin, usado pelo ui-reviewer para as capturas) existe só no banco de desenvolvimento e **nunca** pode ser criado em produção. No deploy, conferir que ele não existe no banco do Render e não incluir nenhum script ou seed que o crie. Conferência descrita em `docs\deploy.md` (item 7). |
 | Auditoria da Fase 12, parte A (Importante 1) | RN-47 no Render: confirmar no primeiro deploy como o proxy monta o `X-Forwarded-For` (rota temporária só de admin mostrando o cabeçalho e o `request.client`, removida depois) e se o último item é mesmo o IP do cliente; se o Render tiver cabeçalho próprio confiável, usar esse. Ler com `request.headers.getlist`. Não usar `uvicorn --forwarded-allow-ips="*"` com `TRUST_PROXY_HEADERS=false`. |
-| Fase 13, parte B (RN-54) | O banco gratuito do Postgres no Render **expira em 30 dias**: antes de vencer, criar um banco novo, trocar `DATABASE_URL` e `MIGRATIONS_DATABASE_URL` na API, refazer o usuário da aplicação (RN-50) e rodar `alembic upgrade head` (a API recria o demo sozinha ao subir). Anotar a data de criação do banco para lembrar. |
+| Fase 13, parte B (RN-54) | O banco gratuito do Postgres no Render foi criado em **29/10/2026** e **expira em 28/11/2026**. Recriar antes disso, com o passo a passo da seção "Banco gratuito do Render", abaixo. |
 | Fase 13, parte B (RN-55) | No Render, definir `DEMO_MODE=true`, `DEMO_EMAIL`, `DEMO_PASSWORD`, `ADMIN_EMAIL` e `ADMIN_PASSWORD` na API e `VITE_DEMO=true`, `VITE_DEMO_EMAIL` e `VITE_DEMO_SENHA` (iguais às da API) no site. No README, publicar o e-mail e a senha da conta de demonstração. |
 | Fase 13, parte B (RN-54) | A recriação só roda quando a API inicia. No plano gratuito ela dorme sem uso e reinicia na próxima visita, então na prática recria todo dia; se ficar acordada mais de 24 horas seguidas, só recria na próxima subida (ou pelo `reset_demo`). |
 | Auditoria da Fase 13, parte B (Importante 5, aceito pelo dono) | Com `DEMO_MODE=true`, o serviço da API recebe a URL do usuário dono (`MIGRATIONS_DATABASE_URL`) para recriar o demo ao iniciar, o que enfraquece a RN-50. Decisão: manter. Conferir no Render que a `DATABASE_URL` da API usa o usuário da aplicação (e não a URL padrão do dono que o Render mostra). |
+
+## Banco gratuito do Render: expira em 28/11/2026
+
+O banco `estoque-db` (Postgres, plano free) foi criado em **29/10/2026**. O plano gratuito dura **30 dias**, então ele **expira em 28/11/2026**, e o Render avisa por e-mail antes. Depois disso a API não consegue mais conectar (no log aparece `OperationalError` ou `connection timeout`). Como o banco só guarda a demonstração, que é recriada a cada subida da API (RN-54), não há dado a salvar: basta trocar o banco.
+
+Para recriar, de preferência alguns dias antes de 28/11/2026:
+
+1. **Apague o banco antigo.** No painel, abra `estoque-db` → **Settings** → **Delete Database**. Se o Render ainda deixar ter dois bancos gratuitos ao mesmo tempo, dá para criar o novo antes e apagar o antigo depois; se recusar, apague primeiro.
+2. **Crie o banco de novo pelo Blueprint.** Abra o Blueprint `estoque-inteligente` → **Manual Sync**. O `render.yaml` declara o `estoque-db`, e a sincronização cria o que estiver faltando, com o mesmo nome, plano, região, banco (`estoque_inteligente`) e usuário (`estoque`). Ela também volta a ligar `DATABASE_URL` e `MIGRATIONS_DATABASE_URL` da API à URL interna do banco novo (`fromDatabase`).
+   - Se a sincronização não criar o banco: crie à mão (**New +** → **Postgres**, nome `estoque-db`, plano Free, região **Virginia**, a mesma da API). Depois, na API, troque `DATABASE_URL` e `MIGRATIONS_DATABASE_URL` pela **Internal Database URL** do banco novo (aba **Info**).
+3. **Confira o acesso.** Em `estoque-db` → **Networking** → **Access Control**, a lista precisa ficar vazia (`ipAllowList: []`): só os serviços do Render entram.
+4. **Suba a API de novo.** Em `estoque-api` → **Manual Deploy** → **Deploy latest commit**. Ao subir, ela roda `alembic upgrade head` e recria a demo sozinha, porque o banco novo não tem nenhuma recriação.
+5. **Confira.** Faça as conferências de `docs\deploy.md` ("O que conferir depois do deploy"): o `/health`, o Request URL do login e o login da demo. Os endereços da API e do site não mudam, porque o banco não tem endereço público.
+6. **Anote a nova data** de criação e de expiração (30 dias depois) nesta seção, em `docs\deploy.md` ("Limitações do plano gratuito") e na agenda.
+
+O usuário separado da aplicação (RN-50, `APP_DB_ROLE`) continua fora do Render: lá a instalação usa um usuário só (veja a pendência da Fase 12, parte B).
 
 ## Depois do deploy
 
