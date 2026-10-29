@@ -64,8 +64,21 @@ O `render.yaml` supõe os endereços `https://estoque-api.onrender.com` e `https
 - Aba **Logs**: a saída do build e da execução. Na API, procure por:
   - `Running upgrade ...`: o Alembic aplicando as migrations;
   - `Application startup complete`: a API subiu (inclusive a recriação da demo, que roda antes disso);
-  - um `RuntimeError` ou `DemoRecusadaError` logo no início: falta ou está errada alguma variável. A mensagem diz qual, sem mostrar o valor.
-- O plano gratuito **dorme depois de 15 minutos sem acesso**. O primeiro acesso depois disso demora cerca de 1 minuto (a API acorda e, se passou de 24 horas, recria a demo).
+  - um `RuntimeError` ou `DemoRecusadaError` logo no início: falta ou está errada alguma variável. A mensagem diz qual, sem mostrar o valor;
+  - `DemoOcupadaError`: outra recriação segurou a trava por mais de 60 segundos. Nada foi apagado; o Render sobe a API de novo e ela tenta outra vez;
+  - `connection timeout` ou `OperationalError` do psycopg: o banco não respondeu em 10 segundos (`connect_timeout`). Confira se o `estoque-db` está disponível.
+- O plano gratuito **dorme depois de 15 minutos sem acesso**. Veja "Primeira visita depois de um tempo parado", abaixo.
+
+## Primeira visita depois de um tempo parado
+
+**A primeira visita depois de um tempo parado pode demorar até um minuto.** A API acorda, roda as migrations e, se a última recriação passou de 24 horas, recria a demo. Só depois disso ela abre a porta. Enquanto isso, o proxy do Render responde **503** (uma página HTML do Render, não o JSON da API).
+
+O site já trata isso no login. Quando a API responde 503 ou não responde, ele mostra "A API está acordando, isso pode levar até um minuto" e tenta de novo sozinho, com esperas crescentes (2, 4, 8, 16 e 30 segundos). Só mostra erro se a API não acordar depois disso. A conferência da sessão salva, ao recarregar a página, também espera, sem aviso. As outras chamadas não se repetem: um envio de estoque nunca é reenviado às cegas.
+
+Para saber de onde veio um 503, olhe o cabeçalho `x-render-routing` da resposta (no navegador: DevTools → Network → a requisição → Response Headers):
+- `suspend-by-user`: o serviço foi suspenso no painel. Clique em **Resume Service**;
+- qualquer outro valor, com corpo HTML: a API ainda está acordando ou caiu. Confira os **Logs**;
+- a própria API nunca responde 503.
 
 ## O que conferir depois do deploy
 
@@ -93,5 +106,5 @@ A recriação acontece sozinha quando a API sobe e a última foi há mais de 24 
 ## Limitações do plano gratuito
 
 - O banco Postgres gratuito **expira 30 dias** depois de criado (o Render avisa por e-mail). Antes disso, crie um banco novo pelo painel e atualize o Blueprint, ou passe para um plano pago.
-- A API dorme sem acesso (veja os logs, acima).
+- A API dorme sem acesso, e a primeira visita depois disso pode demorar até um minuto (veja "Primeira visita depois de um tempo parado", acima).
 - Há um usuário só no banco (o dono). A separação entre dono e usuário da aplicação (RN-50, `APP_DB_ROLE`) fica para depois.

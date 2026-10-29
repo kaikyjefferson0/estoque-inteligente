@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { lerToken, salvarToken } from '../auth/token'
-import { ApiError, EVENTO_SESSAO_EXPIRADA, api } from './client'
+import { ApiError, ESPERAS_AO_ACORDAR_MS, EVENTO_SESSAO_EXPIRADA, api } from './client'
 
 function resposta(status: number, corpo?: unknown): Response {
   return new Response(corpo === undefined ? null : JSON.stringify(corpo), {
@@ -139,5 +139,77 @@ describe('mensagens de erro', () => {
   it('204 devolve vazio, sem tentar ler JSON', async () => {
     simularFetch(new Response(null, { status: 204 }))
     await expect(api('/auth/change-password', { body: {} })).resolves.toBeUndefined()
+  })
+})
+
+describe('partida a frio (a API acordando no Render)', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => vi.useRealTimers())
+
+  const paginaDoRender = () => new Response('<title>Service Unavailable</title>', { status: 503 })
+
+  it('com aoAcordar, no 503 avisa uma vez e tenta de novo até a API responder', async () => {
+    const fetch = simularFetch(paginaDoRender(), paginaDoRender(), resposta(200, { access_token: 't' }))
+    const aoAcordar = vi.fn()
+
+    const promessa = api('/auth/login', { method: 'POST', form: new URLSearchParams(), aoAcordar })
+    await vi.runAllTimersAsync()
+
+    await expect(promessa).resolves.toEqual({ access_token: 't' })
+    expect(fetch).toHaveBeenCalledTimes(3)
+    expect(aoAcordar).toHaveBeenCalledTimes(1)
+  })
+
+  it('sem resposta (o navegador barra o 503 sem CORS), também tenta de novo', async () => {
+    const fetch = simularFetch(new TypeError('Failed to fetch'), resposta(200, { ok: true }))
+    const promessa = api('/auth/me', { aoAcordar: () => {} })
+    await vi.runAllTimersAsync()
+    await expect(promessa).resolves.toEqual({ ok: true })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('as esperas crescem e somam cerca de um minuto', async () => {
+    const fetch = simularFetch(...ESPERAS_AO_ACORDAR_MS.map(() => paginaDoRender()), resposta(200, {}))
+    const promessa = api('/auth/me', { aoAcordar: () => {} })
+
+    for (const [i, espera] of ESPERAS_AO_ACORDAR_MS.entries()) {
+      await vi.advanceTimersByTimeAsync(espera - 1)
+      expect(fetch).toHaveBeenCalledTimes(i + 1)
+      await vi.advanceTimersByTimeAsync(1)
+      expect(fetch).toHaveBeenCalledTimes(i + 2)
+    }
+    await promessa
+    expect(ESPERAS_AO_ACORDAR_MS.every((espera, i) => i === 0 || espera > ESPERAS_AO_ACORDAR_MS[i - 1])).toBe(true)
+    expect(ESPERAS_AO_ACORDAR_MS.reduce((a, b) => a + b)).toBe(60_000)
+  })
+
+  it('esgotadas as tentativas, mostra o erro', async () => {
+    const tentativas = ESPERAS_AO_ACORDAR_MS.length + 1
+    const fetch = simularFetch(...Array.from({ length: tentativas }, () => new TypeError('Failed to fetch')))
+    const promessa = erroDe(api('/auth/me', { aoAcordar: () => {} }))
+    await vi.runAllTimersAsync()
+    const erro = await promessa
+    expect(erro.status).toBe(0)
+    expect(fetch).toHaveBeenCalledTimes(tentativas)
+  })
+
+  it('sem aoAcordar, não repete (um POST de estoque nunca é reenviado às cegas)', async () => {
+    const fetch = simularFetch(paginaDoRender())
+    const erro = await erroDe(api('/stock/exits', { body: {} }))
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(erro.status).toBe(503)
+    expect(erro.message).toBe('A API está fora do ar no momento. Tente de novo em alguns minutos.')
+  })
+
+  it('cancelada durante a espera, para de tentar', async () => {
+    const fetch = simularFetch(paginaDoRender())
+    const controle = new AbortController()
+    const promessa = api('/auth/me', { signal: controle.signal, aoAcordar: () => {} })
+    const rejeitou = expect(promessa).rejects.toMatchObject({ name: 'AbortError' })
+    await vi.advanceTimersByTimeAsync(0)
+    controle.abort()
+    await rejeitou
+    await vi.runAllTimersAsync()
+    expect(fetch).toHaveBeenCalledTimes(1)
   })
 })

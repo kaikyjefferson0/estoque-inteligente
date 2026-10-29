@@ -5,7 +5,8 @@ export interface AuthValor {
   usuario: Usuario | null
   // true enquanto confere o token salvo ao abrir o site
   carregando: boolean
-  entrar: (email: string, senha: string) => Promise<void>
+  // aoAcordar: chamada se a API estiver acordando (partida a frio), para a tela avisar
+  entrar: (email: string, senha: string, aoAcordar?: () => void) => Promise<void>
   sair: () => void
   // RN-48: depois de trocar a senha o token antigo não vale; volta ao login com aviso
   sairAposTrocarSenha: () => void

@@ -14,7 +14,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!lerToken()) return
     const controle = new AbortController()
-    api<Usuario>('/auth/me', { signal: controle.signal })
+    // Partida a frio: espera a API acordar em vez de perder a sessão (o carregando já aparece)
+    api<Usuario>('/auth/me', { signal: controle.signal, aoAcordar: () => {} })
       .then(setUsuario)
       .catch((erro) => {
         if (erro instanceof DOMException && erro.name === 'AbortError') return
@@ -37,10 +38,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(EVENTO_SESSAO_EXPIRADA, aoExpirar)
   }, [navigate])
 
-  const entrar = useCallback(async (email: string, senha: string) => {
+  const entrar = useCallback(async (email: string, senha: string, aoAcordar?: () => void) => {
     // OAuth2PasswordRequestForm: o campo username recebe o e-mail
     const form = new URLSearchParams({ username: email, password: senha })
-    const token = await api<Token>('/auth/login', { method: 'POST', form })
+    // O login pode se repetir: um 503 do Render nem chega à API (e não conta no limite da RN-47)
+    const token = await api<Token>('/auth/login', { method: 'POST', form, aoAcordar })
     salvarToken(token.access_token)
     try {
       setUsuario(await api<Usuario>('/auth/me'))

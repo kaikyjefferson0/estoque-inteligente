@@ -1,7 +1,7 @@
 import { IconEye, IconEyeOff } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { ApiError, mensagemDeErro } from '../api/client'
+import { ApiError, MENSAGEM_ACORDANDO, mensagemDeErro } from '../api/client'
 import { CONTA_DEMO, type ContaDemo } from '../auth/demo'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
@@ -40,6 +40,8 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
   const [erroGeral, setErroGeral] = useState<string | null>(null)
   // Qual botão está entrando: o do formulário ou o da demonstração
   const [enviando, setEnviando] = useState<'formulario' | 'demo' | null>(null)
+  // Partida a frio no Render: a API está acordando e o login tenta de novo sozinho
+  const [acordando, setAcordando] = useState(false)
 
   if (usuario) return <Navigate to={estado?.de ?? '/'} replace />
 
@@ -62,7 +64,7 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
   async function entrarCom(emailUsado: string, senhaUsada: string, botao: 'formulario' | 'demo', form?: HTMLFormElement) {
     setEnviando(botao)
     try {
-      await entrar(emailUsado, senhaUsada)
+      await entrar(emailUsado, senhaUsada, () => setAcordando(true))
       navigate(estado?.de ?? '/', { replace: true })
     } catch (erro) {
       // RN-03: a API devolve a mesma mensagem genérica para qualquer falha de login
@@ -78,6 +80,7 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
       } else {
         setErroGeral(mensagemDeErro(erro))
       }
+      setAcordando(false)
       setEnviando(null)
     }
   }
@@ -102,6 +105,11 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
         {estado?.expirou && !erroGeral && (
           <Aviso situacao="atencao">
             <p>Sua sessão expirou. Entre de novo para continuar.</p>
+          </Aviso>
+        )}
+        {acordando && enviando && (
+          <Aviso situacao="atencao">
+            <p>{MENSAGEM_ACORDANDO}</p>
           </Aviso>
         )}
         {erroGeral && (

@@ -10,15 +10,17 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 
+from psycopg.errors import LockNotAvailable
 from pydantic import TypeAdapter, ValidationError
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import select, text
 from sqlalchemy.engine import Connection, Engine, make_url
-from sqlalchemy.exc import ArgumentError
+from sqlalchemy.exc import ArgumentError, OperationalError
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
 from app.core import migracoes
 from app.core.clock import hoje
+from app.core.database import criar_engine
 from app.models.batch import Batch
 from app.models.demo_reset import DemoReset
 from app.models.product import Product
@@ -34,6 +36,9 @@ INTERVALO = timedelta(hours=24)
 # Chave da trava consultiva do Postgres: duas recriações nunca rodam juntas
 # (a API subindo e o comando manual, ou duas instâncias da API)
 _CHAVE_DA_TRAVA = 5_400_013_055
+# Quanto esperar pela trava de outra recriação antes de desistir (uma recriação leva segundos);
+# sem limite, uma trava esquecida deixaria a API subindo para sempre, sem abrir a porta
+TEMPO_LIMITE_DA_TRAVA_SEGUNDOS = 60
 # RN-55 e pendência da Fase 11: o usuário das capturas do ui-reviewer nunca existe no demo
 EMAIL_PROIBIDO = "revisor-ui@estoque.local"
 
@@ -42,6 +47,10 @@ _EMAIL = TypeAdapter(Email)
 
 class DemoRecusadaError(Exception):
     """RN-54: a recriação foi recusada antes de tocar no banco. A mensagem nunca traz segredos."""
+
+
+class DemoOcupadaError(Exception):
+    """RN-54: outra recriação segurou a trava além do tempo limite; nada foi apagado."""
 
 
 @dataclass(frozen=True)
@@ -108,7 +117,19 @@ def ler_config_demo(config) -> ConfigDemo:
 def _travado(engine: Engine) -> Iterator[Connection]:
     """Trava consultiva de sessão, numa conexão só dela (o NullPool fecha a conexão no fim)."""
     with engine.connect() as conexao:
-        conexao.execute(text("SELECT pg_advisory_lock(:chave)"), {"chave": _CHAVE_DA_TRAVA})
+        try:
+            # O lock_timeout vale só nesta transação (true = local), que termina logo abaixo
+            conexao.execute(
+                text("SELECT set_config('lock_timeout', :limite, true)"), {"limite": f"{TEMPO_LIMITE_DA_TRAVA_SEGUNDOS}s"}
+            )
+            conexao.execute(text("SELECT pg_advisory_lock(:chave)"), {"chave": _CHAVE_DA_TRAVA})
+        except OperationalError as erro:
+            if isinstance(erro.orig, LockNotAvailable):
+                raise DemoOcupadaError(
+                    f"Outra recriação da demonstração segurou a trava por mais de {TEMPO_LIMITE_DA_TRAVA_SEGUNDOS} "
+                    "segundos. Nada foi apagado; a próxima subida da API tenta de novo."
+                ) from None
+            raise
         # Sem transação aberta aqui: uma leitura pendente seguraria a tabela e o DROP esperaria para sempre
         conexao.commit()
         try:
@@ -146,7 +167,7 @@ def _recriar(engine: Engine, config: ConfigDemo) -> None:
 
 def recriar(config: ConfigDemo) -> None:
     """RN-54: recria na hora (comando manual)."""
-    engine = create_engine(config.url_dono, poolclass=NullPool)
+    engine = criar_engine(config.url_dono, poolclass=NullPool)
     try:
         with _travado(engine):
             _recriar(engine, config)
@@ -156,7 +177,7 @@ def recriar(config: ConfigDemo) -> None:
 
 def recriar_se_preciso(config: ConfigDemo, agora: datetime | None = None) -> bool:
     """RN-54: ao iniciar a API, recria só se a última recriação passou de 24 horas. Devolve se recriou."""
-    engine = create_engine(config.url_dono, poolclass=NullPool)
+    engine = criar_engine(config.url_dono, poolclass=NullPool)
     try:
         with _travado(engine) as conexao:
             # Conferido já com a trava: quem esperou outra recriação vê a data nova e não repete

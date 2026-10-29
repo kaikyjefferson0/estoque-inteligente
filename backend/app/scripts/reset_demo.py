@@ -23,7 +23,11 @@ def main() -> int:
     # Só o servidor e o nome do banco, nunca usuário e senha
     url = make_url(config.url_dono)
     print(f"Recriando os dados de demonstração em {url.host}/{url.database}...")
-    demo.recriar(config)
+    try:
+        demo.recriar(config)
+    except demo.DemoOcupadaError as erro:
+        print(erro, file=sys.stderr)
+        return 1
     print(f"Pronto: admin {config.admin_email} e conta de demonstração {config.demo_email} (operador).")
     return 0
 

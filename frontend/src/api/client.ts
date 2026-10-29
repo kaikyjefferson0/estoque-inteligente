@@ -26,7 +26,16 @@ interface Opcoes {
   // Corpo de formulário (usado no login OAuth2)
   form?: URLSearchParams
   signal?: AbortSignal
+  // Partida a frio: com esta função, 503 ou falta de resposta viram novas tentativas
+  // (ESPERAS_AO_ACORDAR_MS); ela é chamada uma vez, antes da primeira espera, para a tela avisar.
+  // Só para chamadas que podem se repetir sem efeito duplicado (o login e as leituras).
+  aoAcordar?: () => void
 }
+
+// Plano gratuito do Render: a API dorme sem acesso e, enquanto acorda, o proxy responde 503
+// (sem CORS, então o navegador costuma ver só a falta de resposta). Esperas crescentes, 1 minuto no total.
+export const ESPERAS_AO_ACORDAR_MS = [2000, 4000, 8000, 16000, 30000]
+export const MENSAGEM_ACORDANDO = 'A API está acordando, isso pode levar até um minuto.'
 
 const MENSAGEM_POR_STATUS: Record<number, string> = {
   400: 'A API não aceitou os dados enviados. Confira os campos e tente de novo.',
@@ -37,6 +46,7 @@ const MENSAGEM_POR_STATUS: Record<number, string> = {
   422: 'Alguns campos estão inválidos. Corrija os destacados e tente de novo.',
   // RN-47 e RN-52: limites de tentativas de login e de troca de senha
   429: 'Muitas tentativas. Aguarde um minuto e tente de novo.',
+  503: 'A API está fora do ar no momento. Tente de novo em alguns minutos.',
 }
 
 const MENSAGEM_SERVIDOR = 'O servidor falhou ao responder. Tente de novo em instantes.'
@@ -64,6 +74,44 @@ function lerDetalhe(status: number, detalhe: unknown): ApiError {
   return new ApiError(status, MENSAGEM_POR_STATUS[status] ?? MENSAGEM_SERVIDOR)
 }
 
+async function buscar(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init)
+  } catch (erro) {
+    if (erro instanceof DOMException && erro.name === 'AbortError') throw erro
+    throw new ApiError(0, MENSAGEM_SEM_CONEXAO)
+  }
+}
+
+function esperar(ms: number, signal?: AbortSignal | null): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const relogio = setTimeout(resolve, ms)
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(relogio)
+        reject(new DOMException('A chamada foi cancelada.', 'AbortError'))
+      },
+      { once: true },
+    )
+  })
+}
+
+/** Sem aoAcordar, uma tentativa só; com ele, tenta de novo enquanto a API acorda. */
+async function buscarEsperandoAcordar(url: string, init: RequestInit, aoAcordar?: () => void): Promise<Response> {
+  for (let tentativa = 0; ; tentativa++) {
+    const ultima = !aoAcordar || tentativa >= ESPERAS_AO_ACORDAR_MS.length
+    try {
+      const resposta = await buscar(url, init)
+      if (resposta.status !== 503 || ultima) return resposta
+    } catch (erro) {
+      if (ultima || !(erro instanceof ApiError)) throw erro
+    }
+    if (tentativa === 0) aoAcordar?.()
+    await esperar(ESPERAS_AO_ACORDAR_MS[tentativa], init.signal)
+  }
+}
+
 /** Função única para chamar a API. Devolve o JSON da resposta ou lança ApiError. */
 export async function api<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
   const token = lerToken()
@@ -78,18 +126,11 @@ export async function api<T>(caminho: string, opcoes: Opcoes = {}): Promise<T> {
     corpo = JSON.stringify(opcoes.body)
   }
 
-  let resposta: Response
-  try {
-    resposta = await fetch(`${BASE_URL}${caminho}`, {
-      method: opcoes.method ?? (corpo ? 'POST' : 'GET'),
-      headers,
-      body: corpo,
-      signal: opcoes.signal,
-    })
-  } catch (erro) {
-    if (erro instanceof DOMException && erro.name === 'AbortError') throw erro
-    throw new ApiError(0, MENSAGEM_SEM_CONEXAO)
-  }
+  const resposta = await buscarEsperandoAcordar(
+    `${BASE_URL}${caminho}`,
+    { method: opcoes.method ?? (corpo ? 'POST' : 'GET'), headers, body: corpo, signal: opcoes.signal },
+    opcoes.aoAcordar,
+  )
 
   if (resposta.status === 204) return undefined as T
 
