@@ -7,6 +7,7 @@ import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { usePaginaNaUrl } from '../components/usePaginaNaUrl'
@@ -124,7 +125,7 @@ export function ProdutosPage() {
       )}
 
       {dados && dados.length > 0 && (
-        <div className="painel">
+        <div className="painel tabela-empilhavel">
           <table className="tabela produtos" aria-busy={buscando}>
             <caption className="visualmente-oculto">Produtos cadastrados</caption>
             <thead>
@@ -140,21 +141,21 @@ export function ProdutosPage() {
             <tbody>
               {dados.map((p) => (
                 <tr key={p.id}>
-                  <td className="produtos__nome">
+                  <td className="produtos__nome tabela__principal">
                     <Link to={`/produtos/${p.id}`} className="tabela__link">
-                      {p.nome}
+                      <NomeEmLista nome={p.nome} />
                     </Link>
                   </td>
-                  <td className="produtos__codigo numero">{p.codigo_barras}</td>
-                  <td className="produtos__fornecedor">
+                  <td className="produtos__codigo tabela__etiqueta numero">{p.codigo_barras}</td>
+                  <td className="produtos__fornecedor tabela__etiqueta">
                     {p.fornecedor_nome === null ? (
                       <span className="tabela__vazio">Sem fornecedor</span>
                     ) : (
-                      p.fornecedor_nome
+                      <NomeEmLista nome={p.fornecedor_nome} />
                     )}
                   </td>
-                  <td className="produtos__minimo tabela__numero numero">
-                    <span className="produtos__rotulo-celular">Mínimo </span>
+                  <td className="produtos__minimo tabela__numero tabela__etiqueta numero">
+                    <span className="tabela__rotulo-celular">Mínimo </span>
                     {formatarNumero(p.estoque_minimo)}
                   </td>
                 </tr>

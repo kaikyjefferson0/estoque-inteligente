@@ -3,7 +3,15 @@
 // 1. Gera as senhas do admin e do operador na hora (só em memória, passadas por variável de ambiente).
 // 2. Recria o banco estoque_e2e pelas migrations e cria os dois usuários (backend\tests\e2e_preparar.py).
 // 3. Sobe a API na porta 8001 (usuário da aplicação, CORS para a 5175) e o site na porta 5175.
-// 4. Roda o Playwright (e2e\*.spec.ts) e, no fim, para a API e o site, mesmo se algo falhar.
+// 4. Roda o estoque.spec.ts (banco vazio).
+// 5. Recria o banco com os dados de exemplo da demo e os casos extremos (e2e_preparar.py --demo)
+//    e roda o responsividade.spec.ts.
+// No fim, para a API e o site, mesmo se algo falhar.
+//
+// Opções:
+//   --responsividade      roda só a etapa 5
+//   --capturas=<pasta>    guarda uma captura de cada tela e largura (para o ui-reviewer)
+//   E2E_GREP=<texto>      roda só os testes cujo nome contém o texto (ex.: "em 320px")
 import { spawn, spawnSync } from 'node:child_process'
 import { createConnection } from 'node:net'
 import { randomBytes } from 'node:crypto'
@@ -22,6 +30,8 @@ const API = `http://127.0.0.1:${PORTA_API}`
 const SITE = `http://localhost:${PORTA_SITE}`
 const ESPERA_MAXIMA_MS = 60_000
 const RESULTADOS = path.join(FRONTEND, 'test-results', 'e2e')
+const SO_RESPONSIVIDADE = process.argv.includes('--responsividade')
+const PASTA_CAPTURAS = process.argv.find((a) => a.startsWith('--capturas='))?.slice('--capturas='.length)
 
 // Executáveis chamados direto pelo node, sem o npx: o processo parado é o próprio servidor
 const VITE = path.join(FRONTEND, 'node_modules', 'vite', 'bin', 'vite.js')
@@ -119,13 +129,31 @@ async function principal() {
     }
   }
 
-  log('Recriando o banco estoque_e2e pelas migrations…')
-  const preparo = spawnSync(PYTHON, ['-m', 'tests.e2e_preparar'], {
-    cwd: BACKEND,
-    env: { ...ambienteBase, ...segredos },
-    stdio: 'inherit',
-  })
-  if (preparo.status !== 0) throw new Error('A preparação do banco falhou.')
+  function preparar(comDemo) {
+    log(`Recriando o banco estoque_e2e pelas migrations${comDemo ? ', com os dados da demo' : ''}…`)
+    const preparo = spawnSync(PYTHON, ['-m', 'tests.e2e_preparar', ...(comDemo ? ['--demo'] : [])], {
+      cwd: BACKEND,
+      env: { ...ambienteBase, ...segredos },
+      stdio: 'inherit',
+    })
+    if (preparo.status !== 0) throw new Error('A preparação do banco falhou.')
+  }
+
+  function rodarPlaywright(arquivo, extras = {}) {
+    // E2E_GREP: só os testes cujo nome contém o texto (ex.: uma largura)
+    const filtro = process.env.E2E_GREP ? ['--grep', process.env.E2E_GREP] : []
+    log(`Rodando ${arquivo} no Playwright…`)
+    const testes = spawnSync(process.execPath, [PLAYWRIGHT, 'test', '-c', path.join('e2e', 'playwright.config.ts'), arquivo, ...filtro], {
+      cwd: FRONTEND,
+      env: { ...ambienteBase, ...segredos, E2E_SITE: SITE, ...extras },
+      stdio: 'inherit',
+    })
+    // Numa falha, o Playwright grava o retrato da página (error-context.md); as senhas não podem ficar lá
+    apagarSegredos(RESULTADOS, Object.values(segredos))
+    return testes.status ?? 1
+  }
+
+  preparar(SO_RESPONSIVIDADE)
 
   log(`Subindo a API em ${API} e o site em ${SITE}…`)
   const api = subir('API', PYTHON, ['-m', 'tests.e2e_api'], { cwd: BACKEND, env: ambienteBase })
@@ -143,15 +171,14 @@ async function principal() {
     }
   }
 
-  log('Rodando os cenários no Playwright…')
-  const testes = spawnSync(process.execPath, [PLAYWRIGHT, 'test', '-c', path.join('e2e', 'playwright.config.ts')], {
-    cwd: FRONTEND,
-    env: { ...ambienteBase, ...segredos, E2E_SITE: SITE },
-    stdio: 'inherit',
-  })
-  // Numa falha, o Playwright grava o retrato da página (error-context.md); as senhas não podem ficar lá
-  apagarSegredos(RESULTADOS, Object.values(segredos))
-  return testes.status ?? 1
+  let codigo = 0
+  if (!SO_RESPONSIVIDADE) {
+    codigo = rodarPlaywright('estoque.spec.ts')
+    // Mesmos servidores; a API lê o banco a cada requisição
+    preparar(true)
+  }
+  const capturas = PASTA_CAPTURAS ? { E2E_CAPTURAS: path.resolve(PASTA_CAPTURAS) } : {}
+  return rodarPlaywright('responsividade.spec.ts', capturas) || codigo
 }
 
 /** Troca as senhas por *** em qualquer arquivo de texto que o Playwright tenha deixado. */

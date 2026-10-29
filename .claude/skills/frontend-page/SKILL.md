@@ -73,15 +73,27 @@ async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
 - Ícones só de `@tabler/icons-react`, com `aria-hidden` quando há texto ao lado; o tamanho vem do CSS (`--icone-p` ou `--icone-m`).
 - Sem gradientes, vidro, grade de cartões idênticos com sombra, CAIXA ALTA, setas "→" em botões ou emojis. Textos curtos, em português, com verbo nos botões.
 
-## Textos longos e larguras
+## Textos longos e larguras (critérios de aceitação de toda tela)
 
-- **Nenhuma tela tem rolagem horizontal**, em nenhuma largura.
-- **Nomes, e-mails e outros textos livres** (pense em 40 caracteres, inclusive uma palavra só, sem espaço) não podem estourar a tela nem empurrar botões:
-  - Em listas, tabelas, cabeçalho e menus: uma linha com reticências, usando a classe `texto-cortado` (`componentes.css`) com `title={texto}` igual ao texto, para mostrar tudo ao passar o mouse. O pai precisa deixar o item encolher (`min-width: 0` em flex ou grid; em tabela, a célula com `width: 100%` e `max-width: 0`).
-  - Na tela de detalhe (edição, "Minha conta", janelas de confirmação): o texto aparece **inteiro**, quebrando a linha com `texto-inteiro` (`overflow-wrap: anywhere`). É ali que quem está no celular, sem mouse, lê o texto completo.
-  - Ícones, setas e marcas ao lado de um texto que encolhe levam `flex-shrink: 0`.
-- **Listas no celular:** tabela com mais de duas ou três colunas vira lista empilhada (um item por bloco, ações embaixo), em vez de tabela espremida. Prefira container query no painel (`container-type: inline-size`), para a forma depender da largura real da lista, com ou sem o menu lateral. Exemplo pronto: `src\pages\UsuariosPage.tsx` e `UsuariosPage.css`.
-- **Larguras de revisão:** 320, 375, 414, 768 e 1280px. Confira cada tela nas cinco (o `scripts\capturas-ui.mjs` tem `LARGURAS_REVISAO` e mede rolagem horizontal e elementos além da tela).
+Valem para todas as telas, novas e alteradas. O `e2e\responsividade.spec.ts` (dentro de `npm run test:e2e`) mede automaticamente os itens marcados com (teste); o resto é conferido nas capturas pelo ui-reviewer.
+
+- **Larguras de revisão:** 320, 360, 375, 390, 414, 768, 1024, 1280 e 1440px, e o zoom de 200% do navegador em 1280px (640px com o dobro de densidade). Tela nova entra na lista `TELAS` do `responsividade.spec.ts`.
+- **Nenhuma rolagem horizontal da página** e nada além da borda da tela, em nenhuma largura (teste).
+- **Nomes nunca quebram no meio de uma palavra:** quebram só entre palavras. Nada de `overflow-wrap: anywhere` nem `word-break: break-all`. A exceção é um texto que sozinho não cabe na linha (um e-mail longo), e por isso o detalhe usa `texto-inteiro` (`overflow-wrap: break-word`).
+- **Em listas, o nome fica numa linha própria**, com `<NomeEmLista nome={...} />` (`src\components\Metadados.tsx`): no máximo 2 linhas, com reticências, e o nome completo no `title` e na tela de detalhe. Uma quantidade pode ficar à direita do nome; nenhum outro texto vai na linha dele.
+- **Metadados (tipo, validade, tempo, código, saldo, perfil) ficam abaixo do nome, como etiquetas**, com `<Metadados itens={[{ rotulo, valor }]} />`. Elas passam para a linha de baixo quando não cabem, sem se sobrepor nem encostar.
+- **Texto separado também ao copiar e no leitor de tela (teste):**
+  - Rótulo oculto e valor ficam em blocos próprios: `<dl>` com `<dt className="visualmente-oculto">` e `<dd>` (é o que o `Metadados` faz).
+  - **Nunca** `<span className="visualmente-oculto">Tipo: </span>Valor` na mesma linha: o espaço do fim some na cópia e vira "Tipo:Valor".
+  - Para dar contexto a um número num link (contagem), use `aria-label` no link com o texto visível no começo ("Alertas, 11 ativos").
+  - Setas decorativas com texto oculto ("→" + " para ") também grudam: escreva o texto visível ("de 28 para 26").
+- **Botões, campos e links soltos com pelo menos 44px de altura no celular** (`min-height: var(--alvo-min)`) (teste). Ações que não cabem vão para a linha de baixo (`flex-wrap`) ou para um menu, sem sair da tela.
+- **Tabelas viram listas empilhadas no celular:** um item por bloco, nome em cima, etiquetas embaixo e ações no fim. Prefira container query no painel (`container-type: inline-size`), para a forma depender da largura real da lista, com ou sem o menu lateral. Exemplo: `src\pages\UsuariosPage.tsx`.
+- **Formulários em uma coluna no celular**, com o rótulo acima do campo (`<Campo>` já faz assim).
+- **Janelas de confirmação cabem inteiras na tela do celular**, com rolagem interna se precisar (`.dialogo`) (teste).
+- **Números alinhados** com a classe `numero` (`tabular-nums`). **Número e unidade não se separam:** nomes com quantidade passam por `semQuebraNaUnidade` (`src\utils\formato.ts`; o `NomeEmLista` já usa), que junta "500 g" com espaço inseparável.
+- **Espaçamentos só da escala do `theme.css`** (`--esp-0` a `--esp-7`).
+- Fora das listas (cabeçalho, menu, célula de tabela larga), um texto livre pode usar uma linha só com `texto-cortado` e `title={texto}`. O pai precisa deixar o item encolher (`min-width: 0` em flex ou grid; em tabela, a célula com `width: 100%` e `max-width: 0`). Ícones e marcas ao lado de um texto que encolhe levam `flex-shrink: 0`.
 
 ## Etiqueta de prateleira
 
@@ -102,4 +114,5 @@ Itens de estoque, lotes e alertas levam a etiqueta: classe `etiqueta etiqueta--o
 ## Ao terminar
 
 1. `npm run build` (sem erros de TypeScript) e `npm run lint`, dentro de `frontend`.
-2. Suba a API e o site e chame o subagente **ui-reviewer** na página nova, pedindo as cinco larguras de revisão (320, 375, 414, 768 e 1280px) e dados com textos longos. Corrija os itens Críticos e mostre ao usuário os Importantes.
+2. Rode `npm run test:e2e` (inclui o `responsividade.spec.ts`). Para as capturas, `node e2e\rodar.mjs --responsividade --capturas=<pasta>` (dados da demo, com textos de 60 caracteres e saldo de 99.999).
+3. Chame o subagente **ui-reviewer** com essas capturas, em todas as larguras de revisão. Corrija os itens Críticos e mostre ao usuário os Importantes.

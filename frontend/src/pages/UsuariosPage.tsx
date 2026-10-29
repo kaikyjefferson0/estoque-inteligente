@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Metadados, NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { usePaginaNaUrl } from '../components/usePaginaNaUrl'
@@ -24,14 +25,12 @@ function resumo(pagina: Pagina<Usuario>): string {
   return inativos > 0 ? `${total}, ${formatarNumero(inativos)} ${plural(inativos, 'inativo', 'inativos')}` : total
 }
 
-/** Nome e e-mail em uma linha cada, com reticências; o texto inteiro fica no title e na edição. */
+/** Nome em até duas linhas e e-mail em uma, com reticências; o texto inteiro fica no title e na edição. */
 function Identificacao({ usuario, proprio }: { usuario: Usuario; proprio: boolean }) {
   return (
     <div className="usuarios__identificacao">
       <div className="usuarios__linha-nome">
-        <span className="usuarios__nome texto-cortado" title={usuario.nome}>
-          {usuario.nome}
-        </span>
+        <NomeEmLista nome={usuario.nome} className="usuarios__nome" />
         {/* Marca o usuário logado (RN-22: perfil e situação dele não mudam) */}
         {proprio && <span className="usuarios__voce">Você</span>}
       </div>
@@ -123,10 +122,12 @@ export function UsuariosPage() {
               return (
                 <li key={u.id} className="usuarios__bloco" data-inativo={!u.ativo || undefined}>
                   <Identificacao usuario={u} proprio={proprio} />
-                  <p className="usuarios__detalhes">
-                    <span className="usuarios__perfil">{NOME_DO_PERFIL[u.perfil]}</span>
-                    <span className="usuarios__situacao">{u.ativo ? 'Ativo' : 'Inativo'}</span>
-                  </p>
+                  <Metadados
+                    itens={[
+                      { rotulo: 'Perfil', valor: NOME_DO_PERFIL[u.perfil] },
+                      { rotulo: 'Situação', valor: u.ativo ? 'Ativo' : 'Inativo' },
+                    ]}
+                  />
                   <Acoes usuario={u} proprio={proprio} aoDefinirSenha={() => setDefinindoSenha(u)} />
                 </li>
               )

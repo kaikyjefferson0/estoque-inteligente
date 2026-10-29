@@ -1,5 +1,5 @@
 .detalhe__titulo {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /* Ficha do cadastro: rótulo à esquerda, valor à direita */
@@ -26,7 +26,7 @@
 }
 
 .ficha dd {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .ficha__vazio {
@@ -153,17 +153,21 @@
 
 /* Subgrid: todas as linhas compartilham as mesmas colunas */
 .historico {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  margin: var(--esp-0);
+  padding: var(--esp-0);
+  list-style: none;
 }
 
+/* Tipo e quantidade em cima; lote, quem e quando como etiquetas embaixo; o ajuste no fim */
 .historico__item {
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'tipo quantidade'
+    'metadados metadados'
+    'ajuste ajuste';
   align-items: baseline;
-  column-gap: var(--esp-5);
-  row-gap: var(--esp-1);
+  gap: var(--esp-2) var(--esp-4);
   padding: var(--esp-3) var(--esp-5);
 }
 
@@ -171,50 +175,47 @@
   border-top: var(--borda);
 }
 
-.historico__data {
-  font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-  white-space: nowrap;
-}
-
 .historico__tipo {
   display: inline-flex;
+  grid-area: tipo;
   align-items: center;
   gap: var(--esp-2);
   font-size: var(--fs-2);
   font-weight: var(--peso-medio);
-  align-self: center;
 }
 
 .historico__tipo svg {
+  flex-shrink: 0;
   width: var(--icone-p);
   height: var(--icone-p);
   color: var(--cor-texto-suave);
 }
 
-.historico__lote {
-  font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-}
-
 .historico__quantidade {
+  grid-area: quantidade;
+  margin: var(--esp-0);
   font-weight: var(--peso-medio);
   text-align: right;
+  white-space: nowrap;
 }
 
-.historico__usuario {
-  font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-  text-align: right;
+.historico__quantidade dd {
+  margin: var(--esp-0);
+}
+
+.historico__metadados {
+  grid-area: metadados;
 }
 
 /* Linha extra do ajuste: antes e depois, e o motivo */
 .historico__ajuste {
   display: flex;
-  flex-wrap: wrap;
-  grid-column: 3 / -1;
-  gap: var(--esp-1) var(--esp-4);
+  flex-direction: column;
+  grid-area: ajuste;
+  gap: var(--esp-1);
+  min-width: 0;
   font-size: var(--fs-2);
+  overflow-wrap: break-word;
 }
 
 .historico__paginacao {
@@ -258,46 +259,7 @@
     grid-area: quantidade;
   }
 
-  /* Celular: tipo e quantidade em cima; lote, data e usuário embaixo */
-  .historico {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
   .historico__item {
-    grid-template-areas:
-      'tipo quantidade'
-      'lote lote'
-      'data usuario'
-      'ajuste ajuste';
-    column-gap: var(--esp-3);
     padding: var(--esp-3) var(--esp-4);
-  }
-
-  .historico__tipo {
-    grid-area: tipo;
-  }
-
-  .historico__quantidade {
-    grid-area: quantidade;
-  }
-
-  .historico__lote {
-    grid-area: lote;
-  }
-
-  .historico__data {
-    grid-area: data;
-    font-size: var(--fs-1);
-  }
-
-  .historico__usuario {
-    grid-area: usuario;
-    font-size: var(--fs-1);
-  }
-
-  .historico__ajuste {
-    grid-area: ajuste;
-    grid-column: 1 / -1;
-    flex-direction: column;
   }
 }

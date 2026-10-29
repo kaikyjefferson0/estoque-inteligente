@@ -81,13 +81,6 @@
   border-top: var(--borda);
 }
 
-.usuarios__detalhes {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-1) var(--esp-4);
-  margin: var(--esp-0);
-}
-
 /* Os botões começam alinhados ao texto: o recuo desconta o padding do fantasma (a borda de 1px fica) */
 .usuarios__bloco .usuarios__acoes {
   margin-left: calc(-1 * var(--esp-4));

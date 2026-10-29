@@ -10,6 +10,7 @@
   display: flex;
   align-items: center;
   flex: 1;
+  white-space: nowrap;
   justify-content: flex-end;
   min-height: var(--alvo-min);
   font-size: var(--fs-2);
@@ -30,16 +31,13 @@
   transition: opacity var(--mov-rapido) var(--mov-curva);
 }
 
-/* Subgrid com colunas de largura fixa: não mudam de lugar ao trocar o filtro ou mostrar resolvidos */
 .alertas {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--largura-coluna-situacao) var(--largura-coluna-situacao) var(--largura-coluna-tempo);
+  margin: var(--esp-0);
+  padding: var(--esp-0);
+  list-style: none;
 }
 
 .alerta {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
   background: var(--etiqueta-fundo);
 }
 
@@ -47,21 +45,18 @@
   border-top: var(--borda);
 }
 
-/* A linha inteira leva ao produto */
+/* O item inteiro leva ao produto: nome numa linha própria, etiquetas embaixo, em qualquer largura */
 .alerta__link {
-  display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
-  align-items: baseline;
-  column-gap: var(--esp-5);
-  row-gap: var(--esp-1);
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-2);
   min-height: var(--alvo-min);
   padding: var(--esp-3) var(--esp-5);
   color: var(--cor-texto);
   text-decoration: none;
 }
 
-/* O anel fica dentro da linha: o painel corta o que passa da borda */
+/* O anel fica dentro do item: o painel corta o que passa da borda */
 .alerta__link:focus-visible {
   outline-offset: calc(-1 * var(--foco-distancia));
 }
@@ -71,7 +66,6 @@
   color: var(--cor-primaria);
   text-decoration: underline;
   text-underline-offset: var(--sublinhado-distancia);
-  overflow-wrap: anywhere;
 }
 
 .alerta__link:hover .alerta__produto {
@@ -79,21 +73,8 @@
 }
 
 .alerta__tipo {
-  font-size: var(--fs-2);
   font-weight: var(--peso-medio);
   color: var(--etiqueta-texto);
-  white-space: nowrap;
-}
-
-.alerta__lote,
-.alerta__tempo {
-  font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-  white-space: nowrap;
-}
-
-.alerta__tempo {
-  text-align: right;
 }
 
 /* Resolvido: discreto, sem fundo e com a faixa neutra (RN-39) */
@@ -137,34 +118,14 @@
     border-bottom: var(--borda);
   }
 
+  /* text-align: "Vencimento próximo" quebra em duas linhas e fica centralizado como as outras */
   .alertas__filtros .segmentos__opcao span {
     flex: 1;
     justify-content: center;
-  }
-
-  .alertas {
-    grid-template-columns: minmax(0, 1fr);
+    text-align: center;
   }
 
   .alerta__link {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    column-gap: var(--esp-3);
     padding: var(--esp-3) var(--esp-4);
-  }
-
-  .alerta__produto,
-  .alerta__tempo {
-    flex-basis: 100%;
-  }
-
-  .alerta__lote:empty {
-    display: none;
-  }
-
-  .alerta__tempo {
-    font-size: var(--fs-1);
-    text-align: left;
   }
 }

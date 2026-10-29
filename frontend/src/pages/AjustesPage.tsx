@@ -17,7 +17,7 @@ import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { AjusteRegistrado } from '../types/estoque'
 import type { Pagina } from '../types/pagina'
 import type { Lote, Produto, SaldoProduto } from '../types/produto'
-import { formatarComSinal, formatarNumero, hojeIso } from '../utils/formato'
+import { formatarComSinal, formatarNumero, hojeIso, semQuebraNaUnidade } from '../utils/formato'
 import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import { validarSaldoContado } from '../utils/validacao'
 import './AjustesPage.css'
@@ -51,7 +51,15 @@ function campoDoErro(erro: ApiError): CampoAjuste {
   return /motivo/i.test(erro.message) ? 'motivo' : 'saldo_contado'
 }
 
-function FormularioAjuste({ produtoId, aoRegistrar }: { produtoId: number; aoRegistrar: (r: AjusteRegistrado) => void }) {
+function FormularioAjuste({
+  produtoId,
+  produtoNome,
+  aoRegistrar,
+}: {
+  produtoId: number
+  produtoNome: string
+  aoRegistrar: (r: AjusteRegistrado) => void
+}) {
   const saldo = useRecurso<SaldoProduto>(`/products/${produtoId}/stock`)
   const [loteId, setLoteId] = useState<number | null>(null)
   const [contado, setContado] = useState('')
@@ -228,10 +236,12 @@ function FormularioAjuste({ produtoId, aoRegistrar }: { produtoId: number; aoReg
         descricao={
           pendente && (
             <>
-              <span className="ajuste__confirmacao numero">
-                {descreverLote(pendente.lote.validade)}: {formatarNumero(pendente.lote.quantidade)} <span aria-hidden>→</span>
-                <span className="visualmente-oculto"> para </span> {formatarNumero(pendente.contado)} (
-                {formatarComSinal(diferenca)})
+              {/* O produto inteiro: no celular o campo de busca mostra só o começo do nome */}
+              <span className="ajuste__confirmacao ajuste__confirmacao-produto texto-inteiro">{semQuebraNaUnidade(produtoNome)}</span>
+              <span className="ajuste__confirmacao ajuste__lote numero">
+                {/* Espaço que não quebra antes da diferença: "(−1)" não desce sozinho */}
+                {descreverLote(pendente.lote.validade)}: de {formatarNumero(pendente.lote.quantidade)} para{' '}
+                {formatarNumero(pendente.contado)}&nbsp;({formatarComSinal(diferenca)})
               </span>
               <span className="ajuste__confirmacao">Motivo: {pendente.motivo}</span>
               <span className="ajuste__confirmacao">O ajuste fica no histórico e não pode ser desfeito.</span>
@@ -307,7 +317,7 @@ function ProdutoParaAjustar({
         />
       )}
       {dados && (
-        <FormularioAjuste key={dados.id} produtoId={dados.id} aoRegistrar={(resultado) => aoRegistrar(dados.nome, resultado)} />
+        <FormularioAjuste key={dados.id} produtoId={dados.id} produtoNome={dados.nome} aoRegistrar={(resultado) => aoRegistrar(dados.nome, resultado)} />
       )}
     </>
   )
@@ -345,8 +355,7 @@ export function AjustesPage() {
           <p>
             <strong>Ajuste registrado.</strong> {ultimo.nome}, {descreverLote(ultimo.resultado.validade).toLowerCase()}:{' '}
             <span className="numero">
-              {formatarNumero(ultimo.resultado.saldo_anterior)} <span aria-hidden>→</span>
-              <span className="visualmente-oculto"> para </span> {formatarNumero(ultimo.resultado.saldo_novo)} (
+              de {formatarNumero(ultimo.resultado.saldo_anterior)} para {formatarNumero(ultimo.resultado.saldo_novo)} (
               {formatarComSinal(ultimo.resultado.quantidade)})
             </span>
             .

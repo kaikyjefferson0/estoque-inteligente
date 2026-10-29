@@ -94,3 +94,9 @@ export function formatarTempoDecorrido(iso: string, agora = Date.now()): string 
   if (passado < MS_DIA) return RELATIVO.format(-Math.floor(passado / MS_HORA), 'hour')
   return RELATIVO.format(-Math.floor(passado / MS_DIA), 'day')
 }
+
+/** Junta o número à palavra seguinte com espaço inseparável ("800 g", "12 rolos", "5 L"):
+ *  o nome quebra entre palavras, mas nunca entre a quantidade e a unidade. */
+export function semQuebraNaUnidade(texto: string): string {
+  return texto.replace(/(\d)[ \t]+(?=[\p{L}\d])/gu, '$1 ')
+}

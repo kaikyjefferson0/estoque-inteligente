@@ -14,3 +14,6 @@ dist/
 *.key
 .coverage
 htmlcov/
+
+# Capturas de referência (só locais, nunca no Git)
+capturas/

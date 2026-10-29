@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Metadados, NomeEmLista } from '../components/Metadados'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Dashboard, MovimentacaoRecente, TipoMovimentacao } from '../types/dashboard'
 import type { Situacao } from '../types/situacao'
@@ -101,27 +102,34 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
         const quantidade = quantidadeComSinal(m)
         return (
           <li key={m.id} className="movimento">
-            <span className={`movimento__tipo movimento__tipo--${m.tipo}`}>
-              <Icone aria-hidden />
-              {rotulo}
-            </span>
-            <span className="movimento__produto">
-              <span className="movimento__nome">{m.produto_nome}</span>
-              <span className="movimento__lote">
-                Lote {m.lote_id}
-                {m.validade ? `, validade ${formatarData(m.validade)}` : ', sem validade'}
-              </span>
-            </span>
-            <span className="movimento__quantidade numero">
-              <span className="visualmente-oculto">Quantidade </span>
-              {formatarComSinal(quantidade)}
-            </span>
-            <span className="movimento__autor">
-              {m.usuario_nome}
-              <time dateTime={m.criado_em} className="numero">
-                {formatarDataHora(m.criado_em)}
-              </time>
-            </span>
+            <NomeEmLista nome={m.produto_nome} className="movimento__nome" />
+            {/* Rótulo e valor em blocos próprios: um rótulo oculto na mesma linha gruda ao copiar */}
+            <dl className="movimento__quantidade">
+              <dt className="visualmente-oculto">Quantidade</dt>
+              <dd className="numero">{formatarComSinal(quantidade)}</dd>
+            </dl>
+            <Metadados
+              className="movimento__metadados"
+              itens={[
+                {
+                  rotulo: 'Tipo',
+                  className: `movimento__tipo movimento__tipo--${m.tipo}`,
+                  valor: (
+                    <>
+                      <Icone aria-hidden />
+                      {rotulo}
+                    </>
+                  ),
+                },
+                {
+                  rotulo: 'Lote',
+                  rotuloVisivel: true,
+                  valor: `${m.lote_id}, ${m.validade ? `validade ${formatarData(m.validade)}` : 'sem validade'}`,
+                },
+                { rotulo: 'Por', valor: <span title={m.usuario_nome}>{m.usuario_nome}</span> },
+                { rotulo: 'Em', valor: <time dateTime={m.criado_em}>{formatarDataHora(m.criado_em)}</time> },
+              ]}
+            />
           </li>
         )
       })}

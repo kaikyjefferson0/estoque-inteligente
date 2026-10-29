@@ -9,6 +9,7 @@ import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { CaixaDeMarcar } from '../components/CaixaDeMarcar'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Metadados, NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
@@ -52,29 +53,30 @@ function ItemAlerta({ alerta }: { alerta: Alerta }) {
   const resolvido = alerta.resolvido_em !== null
   return (
     <li className={`alerta etiqueta etiqueta--${etiqueta}`} data-resolvido={resolvido || undefined}>
+      {/* O item inteiro leva ao produto: nome numa linha própria, etiquetas embaixo */}
       <Link to={`/produtos/${alerta.produto_id}`} className="alerta__link">
-        <span className="alerta__produto">{alerta.produto_nome}</span>
-        <span className="alerta__tipo">
-          <span className="visualmente-oculto">Tipo: </span>
-          {rotulo}
-        </span>
-        <span className="alerta__lote numero">{alerta.validade ? descreverLote(alerta.validade) : ''}</span>
-        {/* RN-39: o resolvido continua na lista, com a data em que a condição deixou de existir */}
-        {alerta.resolvido_em ? (
-          <span className="alerta__tempo">
-            Resolvido em{' '}
-            <time dateTime={alerta.resolvido_em} className="numero">
-              {formatarDataHora(alerta.resolvido_em)}
-            </time>
-          </span>
-        ) : (
-          <span className="alerta__tempo">
-            <span className="visualmente-oculto">Aberto </span>
-            <time dateTime={alerta.criado_em} title={formatarDataHora(alerta.criado_em)}>
-              {formatarTempoDecorrido(alerta.criado_em)}
-            </time>
-          </span>
-        )}
+        <NomeEmLista nome={alerta.produto_nome} className="alerta__produto" />
+        <Metadados
+          itens={[
+            { rotulo: 'Tipo', valor: rotulo, className: 'alerta__tipo' },
+            alerta.validade ? { rotulo: 'Lote', valor: descreverLote(alerta.validade) } : null,
+            // RN-39: o resolvido continua na lista, com a data em que a condição deixou de existir
+            alerta.resolvido_em
+              ? {
+                  rotulo: 'Resolvido em',
+                  rotuloVisivel: true,
+                  valor: <time dateTime={alerta.resolvido_em}>{formatarDataHora(alerta.resolvido_em)}</time>,
+                }
+              : {
+                  rotulo: 'Aberto',
+                  valor: (
+                    <time dateTime={alerta.criado_em} title={formatarDataHora(alerta.criado_em)}>
+                      {formatarTempoDecorrido(alerta.criado_em)}
+                    </time>
+                  ),
+                },
+          ]}
+        />
       </Link>
     </li>
   )

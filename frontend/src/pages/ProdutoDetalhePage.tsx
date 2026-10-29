@@ -14,6 +14,7 @@ import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
 import { BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { Metadados } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
@@ -21,7 +22,7 @@ import type { TipoMovimentacao } from '../types/dashboard'
 import type { Movimentacao } from '../types/estoque'
 import type { Pagina } from '../types/pagina'
 import type { Produto, SaldoProduto } from '../types/produto'
-import { formatarComSinal, formatarDataHora, formatarNumero, hojeIso, plural } from '../utils/formato'
+import { formatarComSinal, formatarDataHora, formatarNumero, hojeIso, plural, semQuebraNaUnidade } from '../utils/formato'
 import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import './ProdutoDetalhePage.css'
 
@@ -184,29 +185,30 @@ function Historico({ produtoId }: { produtoId: number }) {
               const quantidade = m.tipo === 'saida' ? -m.quantidade : m.quantidade
               return (
                 <li key={m.id} className="historico__item">
-                  <time dateTime={m.criado_em} className="historico__data numero">
-                    {formatarDataHora(m.criado_em)}
-                  </time>
                   <span className="historico__tipo">
                     <Icone aria-hidden />
                     {rotulo}
                   </span>
-                  <span className="historico__lote">{descreverLote(m.validade)}</span>
-                  <span className="historico__quantidade numero">
-                    <span className="visualmente-oculto">Quantidade </span>
-                    {formatarComSinal(quantidade)}
-                  </span>
-                  <span className="historico__usuario">{m.usuario_nome}</span>
+                  {/* Rótulo e valor em blocos próprios: um rótulo oculto na mesma linha gruda ao copiar */}
+                  <dl className="historico__quantidade">
+                    <dt className="visualmente-oculto">Quantidade</dt>
+                    <dd className="numero">{formatarComSinal(quantidade)}</dd>
+                  </dl>
+                  <Metadados
+                    className="historico__metadados"
+                    itens={[
+                      { rotulo: 'Lote', valor: descreverLote(m.validade) },
+                      { rotulo: 'Por', valor: <span title={m.usuario_nome}>{m.usuario_nome}</span> },
+                      { rotulo: 'Em', valor: <time dateTime={m.criado_em}>{formatarDataHora(m.criado_em)}</time> },
+                    ]}
+                  />
                   {/* RN-34: no ajuste, o saldo do lote antes e depois e o motivo */}
                   {m.tipo === 'ajuste' && (
                     <span className="historico__ajuste">
                       {m.saldo_anterior !== null && m.saldo_novo !== null && (
                         <span>
-                          Saldo do lote:{' '}
-                          <span className="numero">
-                            {formatarNumero(m.saldo_anterior)} <span aria-hidden>→</span>
-                            <span className="visualmente-oculto"> para </span> {formatarNumero(m.saldo_novo)}
-                          </span>
+                          Saldo do lote: de <span className="numero">{formatarNumero(m.saldo_anterior)}</span> para{' '}
+                          <span className="numero">{formatarNumero(m.saldo_novo)}</span>
                         </span>
                       )}
                       {m.motivo && <span>Motivo: {m.motivo}</span>}
@@ -244,7 +246,7 @@ export function ProdutoDetalhePage() {
           <Link to="/produtos" className="link-acao">
             Produtos
           </Link>
-          <h1 className="detalhe__titulo">{dados?.nome ?? 'Produto'}</h1>
+          <h1 className="detalhe__titulo">{dados ? semQuebraNaUnidade(dados.nome) : 'Produto'}</h1>
         </div>
         {dados && (
           <div className="pagina__acoes">

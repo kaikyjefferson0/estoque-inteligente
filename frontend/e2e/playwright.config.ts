@@ -18,6 +18,8 @@ export default defineConfig({
     baseURL: process.env.E2E_SITE,
     locale: 'pt-BR',
     timezoneId: 'America/Sao_Paulo',
+    // Uma ação que não acontece falha logo, em vez de esperar o tempo do teste inteiro
+    actionTimeout: 10_000,
     trace: 'off',
     video: 'off',
     screenshot: 'only-on-failure',

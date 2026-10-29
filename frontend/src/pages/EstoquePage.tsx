@@ -6,6 +6,7 @@ import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
@@ -43,16 +44,16 @@ function Linha({ item }: { item: ItemEstoque }) {
   const vencidos = item.saldo_fisico - item.saldo_disponivel
   return (
     <tr className={`estoque__linha etiqueta etiqueta--${etiqueta}`} data-problema={item.situacao !== 'ok' || undefined}>
-      <td className="estoque__produto">
+      <td className="estoque__produto tabela__principal">
         {/* Código como segunda linha do link: o alvo cresce com o nome, sem sobrepor */}
         <Link to={`/produtos/${item.produto_id}`} className="estoque__link">
-          <span className="estoque__nome">{item.nome}</span>
+          <NomeEmLista nome={item.nome} className="estoque__nome" />
           <span className="estoque__codigo numero">{item.codigo_barras}</span>
         </Link>
       </td>
-      <td className="estoque__saldo tabela__numero">
+      <td className="estoque__saldo tabela__numero tabela__etiqueta">
         <span className="estoque__disponivel numero">
-          <span className="estoque__rotulo-celular">Disponível </span>
+          <span className="tabela__rotulo-celular">Disponível </span>
           {formatarNumero(item.saldo_disponivel)}
         </span>
         {vencidos > 0 && (
@@ -61,14 +62,12 @@ function Linha({ item }: { item: ItemEstoque }) {
           </span>
         )}
       </td>
-      <td className="estoque__minimo tabela__numero numero">
-        <span className="estoque__rotulo-celular">Mínimo </span>
+      <td className="estoque__minimo tabela__numero tabela__etiqueta numero">
+        <span className="tabela__rotulo-celular">Mínimo </span>
         {formatarNumero(item.estoque_minimo)}
       </td>
-      <td className="estoque__situacao">
-        <span className="visualmente-oculto">Situação: </span>
-        {rotulo}
-      </td>
+      {/* Sem rótulo oculto na mesma linha: ele gruda no valor ao copiar; a coluna já diz o que é */}
+      <td className="estoque__situacao tabela__etiqueta">{rotulo}</td>
     </tr>
   )
 }
@@ -216,7 +215,7 @@ export function EstoquePage() {
       )}
 
       {itens.length > 0 && (
-        <div className="estoque__painel">
+        <div className="estoque__painel tabela-empilhavel">
           <table className="tabela estoque" aria-busy={trocando}>
             <caption className="visualmente-oculto">Saldo e situação dos produtos</caption>
             <thead>

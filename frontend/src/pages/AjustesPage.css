@@ -148,7 +148,13 @@
   display: block;
 }
 
-.ajuste__confirmacao:first-child {
+/* Só a janela de confirmação (a .ajuste__produto é a seção "Produto" da página) */
+.ajuste__confirmacao-produto {
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
+}
+
+.ajuste__lote {
   margin-bottom: var(--esp-2);
   font-size: var(--fs-4);
   font-weight: var(--peso-medio);

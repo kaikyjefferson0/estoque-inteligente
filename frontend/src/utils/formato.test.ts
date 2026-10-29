@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { formatarCnpj, formatarData, formatarDataHora, formatarHora, hojeIso, lerData, somenteDigitos } from './formato'
+import { formatarCnpj, formatarData, formatarDataHora, formatarHora, hojeIso, lerData, semQuebraNaUnidade, somenteDigitos } from './formato'
 
 afterEach(() => {
   vi.useRealTimers()
@@ -61,5 +61,18 @@ describe('máscara do CNPJ', () => {
 
   it('somenteDigitos tira pontuação e espaços', () => {
     expect(somenteDigitos(' 12.345.678/0001-95 ')).toBe('12345678000195')
+  })
+})
+
+describe('semQuebraNaUnidade', () => {
+  it('junta o número à unidade com espaço inseparável', () => {
+    expect(semQuebraNaUnidade('Café torrado e moído 500 g')).toBe('Café torrado e moído 500 g')
+    expect(semQuebraNaUnidade('Papel higiênico folha dupla 12 rolos')).toBe('Papel higiênico folha dupla 12 rolos')
+    expect(semQuebraNaUnidade('Leite integral 1 L')).toBe('Leite integral 1 L')
+  })
+
+  it('não mexe no resto do texto', () => {
+    expect(semQuebraNaUnidade('Pão de forma tradicional')).toBe('Pão de forma tradicional')
+    expect(semQuebraNaUnidade('Lote 14, validade 01/11/2026')).toBe('Lote 14, validade 01/11/2026')
   })
 })

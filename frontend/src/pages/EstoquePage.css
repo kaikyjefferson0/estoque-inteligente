@@ -59,10 +59,6 @@
   background: var(--etiqueta-fundo);
 }
 
-.estoque__produto {
-  overflow-wrap: anywhere;
-}
-
 .estoque__link {
   display: flex;
   flex-direction: column;
@@ -109,72 +105,19 @@
   color: var(--etiqueta-texto);
 }
 
-.estoque__rotulo-celular {
-  display: none;
-}
-
-/* Celular: nome e código em cima; disponível, mínimo e situação embaixo */
-@media (max-width: 640px) {
+/* Lista empilhada: saldo, mínimo e situação viram etiquetas, no tamanho delas */
+@container (max-width: 48rem) {
   .estoque {
     table-layout: auto;
   }
 
-  .estoque thead {
-    display: none;
-  }
-
-  .estoque tbody tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      'produto produto'
-      'saldo situacao'
-      'minimo situacao';
-    column-gap: var(--esp-3);
-    padding: var(--esp-2) var(--esp-4) var(--esp-3);
-  }
-
-  .estoque tbody tr + tr {
-    border-top: var(--borda);
-  }
-
-  .estoque td,
-  .estoque tbody tr + tr td {
-    padding: var(--esp-0);
-    border-top: 0;
-  }
-
-  .estoque .tabela__numero {
-    text-align: left;
-  }
-
-  .estoque__produto {
-    grid-area: produto;
-  }
-
-  .estoque__saldo {
-    grid-area: saldo;
-  }
-
+  /* Disponível e físico seguem em blocos (em linha, os dois grudariam ao copiar) */
   .estoque__disponivel {
-    font-size: var(--fs-3);
+    font-size: var(--fs-1);
   }
 
-  .estoque__minimo {
-    grid-area: minimo;
-    font-size: var(--fs-2);
-    color: var(--cor-texto-suave);
-  }
-
-  .estoque__situacao {
-    grid-area: situacao;
-    align-self: center;
-  }
-
-  .estoque__rotulo-celular {
-    display: inline;
-    font-size: var(--fs-2);
-    font-weight: var(--peso-normal);
-    color: var(--cor-texto-suave);
+  .estoque__linha[data-problema] .estoque__situacao {
+    border-color: currentColor;
   }
 }
+

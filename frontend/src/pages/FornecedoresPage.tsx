@@ -4,6 +4,7 @@ import { useRecurso } from '../api/useRecurso'
 import { Aviso } from '../components/Aviso'
 import { BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { usePaginaNaUrl } from '../components/usePaginaNaUrl'
@@ -71,7 +72,7 @@ export function FornecedoresPage() {
       )}
 
       {dados && !vazio && (
-        <div className="painel">
+        <div className="painel tabela-empilhavel">
           <table className="tabela fornecedores">
             <caption className="visualmente-oculto">Fornecedores cadastrados</caption>
             <thead>
@@ -86,15 +87,17 @@ export function FornecedoresPage() {
             <tbody>
               {dados.map((f) => (
                 <tr key={f.id}>
-                  <td className="fornecedores__nome">{f.nome}</td>
-                  <td className="fornecedores__cnpj">
+                  <td className="fornecedores__nome tabela__principal">
+                    <NomeEmLista nome={f.nome} />
+                  </td>
+                  <td className="fornecedores__cnpj tabela__etiqueta">
                     {f.cnpj ? (
                       <span className="numero">{formatarCnpj(f.cnpj)}</span>
                     ) : (
                       <span className="tabela__vazio">Sem CNPJ</span>
                     )}
                   </td>
-                  <td className="fornecedores__acao">
+                  <td className="fornecedores__acao tabela__acao">
                     <BotaoLink
                       to={`/fornecedores/${f.id}/editar`}
                       variante="fantasma"

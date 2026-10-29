@@ -74,16 +74,20 @@
 /* ---------- Últimas movimentações ---------- */
 /* Subgrid: todas as linhas compartilham as mesmas colunas */
 .movimentos {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  margin: var(--esp-0);
+  padding: var(--esp-0);
+  list-style: none;
 }
 
+/* Nome numa linha própria, com a quantidade à direita; etiquetas embaixo, em qualquer largura */
 .movimento {
   display: grid;
-  grid-column: 1 / -1;
-  grid-template-columns: subgrid;
-  align-items: center;
-  column-gap: var(--esp-5);
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'nome quantidade'
+    'metadados metadados';
+  align-items: baseline;
+  gap: var(--esp-2) var(--esp-4);
   padding: var(--esp-3) var(--esp-5);
 }
 
@@ -91,48 +95,38 @@
   border-top: var(--borda);
 }
 
-.movimento__tipo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--esp-2);
-  font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-}
-
-.movimento__tipo svg {
-  width: var(--icone-p);
-  height: var(--icone-p);
-}
-
-.movimento__produto {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .movimento__nome {
-  overflow: hidden;
+  grid-area: nome;
   font-weight: var(--peso-medio);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.movimento__lote {
-  font-size: var(--fs-1);
-  color: var(--cor-texto-suave);
 }
 
 .movimento__quantidade {
+  grid-area: quantidade;
+  margin: var(--esp-0);
   font-weight: var(--peso-medio);
   text-align: right;
+  white-space: nowrap;
 }
 
-.movimento__autor {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  font-size: var(--fs-1);
-  color: var(--cor-texto-suave);
+.movimento__quantidade dd {
+  margin: var(--esp-0);
+}
+
+.movimento__metadados {
+  grid-area: metadados;
+}
+
+.movimento__tipo .metadado__valor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--esp-1);
+}
+
+.movimento__tipo svg {
+  flex-shrink: 0;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  vertical-align: middle;
 }
 
 @media (max-width: 900px) {
@@ -149,50 +143,9 @@
   }
 }
 
-/* Celular: produto e quantidade na primeira linha; tipo e usuário numa linha própria.
-   Produto e autor atravessam a coluna flexível, então não alargam as colunas "auto"
-   e o nome do produto fica com quase toda a largura. */
 @media (max-width: 640px) {
-  .movimentos {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-  }
-
   .movimento {
-    grid-template-areas:
-      'produto produto quantidade'
-      'tipo autor autor';
-    align-items: baseline;
-    row-gap: var(--esp-2);
-    column-gap: var(--esp-3);
     padding: var(--esp-3) var(--esp-4);
-  }
-
-  .movimento__produto {
-    grid-area: produto;
-  }
-
-  /* No celular o nome quebra linha em vez de ser cortado */
-  .movimento__nome {
-    overflow: visible;
-    white-space: normal;
-    overflow-wrap: anywhere;
-  }
-
-  .movimento__quantidade {
-    grid-area: quantidade;
-  }
-
-  .movimento__tipo {
-    grid-area: tipo;
-    font-size: var(--fs-1);
-  }
-
-  .movimento__autor {
-    grid-area: autor;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: var(--esp-2);
   }
 
   .painel__cabecalho {

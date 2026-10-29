@@ -374,9 +374,61 @@
   white-space: nowrap;
 }
 
-/* Texto longo mostrado por inteiro (detalhe): quebra até no meio da palavra, sem estourar */
+/* Texto longo mostrado por inteiro (detalhe): quebra entre palavras; no meio de uma palavra só
+   quando ela sozinha não cabe na linha (um e-mail longo), sem estourar */
 .texto-inteiro {
-  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/* ---------- Item de lista: nome em cima, metadados embaixo (NomeEmLista e Metadados) ---------- */
+/* Até duas linhas, quebrando só entre palavras, com reticências; o nome inteiro vai no title */
+.nome-em-lista {
+  display: -webkit-box;
+  min-width: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+/* Etiquetas numa linha própria, que passam para a de baixo quando não cabem */
+.metadados {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--esp-1) var(--esp-2);
+  min-width: 0;
+  margin: var(--esp-0);
+  font-size: var(--fs-1);
+  font-weight: var(--peso-normal);
+  color: var(--cor-texto-suave);
+}
+
+.metadado {
+  display: flex;
+  align-items: baseline;
+  gap: var(--esp-1);
+  min-width: 0;
+  max-width: 100%;
+  padding: var(--esp-0) var(--esp-2);
+  border: var(--borda);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  white-space: nowrap;
+}
+
+.metadado__rotulo {
+  flex-shrink: 0;
+}
+
+.metadado__valor {
+  min-width: 0;
+  margin: var(--esp-0);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Página e painel ---------- */
@@ -397,7 +449,7 @@
 
 .pagina__apoio {
   margin-top: var(--esp-1);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-size: var(--fs-2);
   color: var(--cor-texto-suave);
 }
@@ -427,9 +479,11 @@
 .painel__cabecalho a,
 .link-acao {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   min-height: var(--alvo-min);
   font-size: var(--fs-2);
+  white-space: nowrap;
 }
 
 /* ---------- Sobreposição, janela de confirmação e gaveta ---------- */
@@ -463,14 +517,14 @@
 
 .dialogo__titulo {
   margin: var(--esp-0);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-size: var(--fs-4);
   font-weight: var(--peso-medio);
 }
 
 .dialogo__descricao {
   margin: var(--esp-0);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
   font-size: var(--fs-2);
   color: var(--cor-texto-suave);
 }
@@ -515,13 +569,13 @@
 .suspenso__nome {
   font-size: var(--fs-2);
   font-weight: var(--peso-medio);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .suspenso__email {
   font-size: var(--fs-1);
   color: var(--cor-texto-suave);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .suspenso__separador {
@@ -709,6 +763,73 @@
 .tabela[aria-busy='true'] tbody {
   opacity: var(--opacidade-ocupado);
   transition: opacity var(--mov-rapido) var(--mov-curva);
+}
+
+/* ---------- Tabela que vira lista empilhada quando o painel é estreito ---------- */
+/* O painel decide pela própria largura (container query), com ou sem o menu lateral.
+   Estreito: um item por bloco; o nome (.tabela__principal) numa linha própria, as outras células
+   como etiquetas embaixo (.tabela__etiqueta) e a ação (.tabela__acao) no fim da linha delas.
+   48rem: abaixo disso a coluna do nome ficaria espremida ao lado das outras. */
+.tabela-empilhavel {
+  container-type: inline-size;
+}
+
+/* No computador o cabeçalho da coluna já diz o que é */
+.tabela__rotulo-celular {
+  display: none;
+}
+
+@container (max-width: 48rem) {
+  .tabela-empilhavel .tabela thead {
+    display: none;
+  }
+
+  .tabela-empilhavel .tabela tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--esp-2);
+    padding: var(--esp-3) var(--esp-4);
+  }
+
+  .tabela-empilhavel .tabela tbody tr + tr {
+    border-top: var(--borda);
+  }
+
+  .tabela-empilhavel .tabela td,
+  .tabela-empilhavel .tabela tbody tr + tr td {
+    border-top: 0;
+    text-align: left;
+  }
+
+  /* Sem o recuo das células; as etiquetas mantêm o delas (abaixo) */
+  .tabela-empilhavel .tabela td:not(.tabela__etiqueta) {
+    padding: var(--esp-0);
+  }
+
+  .tabela-empilhavel .tabela__principal {
+    flex-basis: 100%;
+    min-width: 0;
+  }
+
+  .tabela-empilhavel .tabela__etiqueta {
+    min-width: 0;
+    max-width: 100%;
+    padding: var(--esp-0) var(--esp-2);
+    border: var(--borda);
+    border-radius: var(--raio-p);
+    background: var(--cor-superficie);
+    font-size: var(--fs-1);
+    color: var(--cor-texto-suave);
+  }
+
+  .tabela-empilhavel .tabela__acao {
+    margin-left: auto;
+  }
+
+  .tabela-empilhavel .tabela__rotulo-celular {
+    display: inline;
+  }
 }
 
 @media (max-width: 640px) {
