@@ -6,7 +6,7 @@ Sistema web de controle de estoque com lotes e validade, alertas automáticos e 
 
 - **FEFO:** a saída usa primeiro o lote que vence primeiro, e o saldo nunca fica negativo.
 - **Alertas automáticos:** estoque baixo, vencimento próximo e vencido, sem repetição.
-- **Dashboard:** a situação do estoque em tempo real.
+- **Dashboard:** a situação do estoque, calculada a cada acesso.
 - **Segurança:** login com JWT, senhas com Argon2, perfis admin e operador, e limite de tentativas de login.
 - **Histórico imutável:** nenhuma movimentação pode ser alterada ou apagada, nem pelo próprio sistema.
 - **Qualidade:** 295 testes automatizados, entre backend, frontend e ponta a ponta.
@@ -110,7 +110,32 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
    ```
    O site abre em http://localhost:5173.
 
-Testes: `pytest` (dentro de `backend`), `npm run test` e `npm run test:e2e` (dentro de `frontend`).
+7. **Bancos dos testes.** Os testes automatizados nunca usam o banco de desenvolvimento: eles apagam e recriam o banco a cada execução, por isso cada um tem uma trava que recusa rodar se o nome do banco não terminar no sufixo esperado. Os valores de exemplo de todas as variáveis abaixo estão em `backend\.env.example`.
+
+   - **pytest:** precisa de um banco com nome terminado em `_test`, configurado em `TEST_DATABASE_URL` com o usuário dono do banco (as migrations rodam nele). Sem essa variável, ou com outro nome de banco, o pytest para antes de começar.
+   - **`npm run test:e2e`:** precisa do banco `estoque_e2e`, de um usuário da aplicação separado do dono e de três variáveis: `E2E_DATABASE_URL` (o dono), `E2E_APP_DATABASE_URL` (o usuário da aplicação, no mesmo banco) e `APP_DB_ROLE` (o nome desse usuário). O teste sobe a API com o usuário da aplicação, como em produção.
+   - **Opcional:** `TEST_APP_DATABASE_URL` (o banco `_test` com o usuário da aplicação) liga os testes de permissão do banco; sem ela, esses testes são pulados.
+
+   Para criar os bancos, no `psql` como `postgres` (troque as senhas):
+   ```sql
+   CREATE ROLE estoque LOGIN PASSWORD 'senha-do-dono';
+   CREATE ROLE estoque_app LOGIN PASSWORD 'senha-da-aplicacao';
+   CREATE DATABASE estoque_inteligente_test OWNER estoque;
+   CREATE DATABASE estoque_e2e OWNER estoque;
+   GRANT CONNECT ON DATABASE estoque_inteligente_test TO estoque_app;
+   GRANT CONNECT ON DATABASE estoque_e2e TO estoque_app;
+   ```
+   E no `backend\.env`:
+   ```
+   TEST_DATABASE_URL=postgresql+psycopg://estoque:senha-do-dono@localhost:5432/estoque_inteligente_test
+   TEST_APP_DATABASE_URL=postgresql+psycopg://estoque_app:senha-da-aplicacao@localhost:5432/estoque_inteligente_test
+   APP_DB_ROLE=estoque_app
+   E2E_DATABASE_URL=postgresql+psycopg://estoque:senha-do-dono@localhost:5432/estoque_e2e
+   E2E_APP_DATABASE_URL=postgresql+psycopg://estoque_app:senha-da-aplicacao@localhost:5432/estoque_e2e
+   ```
+   As permissões do usuário da aplicação nas tabelas são concedidas pelas próprias migrations, a partir da `APP_DB_ROLE`. O teste de ponta a ponta também usa as portas 8001 e 5175, que precisam estar livres.
+
+8. **Rodar os testes:** `pytest` (dentro de `backend`), `npm run test` e `npm run test:e2e` (dentro de `frontend`).
 
 ## Limitações conhecidas
 
@@ -132,3 +157,11 @@ O projeto foi conduzido com o engenheiro definindo a arquitetura, as regras de n
 - [Casos de teste](docs/casos-de-teste.md)
 - [Modelo de dados](docs/modelo-de-dados.md)
 - [Guia de deploy](docs/deploy.md)
+
+## Autor
+
+**Kaiky Jefferson Fernandes Lima** — [GitHub](https://github.com/kaikyjefferson0)
+
+## Licença
+
+Distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE).
