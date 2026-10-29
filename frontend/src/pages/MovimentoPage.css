@@ -43,6 +43,18 @@
   flex-basis: 100%;
 }
 
+/* Celular estreito: só a lupa, para o código lido caber inteiro no campo */
+@media (max-width: 400px) {
+  .leitura__botao span {
+    position: absolute;
+    width: var(--tamanho-oculto);
+    height: var(--tamanho-oculto);
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
 /* ---------- Produto lido ---------- */
 .registro__produto {
   display: flex;
@@ -117,12 +129,16 @@
 }
 
 /* ---------- Formulário ---------- */
+/* Mesma borda direita do campo do código: a largura do formulário mais o recuo dos dois lados,
+   como na leitura (campo de até --largura-formulario dentro do recuo do painel). O recuo fica numa
+   variável só, para o limite e o padding nunca se separarem (no celular os dois diminuem juntos) */
 .registro__formulario {
+  --recuo-registro: var(--esp-5);
   display: flex;
   flex-direction: column;
   gap: var(--esp-4);
-  max-width: var(--largura-formulario);
-  padding: var(--esp-0) var(--esp-5) var(--esp-5);
+  max-width: calc(var(--largura-formulario) + 2 * var(--recuo-registro));
+  padding: var(--esp-0) var(--recuo-registro) var(--recuo-registro);
 }
 
 .registro__campos {
@@ -178,7 +194,7 @@
   }
 
   .registro__formulario {
-    padding: var(--esp-0) var(--esp-4) var(--esp-4);
+    --recuo-registro: var(--esp-4);
   }
 
   /* Celular: "Registrar" e "Ler outro código" empilhados, na largura toda e alinhados */

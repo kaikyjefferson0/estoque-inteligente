@@ -460,6 +460,14 @@
   gap: var(--esp-2);
 }
 
+/* Celular: as ações descem para baixo do título; o botão sem fundo que abre a linha desconta o
+   próprio recuo, para o ícone alinhar com o título (o mesmo recuo das ações em Usuários) */
+@media (max-width: 480px) {
+  .pagina__acoes > .botao--fantasma:first-child {
+    margin-left: calc(-1 * var(--esp-4));
+  }
+}
+
 .painel {
   background: var(--cor-superficie);
   border: var(--borda);

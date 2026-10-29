@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { ApiError, api, mensagemDeErro } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
@@ -98,7 +99,16 @@ export function MinhaContaPage() {
             <dd>{NOME_DO_PERFIL[usuario.perfil]}</dd>
           </div>
         </dl>
-        <p className="conta__nota">Para mudar o nome ou o e-mail, fale com um administrador.</p>
+        {/* O e-mail é o login e não muda; o nome, o admin muda no próprio cadastro (RN-22 só
+            trava o perfil e a situação dele) e o operador pede a um administrador */}
+        {usuario.perfil === 'admin' ? (
+          <p className="conta__nota">
+            O e-mail é o login e não muda. Para mudar o nome,{' '}
+            <Link to={`/usuarios/${usuario.id}/editar`}>edite o seu cadastro em Usuários</Link>.
+          </p>
+        ) : (
+          <p className="conta__nota">O e-mail é o login e não muda. Para mudar o nome, fale com um administrador.</p>
+        )}
       </section>
 
       {usuario.demo ? (

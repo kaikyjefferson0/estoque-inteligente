@@ -219,7 +219,7 @@
 }
 
 .historico__paginacao {
-  padding: var(--esp-3) var(--esp-4);
+  padding: var(--esp-3) var(--esp-5);
   border-top: var(--borda);
 }
 
@@ -259,7 +259,8 @@
     grid-area: quantidade;
   }
 
-  .historico__item {
+  .historico__item,
+  .historico__paginacao {
     padding: var(--esp-3) var(--esp-4);
   }
 }

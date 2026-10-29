@@ -34,7 +34,16 @@ export function LeituraDeCodigo({ leitura, campoRef }: { leitura: Leitura; campo
         acessorio={
           <>
             <IconBarcode className="leitura__icone" aria-hidden />
-            <Botao type="submit" variante="fantasma" icone={IconSearch} carregando={leitura.buscando} textoCarregando="Buscando…" className="leitura__botao">
+            {/* aria-label: em telas estreitas o texto some e fica só o ícone (o código lido precisa caber) */}
+            <Botao
+              type="submit"
+              variante="fantasma"
+              icone={IconSearch}
+              carregando={leitura.buscando}
+              textoCarregando="Buscando…"
+              className="leitura__botao"
+              aria-label={leitura.buscando ? 'Buscando…' : 'Buscar'}
+            >
               Buscar
             </Botao>
           </>

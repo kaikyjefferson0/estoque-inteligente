@@ -121,3 +121,19 @@
   }
 }
 
+/* Celular: as três opções em uma grade de colunas iguais, ocupando a largura toda; o texto que
+   quebra em duas linhas fica centralizado (em linha, "Sem estoque" descia sozinho em 320px) */
+@media (max-width: 480px) {
+  .estoque__filtros .segmentos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .estoque__filtros .segmentos__opcao span {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    white-space: normal;
+  }
+}
