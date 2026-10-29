@@ -1,3 +1,4 @@
+import ipaddress
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
@@ -25,18 +26,26 @@ LIMITE_ESCRITA_DEMO = "30/minute;300/hour"
 MENSAGEM_LIMITE_DEMO = "A conta de demonstração fez muitas alterações seguidas. Aguarde um pouco e tente de novo."
 
 
-def ip_do_cliente(request: Request) -> str:
-    """IP usado como chave do limite.
+# RN-47: cabeçalhos que a Cloudflare (na frente do Render) define com o IP do visitante,
+# em ordem de preferência. O X-Forwarded-For fica de fora: o Render só acrescenta itens
+# ao que o cliente mandou, então ele pode ser falsificado.
+CABECALHOS_IP_DO_CLIENTE = ("true-client-ip", "cf-connecting-ip")
 
-    Atrás de um proxy confiável (Render), o IP real está no X-Forwarded-For. Usamos o
-    último item, que é o que o proxy acrescentou: os anteriores vêm do próprio cliente
-    e podem ser inventados para fugir do limite. Fora do proxy, o cabeçalho é ignorado.
+
+def ip_do_cliente(request: Request) -> str:
+    """IP usado como chave do limite (RN-47).
+
+    Atrás do proxy confiável (Render com Cloudflare), vale o primeiro cabeçalho da
+    Cloudflare que tiver um IP válido; sem nenhum, o IP da conexão. Fora do proxy, os
+    cabeçalhos são ignorados.
     """
     if settings.TRUST_PROXY_HEADERS:
-        encaminhado = request.headers.get("x-forwarded-for", "")
-        ips = [ip.strip() for ip in encaminhado.split(",") if ip.strip()]
-        if ips:
-            return ips[-1]
+        for nome in CABECALHOS_IP_DO_CLIENTE:
+            valor = request.headers.get(nome, "").strip()
+            try:
+                return str(ipaddress.ip_address(valor))
+            except ValueError:
+                continue
     return get_remote_address(request)
 
 

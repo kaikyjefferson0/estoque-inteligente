@@ -124,7 +124,7 @@ def test_limite_da_troca_de_senha_e_por_usuario(client, admin, token_admin, toke
     for i in range(5):
         resposta = client.post(
             "/auth/change-password",
-            headers={**auth(token_operador), "X-Forwarded-For": f"200.1.1.{i}"},
+            headers={**auth(token_operador), "True-Client-Ip": f"200.1.1.{i}"},
             json={"senha_atual": "senha-atual-errada", "senha_nova": SENHA_NOVA},
         )
         assert resposta.status_code == 422
@@ -143,24 +143,57 @@ def test_troca_de_senha_sem_login_nao_gasta_o_limite(client, token_operador):
     assert trocar(client, token_operador, SENHA_OPERADOR, SENHA_NOVA).status_code == 204
 
 
-def test_limite_ignora_x_forwarded_for_quando_desligado(client, admin, monkeypatch):
-    """Sem proxy confiável, trocar o X-Forwarded-For não dá tentativas novas."""
+def cabecalhos_de_ip(i: int) -> dict[str, str]:
+    return {"True-Client-Ip": f"10.0.1.{i}", "Cf-Connecting-Ip": f"10.0.2.{i}", "X-Forwarded-For": f"10.0.3.{i}"}
+
+
+def test_limite_ignora_cabecalhos_de_ip_quando_desligado(client, admin, monkeypatch):
+    """Sem proxy confiável, trocar True-Client-Ip, Cf-Connecting-Ip ou X-Forwarded-For não dá tentativas novas."""
     monkeypatch.setattr(settings, "TRUST_PROXY_HEADERS", False)
     for i in range(10):
-        assert login(client, admin.email, "errada-123", {"X-Forwarded-For": f"10.0.0.{i}"}).status_code == 401
-    assert login(client, admin.email, "errada-123", {"X-Forwarded-For": "10.0.0.99"}).status_code == 429
+        assert login(client, admin.email, "errada-123", cabecalhos_de_ip(i)).status_code == 401
+    assert login(client, admin.email, "errada-123", cabecalhos_de_ip(99)).status_code == 429
 
 
-def test_limite_usa_ip_do_proxy_quando_ligado(client, admin, monkeypatch):
-    """Atrás do proxy, conta pelo IP que o proxy acrescentou (o último); o primeiro, inventável, não muda nada."""
+def test_x_forwarded_for_falsificado_nao_muda_a_chave(client, admin, monkeypatch):
+    """Atrás do proxy, um X-Forwarded-For inventado a cada tentativa não dá tentativas novas."""
     monkeypatch.setattr(settings, "TRUST_PROXY_HEADERS", True)
     for i in range(10):
-        cabecalho = {"X-Forwarded-For": f"1.2.3.{i}, 200.1.1.1"}
+        cabecalho = {"True-Client-Ip": "200.1.1.1", "X-Forwarded-For": f"1.2.3.{i}, 5.6.7.{i}"}
         assert login(client, admin.email, "errada-123", cabecalho).status_code == 401
-    assert login(client, admin.email, "errada-123", {"X-Forwarded-For": "9.9.9.9, 200.1.1.1"}).status_code == 429
+    cabecalho = {"True-Client-Ip": "200.1.1.1", "X-Forwarded-For": "9.9.9.9"}
+    assert login(client, admin.email, "errada-123", cabecalho).status_code == 429
 
-    # Outro IP real tem a própria contagem
-    assert login(client, admin.email, SENHA_ADMIN, {"X-Forwarded-For": "200.2.2.2"}).status_code == 200
+    # Sem os cabeçalhos da Cloudflare, vale o IP da conexão, também sem olhar o X-Forwarded-For
+    for i in range(10):
+        assert login(client, admin.email, "errada-123", {"X-Forwarded-For": f"8.8.8.{i}"}).status_code == 401
+    assert login(client, admin.email, "errada-123", {"X-Forwarded-For": "8.8.8.99"}).status_code == 429
+
+
+def test_limite_usa_true_client_ip_quando_existe(client, admin, monkeypatch):
+    """O True-Client-Ip vale mesmo com outro Cf-Connecting-Ip na mesma requisição."""
+    monkeypatch.setattr(settings, "TRUST_PROXY_HEADERS", True)
+    for i in range(10):
+        cabecalho = {"True-Client-Ip": "200.1.1.1", "Cf-Connecting-Ip": f"10.0.0.{i}"}
+        assert login(client, admin.email, "errada-123", cabecalho).status_code == 401
+    cabecalho = {"True-Client-Ip": "200.1.1.1", "Cf-Connecting-Ip": "10.0.0.99"}
+    assert login(client, admin.email, "errada-123", cabecalho).status_code == 429
+
+    # Outro True-Client-Ip tem a própria contagem
+    assert login(client, admin.email, SENHA_ADMIN, {"True-Client-Ip": "200.2.2.2"}).status_code == 200
+
+
+def test_limite_usa_cf_connecting_ip_na_falta_do_true_client_ip(client, admin, monkeypatch):
+    """Sem True-Client-Ip (ou com um valor que não é IP), vale o Cf-Connecting-Ip."""
+    monkeypatch.setattr(settings, "TRUST_PROXY_HEADERS", True)
+    for i in range(10):
+        cabecalho = {"Cf-Connecting-Ip": "200.3.3.3", "X-Forwarded-For": f"1.2.3.{i}"}
+        assert login(client, admin.email, "errada-123", cabecalho).status_code == 401
+    cabecalho = {"True-Client-Ip": "nao-e-ip", "Cf-Connecting-Ip": "200.3.3.3"}
+    assert login(client, admin.email, "errada-123", cabecalho).status_code == 429
+
+    # Outro Cf-Connecting-Ip tem a própria contagem
+    assert login(client, admin.email, SENHA_ADMIN, {"Cf-Connecting-Ip": "200.4.4.4"}).status_code == 200
 
 
 def test_limite_vale_so_para_o_login(client, token_admin):

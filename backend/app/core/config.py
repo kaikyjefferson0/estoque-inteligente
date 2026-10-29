@@ -67,7 +67,7 @@ def validar_ambiente(app_env: str, no_render: bool, confia_no_proxy: bool) -> No
     # O Render define RENDER sozinho: esquecer o APP_ENV lá deixaria /docs aberto e sem HSTS
     if no_render and app_env != "production":
         raise RuntimeError("A API está rodando no Render, mas APP_ENV não é production. Defina APP_ENV=production.")
-    # Atrás do proxy, sem ler o X-Forwarded-For todos os clientes teriam o IP do proxy e
+    # Atrás do proxy, sem ler o True-Client-Ip todos os clientes teriam o IP do proxy e
     # dividiriam o mesmo limite de login (RN-47): 10 tentativas de qualquer um travariam todos
     if app_env == "production" and not confia_no_proxy:
         raise RuntimeError("Em production, defina TRUST_PROXY_HEADERS=true (a API fica atrás do proxy do Render).")
@@ -91,7 +91,7 @@ class Settings:
     # Opcional: origens do frontend autorizadas a chamar a API
     CORS_ORIGINS: list[str] = ler_cors_origins(os.getenv("CORS_ORIGINS"))
     # RN-47: só ligar quando a API estiver atrás de um proxy confiável (Render);
-    # desligada, o X-Forwarded-For é ignorado e vale o IP da conexão
+    # desligada, o True-Client-Ip e o Cf-Connecting-Ip são ignorados e vale o IP da conexão
     TRUST_PROXY_HEADERS: bool = ler_booleano(os.getenv("TRUST_PROXY_HEADERS"))
     # production desliga /docs, /redoc e /openapi.json e liga o HSTS
     APP_ENV: str = ler_ambiente(os.getenv("APP_ENV"))
