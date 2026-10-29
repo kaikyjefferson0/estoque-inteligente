@@ -1,16 +1,9 @@
 """Recriação de um banco descartável pelas migrations, usada pelo pytest (_test) e pelo teste de ponta a ponta (_e2e)."""
 
-from pathlib import Path
-
-from alembic import command
-from alembic.config import Config
-from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
-import app.models  # noqa: F401  (registra as tabelas no Base.metadata)
-from app.core.database import Base
+from app.core import migracoes
 
-PASTA_BACKEND = Path(__file__).resolve().parents[1]
 # Só bancos descartáveis: o do pytest e o do teste de ponta a ponta
 SUFIXOS_PERMITIDOS = ("_test", "_e2e")
 
@@ -25,10 +18,7 @@ def _conferir_descartavel(engine: Engine) -> None:
 def apagar_tudo(engine) -> None:
     """Apaga tabelas, versão do Alembic e a função do trigger (RN-12), que o drop_all não alcança."""
     _conferir_descartavel(engine)
-    Base.metadata.drop_all(engine)
-    with engine.begin() as conexao:
-        conexao.execute(text("DROP TABLE IF EXISTS alembic_version"))
-        conexao.execute(text("DROP FUNCTION IF EXISTS stock_movements_imutavel()"))
+    migracoes.apagar_estrutura(engine)
 
 
 def recriar_banco(engine, app_db_role: str) -> None:
@@ -39,9 +29,4 @@ def recriar_banco(engine, app_db_role: str) -> None:
     então o jeito é recriar.
     """
     apagar_tudo(engine)
-    config = Config()
-    config.set_main_option("script_location", str(PASTA_BACKEND / "alembic"))
-    # Lidos pelo alembic\env.py e pela migration de permissões
-    config.attributes["url"] = engine.url.render_as_string(hide_password=False)
-    config.attributes["app_db_role"] = app_db_role
-    command.upgrade(config, "head")
+    migracoes.aplicar_migrations(engine, app_db_role)

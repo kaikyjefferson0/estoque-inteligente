@@ -63,6 +63,8 @@ class Settings:
     # RN-50: as migrations usam o usuário dono; sem a variável, caem na DATABASE_URL
     # (instalação com um usuário só)
     MIGRATIONS_DATABASE_URL: str = os.getenv("MIGRATIONS_DATABASE_URL", "").strip() or DATABASE_URL
+    # RN-54: a recriação do demo exige a URL do dono escrita de propósito, sem cair na DATABASE_URL
+    MIGRATIONS_DATABASE_URL_DEFINIDA: bool = bool(os.getenv("MIGRATIONS_DATABASE_URL", "").strip())
     # RN-50: opcional; com valor, a migration de permissões concede a esse usuário só o necessário
     APP_DB_ROLE: str = os.getenv("APP_DB_ROLE", "").strip()
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
@@ -78,6 +80,13 @@ class Settings:
     TRUST_PROXY_HEADERS: bool = ler_booleano(os.getenv("TRUST_PROXY_HEADERS"))
     # production desliga /docs, /redoc e /openapi.json e liga o HSTS
     APP_ENV: str = ler_ambiente(os.getenv("APP_ENV"))
+    # RN-54 e RN-55: modo de demonstração. Ligado, a API recria os dados de exemplo ao iniciar
+    # (se a última recriação passou de 24 horas) com estas contas. Desligado, nada disso é lido.
+    DEMO_MODE: bool = ler_booleano(os.getenv("DEMO_MODE"))
+    DEMO_EMAIL: str = os.getenv("DEMO_EMAIL", "").strip() or "demo@exemplo.com.br"
+    DEMO_PASSWORD: str = os.getenv("DEMO_PASSWORD", "")
+    ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "").strip()
+    ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "")
     # Definida pelo próprio Render em todos os serviços dele
     NO_RENDER: bool = bool(os.getenv("RENDER", "").strip())
 

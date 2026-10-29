@@ -68,3 +68,5 @@ class UserOut(BaseModel):
     perfil: Perfil
     ativo: bool
     criado_em: datetime
+    # RN-53: o frontend esconde a troca de senha da conta de demonstração
+    demo: bool

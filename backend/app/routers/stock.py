@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
+from app.core.limiter import limitar_escrita_da_demo
 from app.models.user import User
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.stock import (
@@ -37,7 +38,7 @@ def listar_estoque(
     return service.listar_estoque(db, pagina.limite, pagina.deslocamento, situacao=situacao, busca=busca)
 
 
-@router.post("/stock/entries", response_model=StockEntryOut, status_code=status.HTTP_201_CREATED)
+@router.post("/stock/entries", response_model=StockEntryOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(limitar_escrita_da_demo)])  # RN-56
 def registrar_entrada(
     dados: StockEntryCreate,
     db: Annotated[Session, Depends(get_db)],
@@ -63,7 +64,7 @@ def registrar_entrada(
     )
 
 
-@router.post("/stock/exits", response_model=StockExitOut, status_code=status.HTTP_201_CREATED)
+@router.post("/stock/exits", response_model=StockExitOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(limitar_escrita_da_demo)])  # RN-56
 def registrar_saida(
     dados: StockExitCreate,
     db: Annotated[Session, Depends(get_db)],

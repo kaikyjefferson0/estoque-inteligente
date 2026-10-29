@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
@@ -5,6 +7,7 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.limiter import limite_excedido, limiter
 from app.routers import alerts, auth, dashboard, products, stock, suppliers, users
+from app.services import demo
 
 # Valem para todas as respostas: a API só devolve JSON e nunca é aberta dentro de outra página
 CABECALHOS_DE_SEGURANCA = {
@@ -16,6 +19,15 @@ CABECALHOS_DE_SEGURANCA = {
 HSTS = "max-age=31536000; includeSubDomains"
 
 
+@asynccontextmanager
+async def ciclo_de_vida(app: FastAPI):
+    # RN-54: no modo de demonstração, recria os dados de exemplo se a última recriação passou
+    # de 24 horas. Configuração errada impede a API de subir (melhor que um demo quebrado).
+    if settings.DEMO_MODE:
+        demo.recriar_se_preciso(demo.ler_config_demo(settings))
+    yield
+
+
 def criar_app() -> FastAPI:
     # Em produção a documentação interativa e o esquema da API ficam desligados
     documentacao = not settings.em_producao
@@ -24,6 +36,7 @@ def criar_app() -> FastAPI:
         docs_url="/docs" if documentacao else None,
         redoc_url="/redoc" if documentacao else None,
         openapi_url="/openapi.json" if documentacao else None,
+        lifespan=ciclo_de_vida,
     )
 
     # RN-47 e RN-52: limites de tentativas (o decorador fica na rota)

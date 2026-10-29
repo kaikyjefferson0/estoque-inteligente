@@ -51,4 +51,6 @@ def configurar() -> tuple[str, str]:
     os.environ["MIGRATIONS_DATABASE_URL"] = url_dono
     os.environ["CORS_ORIGINS"] = ORIGEM_SITE
     os.environ["TRUST_PROXY_HEADERS"] = "false"
+    # RN-54: a API da porta 8001 nunca recria o banco (apagaria o admin e o operador preparados)
+    os.environ["DEMO_MODE"] = "false"
     return url_dono, url_app

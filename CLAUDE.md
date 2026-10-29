@@ -33,6 +33,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Rodar a API: `uvicorn app.main:app --reload` (dentro de `backend`)
 - Testes: `pytest` (dentro de `backend`)
 - Migrations: `alembic upgrade head`
+- Recriar os dados de demonstração (apaga todo o banco; só com `DEMO_MODE=true` e a URL do dono): `py -m app.scripts.reset_demo`
 
 ## Comandos do frontend (dentro de `frontend`)
 - Instalar dependências: `npm install`
@@ -62,4 +63,4 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - [x] Fase 10: dashboard (CT-20) — concluída
 - [x] Fase 11: frontend React — concluída
 - [x] Fase 12: revisão final e segurança — concluída (A: limite de login, troca de senha e auditoria; B: menor privilégio no banco, testes pelas migrations e concorrência; C: paginação, testes do frontend e teste de ponta a ponta)
-- [ ] Fase 13: deploy no Render e README — em andamento (A: ajustes de segurança antes do deploy concluída)
+- [ ] Fase 13: deploy no Render e README — em andamento (A: ajustes de segurança antes do deploy concluída; B: modo de demonstração com dados de exemplo concluída)

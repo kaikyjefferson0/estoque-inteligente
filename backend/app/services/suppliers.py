@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.models.supplier import Supplier
 from app.services.paginacao import padrao_de_busca, paginar
+from app.services.teto_demo import TetoDoDemoError, conferir_teto  # noqa: F401  (a rota trata o erro)
 
 PONTUACAO_CNPJ = re.compile(r"[.\-/\s]")
 CNPJ_14_DIGITOS = re.compile(r"[0-9]{14}")
@@ -60,6 +61,7 @@ def _salvar(db: Session, fornecedor: Supplier, cnpj: str | None) -> Supplier:
 
 
 def criar_fornecedor(db: Session, nome: str, cnpj: str | None = None) -> Supplier:
+    conferir_teto(db, Supplier, "fornecedores")  # RN-57
     cnpj = normalizar_cnpj(cnpj)
     if _cnpj_em_uso(db, cnpj):
         raise CnpjJaCadastradoError(cnpj)

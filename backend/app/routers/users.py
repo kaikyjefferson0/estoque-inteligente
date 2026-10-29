@@ -46,7 +46,7 @@ def atualizar(
         return service.atualizar_usuario(db, admin, usuario_id, dados.model_dump(exclude_unset=True))
     except service.UsuarioNaoEncontradoError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado. Atualize a lista de usuários.")
-    except service.AutoAlteracaoProibidaError as erro:
+    except (service.AutoAlteracaoProibidaError, service.PerfilDaContaDemoError) as erro:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 

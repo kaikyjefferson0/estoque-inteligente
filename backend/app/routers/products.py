@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.limiter import limitar_escrita_da_demo
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.products import ProductCreate, ProductOut, ProductUpdate
 from app.services import products as service
@@ -23,7 +24,7 @@ def listar(
     return service.listar_produtos(db, pagina.limite, pagina.deslocamento, busca)
 
 
-@router.post("", response_model=ProductOut, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=ProductOut, status_code=status.HTTP_201_CREATED, dependencies=[Depends(limitar_escrita_da_demo)])  # RN-56
 def criar(dados: ProductCreate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.criar_produto(db, **dados.model_dump())
@@ -33,6 +34,8 @@ def criar(dados: ProductCreate, db: Annotated[Session, Depends(get_db)]):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="O fornecedor escolhido não existe mais. Escolha outro fornecedor ou deixe sem fornecedor.")
     except service.CodigoBarrasJaCadastradoError:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Este código de barras já está cadastrado em outro produto. Confira o código ou edite o produto existente.")
+    except service.TetoDoDemoError as erro:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(erro))
 
 
 @router.get("/by-barcode/{codigo_barras}", response_model=ProductOut)
@@ -54,7 +57,7 @@ def obter(produto_id: int, db: Annotated[Session, Depends(get_db)]):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
 
 
-@router.patch("/{produto_id}", response_model=ProductOut, dependencies=[Depends(get_current_user)])
+@router.patch("/{produto_id}", response_model=ProductOut, dependencies=[Depends(get_current_user), Depends(limitar_escrita_da_demo)])  # RN-56
 def atualizar(produto_id: int, dados: ProductUpdate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.atualizar_produto(db, produto_id, dados.model_dump(exclude_unset=True))

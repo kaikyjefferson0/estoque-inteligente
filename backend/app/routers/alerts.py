@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.core.limiter import limitar_escrita_da_demo
 from app.schemas.alerts import AlertGenerationOut, AlertOut, TipoAlerta
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.products import MAX_INTEGER
@@ -28,7 +29,7 @@ def listar_alertas(
     )
 
 
-@router.post("/generate", response_model=AlertGenerationOut)
+@router.post("/generate", response_model=AlertGenerationOut, dependencies=[Depends(limitar_escrita_da_demo)])  # RN-56
 def gerar_alertas(db: Annotated[Session, Depends(get_db)]):
     resultado = service.gerar_alertas(db)
     return AlertGenerationOut(criados=resultado.criados, resolvidos=resultado.resolvidos)

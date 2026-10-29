@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.core.limiter import limiter
+from app.core.limiter import contagem_demo, limiter
 from app.core.security import create_access_token
 from app.main import app
 from app.services.products import criar_produto
@@ -76,12 +76,23 @@ def client(db) -> Generator[TestClient, None, None]:
         app.dependency_overrides.clear()
 
 
+@pytest.fixture(scope="session", autouse=True)
+def modo_demo_desligado():
+    """RN-54: com DEMO_MODE=true no backend\\.env, subir a API num teste recriaria o banco real
+    (MIGRATIONS_DATABASE_URL). Os testes do demo ligam o modo só onde precisam."""
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(settings, "DEMO_MODE", False)
+        yield
+
+
 @pytest.fixture(autouse=True)
 def limite_de_login_zerado():
-    """RN-47: a contagem de tentativas fica em memória; cada teste começa do zero."""
+    """RN-47, RN-52 e RN-56: as contagens ficam em memória; cada teste começa do zero."""
     limiter.reset()
+    contagem_demo.reset()
     yield
     limiter.reset()
+    contagem_demo.reset()
 
 
 @pytest.fixture

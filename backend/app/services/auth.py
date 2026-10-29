@@ -37,8 +37,15 @@ class SenhaNovaIgualError(Exception):
     pass
 
 
+class ContaDemonstracaoError(Exception):
+    """RN-53: a conta de demonstração não troca a própria senha."""
+
+
 def trocar_senha(db: Session, usuario: User, senha_atual: str, senha_nova: str) -> None:
     """RN-48: confere a senha atual, exige uma nova diferente e invalida os tokens anteriores."""
+    # RN-53: antes de conferir a senha, para a recusa não revelar se a senha atual estava certa
+    if usuario.demo:
+        raise ContaDemonstracaoError()
     if not verify_password(senha_atual, usuario.senha_hash):
         raise SenhaAtualIncorretaError()
     if verify_password(senha_nova, usuario.senha_hash):

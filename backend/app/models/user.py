@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, String, func, true
+from sqlalchemy import Boolean, CheckConstraint, DateTime, String, false, func, true
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -13,6 +13,8 @@ class User(Base):
         CheckConstraint("perfil IN ('admin', 'operador')", name="ck_users_perfil"),
         # E-mail sempre salvo em minúsculas (o service normaliza; o banco garante)
         CheckConstraint("email = lower(email)", name="ck_users_email_minusculo"),
+        # RN-55: a conta de demonstração é sempre operador
+        CheckConstraint("NOT demo OR perfil = 'operador'", name="ck_users_demo_operador"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -25,3 +27,5 @@ class User(Base):
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     # RN-48 e RN-49: tokens emitidos antes da última troca de senha não valem; vazio se nunca trocou
     senha_alterada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    # RN-53 e RN-55: conta de demonstração (só a recriação do demo marca)
+    demo: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())

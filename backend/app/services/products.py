@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.models.supplier import Supplier
 from app.services import alerts as alertas
 from app.services.paginacao import padrao_de_busca, paginar
+from app.services.teto_demo import TetoDoDemoError, conferir_teto  # noqa: F401  (a rota trata o erro)
 
 CAMPOS_EDITAVEIS = (
     "nome",
@@ -91,6 +92,7 @@ def criar_produto(
     fornecedor_id: int | None = None,
 ) -> Product:
     codigo_barras = codigo_barras.strip()
+    conferir_teto(db, Product, "produtos")  # RN-57
     _validar_validade(controla_validade, dias_alerta_validade)
     _validar_fornecedor(db, fornecedor_id)
     if _codigo_em_uso(db, codigo_barras):

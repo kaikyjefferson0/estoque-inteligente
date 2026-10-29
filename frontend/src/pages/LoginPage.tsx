@@ -2,6 +2,7 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react'
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { ApiError, mensagemDeErro } from '../api/client'
+import { CONTA_DEMO, type ContaDemo } from '../auth/demo'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
 import { Botao } from '../components/Botao'
@@ -25,7 +26,7 @@ function validar(email: string, senha: string): ErrosDeCampo<CampoLogin> {
   return erros
 }
 
-export function LoginPage() {
+export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | null }) {
   useTituloDaPagina('Entrar')
   const { usuario, entrar, senhaTrocada } = useAuth()
   const navigate = useNavigate()
@@ -37,7 +38,8 @@ export function LoginPage() {
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const { erros, anuncio, limpar, mostrar } = useErrosDoFormulario(CAMPOS)
   const [erroGeral, setErroGeral] = useState<string | null>(null)
-  const [enviando, setEnviando] = useState(false)
+  // Qual botão está entrando: o do formulário ou o da demonstração
+  const [enviando, setEnviando] = useState<'formulario' | 'demo' | null>(null)
 
   if (usuario) return <Navigate to={estado?.de ?? '/'} replace />
 
@@ -46,10 +48,21 @@ export function LoginPage() {
     const form = evento.currentTarget
     setErroGeral(null)
     if (!mostrar(form, validar(email, senha))) return
+    await entrarCom(email.trim(), senha, 'formulario', form)
+  }
 
-    setEnviando(true)
+  async function entrarComoDemonstracao() {
+    if (!contaDemo) return
+    setErroGeral(null)
+    limpar('email')
+    limpar('senha')
+    await entrarCom(contaDemo.email, contaDemo.senha, 'demo')
+  }
+
+  async function entrarCom(emailUsado: string, senhaUsada: string, botao: 'formulario' | 'demo', form?: HTMLFormElement) {
+    setEnviando(botao)
     try {
-      await entrar(email.trim(), senha)
+      await entrar(emailUsado, senhaUsada)
       navigate(estado?.de ?? '/', { replace: true })
     } catch (erro) {
       // RN-03: a API devolve a mesma mensagem genérica para qualquer falha de login
@@ -58,14 +71,14 @@ export function LoginPage() {
       } else if (erro instanceof ApiError && erro.status === 429) {
         // RN-47: a API já diz quanto esperar
         setErroGeral(erro.message)
-      } else if (erro instanceof ApiError && Object.keys(erro.campos).length > 0) {
+      } else if (form && erro instanceof ApiError && Object.keys(erro.campos).length > 0) {
         // 422: o formulário OAuth2 chama os campos de username e password
         mostrar(form, { email: erro.campos.username, senha: erro.campos.password })
         setErroGeral(erro.message)
       } else {
         setErroGeral(mensagemDeErro(erro))
       }
-      setEnviando(false)
+      setEnviando(null)
     }
   }
 
@@ -136,10 +149,40 @@ export function LoginPage() {
               </button>
             }
           />
-          <Botao type="submit" variante="primaria" larguraTotal carregando={enviando} textoCarregando="Entrando…">
+          <Botao
+            type="submit"
+            variante="primaria"
+            larguraTotal
+            carregando={enviando === 'formulario'}
+            disabled={enviando === 'demo'}
+            textoCarregando="Entrando…"
+          >
             Entrar
           </Botao>
         </form>
+
+        {contaDemo && (
+          <section className="login__demo" aria-labelledby="login-demo">
+            <h2 id="login-demo" className="login__demo-titulo">
+              Só quer conhecer o sistema?
+            </h2>
+            <p className="login__apoio">
+              Entre como operador numa conta de demonstração, com dados de exemplo. Tudo o que você mudar volta ao original
+              uma vez por dia.
+            </p>
+            <Botao
+              type="button"
+              variante="secundaria"
+              larguraTotal
+              onClick={entrarComoDemonstracao}
+              carregando={enviando === 'demo'}
+              disabled={enviando === 'formulario'}
+              textoCarregando="Entrando…"
+            >
+              Entrar como demonstração
+            </Botao>
+          </section>
+        )}
       </main>
     </div>
   )

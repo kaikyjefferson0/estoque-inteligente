@@ -79,3 +79,9 @@ def test_ct61_app_nao_cria_nem_altera_tabelas(conexao_app):
     assert_recusado_por_permissao(conexao_app, "ALTER TABLE products ADD COLUMN coluna_intrusa integer")
     assert_recusado_por_permissao(conexao_app, "DROP TABLE alerts")
     assert_recusado_por_permissao(conexao_app, "SELECT * FROM alembic_version")
+
+
+def test_app_nao_le_nem_grava_a_data_da_recriacao_do_demo(conexao_app):
+    """RN-50 e RN-54: só a recriação (usuário dono) usa a tabela demo_resets."""
+    for privilegio in ("SELECT", "INSERT", "UPDATE", "DELETE"):
+        assert not tem_permissao(conexao_app, "demo_resets", privilegio), privilegio

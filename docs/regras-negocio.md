@@ -66,5 +66,12 @@
 ## Banco de dados
 - RN-50: a API usa um usuário de banco sem poder de alterar a estrutura; no histórico (stock_movements) ele só lê e insere. Só as migrations usam o usuário dono.
 
+## Demonstração
+- RN-53: a conta de demonstração não troca a própria senha: a troca (RN-48) responde 403 "A conta de demonstração não pode trocar a senha." e a senha continua a mesma, para um visitante não trancar o demo para os outros. A tela "Minha conta" dessa conta esconde o formulário de troca e explica o motivo.
+- RN-54: com `DEMO_MODE=true`, os dados de exemplo são recriados do zero pelas migrations (como no teste de ponta a ponta), porque o histórico não aceita DELETE (RN-12). A recriação roda ao iniciar a API, se a última (data guardada no banco) foi há mais de 24 horas ou nunca aconteceu, e pelo comando manual `py -m app.scripts.reset_demo`, que recria na hora. Sem `DEMO_MODE=true`, sem a URL do usuário dono (`MIGRATIONS_DATABASE_URL`) ou sem as variáveis das contas, a recriação é recusada antes de tocar no banco. Duas recriações nunca rodam ao mesmo tempo.
+- RN-55: a recriação cria só duas contas: o admin do dono do sistema, a partir de `ADMIN_EMAIL` e `ADMIN_PASSWORD`, e a conta de demonstração (`DEMO_EMAIL`, senha em `DEMO_PASSWORD`), que é sempre operador. Senhas e e-mails vêm de variáveis de ambiente, nunca do código. Nenhum outro admin é criado, e o `revisor-ui@estoque.local` nunca. O perfil da conta de demonstração não pode ser mudado (409), e o banco também recusa uma conta de demonstração admin. Tokens emitidos antes da recriação deixam de valer.
+- RN-56: a conta de demonstração faz no máximo 30 alterações por minuto e 300 por hora, contadas por usuário (cadastrar e editar produto ou fornecedor, entrada, saída e geração de alertas); acima disso responde 429 "A conta de demonstração fez muitas alterações seguidas. Aguarde um pouco e tente de novo." As outras contas não têm esse limite. A contagem fica em memória, como a da RN-47.
+- RN-57: com `DEMO_MODE=true`, o sistema aceita no máximo 100 produtos e 100 fornecedores; acima disso o cadastro responde 409 "A demonstração chegou ao limite de 100 produtos (ou fornecedores). Os dados de exemplo voltam ao original uma vez por dia." Editar continua permitido. Fora do modo de demonstração não há teto.
+
 ## Pontos a confirmar
 - Nenhum no momento.

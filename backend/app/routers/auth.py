@@ -58,6 +58,9 @@ def trocar_senha(
 ):
     try:
         service.trocar_senha(db, usuario, dados.senha_atual, dados.senha_nova)
+    except service.ContaDemonstracaoError:
+        # RN-53: um visitante não pode trancar o demo para os outros
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="A conta de demonstração não pode trocar a senha.")
     except service.SenhaAtualIncorretaError:
         raise erro_de_campo("senha_atual", "A senha atual não confere. Digite a senha que você usa para entrar.")
     except service.SenhaNovaIgualError:

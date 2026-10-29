@@ -1,18 +1,28 @@
-from fastapi import Request
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.security.utils import get_authorization_scheme_param
+from limits import parse_many
+from limits.storage import MemoryStorage
+from limits.strategies import FixedWindowRateLimiter
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from app.core.config import settings
+from app.core.deps import get_current_user
 from app.core.security import decode_access_token
+from app.models.user import User
 
 # RN-47: no máximo 10 tentativas de login por minuto por IP
 LIMITE_LOGIN = "10/minute"
 # RN-52: no máximo 5 tentativas de troca de senha por minuto por usuário
 LIMITE_TROCA_SENHA = "5/minute"
 MENSAGEM_LIMITE = "Muitas tentativas. Aguarde um minuto e tente de novo."
+# RN-56: alterações da conta de demonstração, por usuário
+LIMITE_ESCRITA_DEMO = "30/minute;300/hour"
+MENSAGEM_LIMITE_DEMO = "A conta de demonstração fez muitas alterações seguidas. Aguarde um pouco e tente de novo."
 
 
 def ip_do_cliente(request: Request) -> str:
@@ -50,3 +60,22 @@ limiter = Limiter(key_func=ip_do_cliente)
 
 def limite_excedido(request: Request, exc: RateLimitExceeded) -> JSONResponse:
     return JSONResponse(status_code=429, content={"detail": MENSAGEM_LIMITE}, headers={"Retry-After": "60"})
+
+
+# RN-56: contagem própria em memória (o conftest zera junto com a do limiter)
+contagem_demo = MemoryStorage()
+_janelas_demo = FixedWindowRateLimiter(contagem_demo)
+_limites_demo = parse_many(LIMITE_ESCRITA_DEMO)
+
+
+def limitar_escrita_da_demo(usuario: Annotated[User, Depends(get_current_user)]) -> None:
+    """RN-56: só a conta de demonstração é limitada; confere todas as janelas antes de contar."""
+    if not usuario.demo:
+        return
+    chave = str(usuario.id)
+    if not all(_janelas_demo.test(limite, "escrita-demo", chave) for limite in _limites_demo):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=MENSAGEM_LIMITE_DEMO, headers={"Retry-After": "60"}
+        )
+    for limite in _limites_demo:
+        _janelas_demo.hit(limite, "escrita-demo", chave)

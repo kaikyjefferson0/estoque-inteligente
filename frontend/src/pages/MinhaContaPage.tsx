@@ -33,7 +33,7 @@ function validar({ atual, nova, confirmacao }: Valores): ErrosDeCampo<CampoSenha
   return erros
 }
 
-// RN-48: qualquer usuário logado vê os próprios dados e troca a própria senha
+// RN-48: qualquer usuário logado vê os próprios dados e troca a própria senha (menos a conta de demonstração, RN-53)
 export function MinhaContaPage() {
   useTituloDaPagina('Minha conta')
   const { usuario, sairAposTrocarSenha } = useAuth()
@@ -101,60 +101,73 @@ export function MinhaContaPage() {
         <p className="conta__nota">Para mudar o nome ou o e-mail, fale com um administrador.</p>
       </section>
 
-      <form className="painel formulario" onSubmit={aoEnviar} noValidate aria-labelledby="conta-senha">
-        <div>
+      {usuario.demo ? (
+        // RN-53: um visitante não pode trancar a demonstração para os outros
+        <section className="painel conta" aria-labelledby="conta-senha">
           <h2 id="conta-senha" className="conta__titulo">
-            Trocar senha
+            Senha
           </h2>
-          <p className="conta__nota">Depois de trocar, você entra de novo com a nova senha, e os outros acessos abertos com a sua conta são encerrados.</p>
-        </div>
-        <AnuncioDeErros mensagem={anuncio} />
-        {erroGeral && (
-          <Aviso situacao="critico">
-            <p>{erroGeral}</p>
-          </Aviso>
-        )}
-        {/* Campo oculto de usuário: o gerenciador de senhas sabe de qual conta é a senha */}
-        <input type="email" name="email" autoComplete="username" value={usuario.email} readOnly hidden />
-        <Campo
-          rotulo="Senha atual"
-          name="senha_atual"
-          type="password"
-          autoComplete="current-password"
-          maxLength={SENHA_MAXIMA}
-          value={valores.atual}
-          onChange={(e) => alterar('atual', e.target.value, 'senha_atual')}
-          erro={erros.senha_atual}
-        />
-        <div className="formulario__grupo">
+          <p className="conta__nota">
+            Esta é a conta de demonstração, usada por todos os visitantes. Por isso a senha dela não pode ser trocada: assim
+            ninguém tranca a demonstração para os outros.
+          </p>
+        </section>
+      ) : (
+        <form className="painel formulario" onSubmit={aoEnviar} noValidate aria-labelledby="conta-senha">
+          <div>
+            <h2 id="conta-senha" className="conta__titulo">
+              Trocar senha
+            </h2>
+            <p className="conta__nota">Depois de trocar, você entra de novo com a nova senha, e os outros acessos abertos com a sua conta são encerrados.</p>
+          </div>
+          <AnuncioDeErros mensagem={anuncio} />
+          {erroGeral && (
+            <Aviso situacao="critico">
+              <p>{erroGeral}</p>
+            </Aviso>
+          )}
+          {/* Campo oculto de usuário: o gerenciador de senhas sabe de qual conta é a senha */}
+          <input type="email" name="email" autoComplete="username" value={usuario.email} readOnly hidden />
           <Campo
-            rotulo="Nova senha"
-            name="senha_nova"
+            rotulo="Senha atual"
+            name="senha_atual"
             type="password"
-            autoComplete="new-password"
+            autoComplete="current-password"
             maxLength={SENHA_MAXIMA}
-            dica={erros.senha_nova ? undefined : `Pelo menos ${SENHA_MINIMA} caracteres, diferente da atual.`}
-            value={valores.nova}
-            onChange={(e) => alterar('nova', e.target.value, 'senha_nova', 'confirmacao')}
-            erro={erros.senha_nova}
+            value={valores.atual}
+            onChange={(e) => alterar('atual', e.target.value, 'senha_atual')}
+            erro={erros.senha_atual}
           />
-          <Campo
-            rotulo="Confirme a nova senha"
-            name="confirmacao"
-            type="password"
-            autoComplete="new-password"
-            maxLength={SENHA_MAXIMA}
-            value={valores.confirmacao}
-            onChange={(e) => alterar('confirmacao', e.target.value, 'confirmacao')}
-            erro={erros.confirmacao}
-          />
-        </div>
-        <div className="formulario__acoes">
-          <Botao type="submit" variante="primaria" carregando={enviando} textoCarregando="Trocando…">
-            Trocar senha
-          </Botao>
-        </div>
-      </form>
+          <div className="formulario__grupo">
+            <Campo
+              rotulo="Nova senha"
+              name="senha_nova"
+              type="password"
+              autoComplete="new-password"
+              maxLength={SENHA_MAXIMA}
+              dica={erros.senha_nova ? undefined : `Pelo menos ${SENHA_MINIMA} caracteres, diferente da atual.`}
+              value={valores.nova}
+              onChange={(e) => alterar('nova', e.target.value, 'senha_nova', 'confirmacao')}
+              erro={erros.senha_nova}
+            />
+            <Campo
+              rotulo="Confirme a nova senha"
+              name="confirmacao"
+              type="password"
+              autoComplete="new-password"
+              maxLength={SENHA_MAXIMA}
+              value={valores.confirmacao}
+              onChange={(e) => alterar('confirmacao', e.target.value, 'confirmacao')}
+              erro={erros.confirmacao}
+            />
+          </div>
+          <div className="formulario__acoes">
+            <Botao type="submit" variante="primaria" carregando={enviando} textoCarregando="Trocando…">
+              Trocar senha
+            </Botao>
+          </div>
+        </form>
+      )}
     </div>
   )
 }

@@ -23,6 +23,10 @@ class AutoAlteracaoProibidaError(Exception):
     """RN-22: o admin não pode desativar a si mesmo nem mudar o próprio perfil."""
 
 
+class PerfilDaContaDemoError(Exception):
+    """RN-55: a conta de demonstração é sempre operador."""
+
+
 def normalizar_email(email: str) -> str:
     return email.strip().lower()
 
@@ -83,6 +87,10 @@ def atualizar_usuario(db: Session, admin: User, usuario_id: int, dados: dict) ->
             raise AutoAlteracaoProibidaError("Você não pode desativar o próprio usuário. Peça a outro administrador, se precisar.")
         if "perfil" in dados and dados["perfil"] != usuario.perfil:
             raise AutoAlteracaoProibidaError("Você não pode mudar o próprio perfil. Peça a outro administrador, se precisar.")
+
+    # RN-55 (o banco também recusa, pela ck_users_demo_operador)
+    if usuario.demo and "perfil" in dados and dados["perfil"] != usuario.perfil:
+        raise PerfilDaContaDemoError("A conta de demonstração é sempre operador; o perfil dela não pode ser mudado.")
 
     if "nome" in dados:
         usuario.nome = dados["nome"].strip()

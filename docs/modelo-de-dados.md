@@ -1,7 +1,8 @@
 # Modelo de dados
 
 ## users
-id, nome, email (único), senha_hash, perfil (admin ou operador), ativo, criado_em, senha_alterada_em (vazio até a primeira troca de senha; tokens emitidos antes dela não valem, RN-48 e RN-49)
+id, nome, email (único), senha_hash, perfil (admin ou operador), ativo, criado_em, senha_alterada_em (vazio até a primeira troca de senha; tokens emitidos antes dela não valem, RN-48 e RN-49), demo (conta de demonstração, padrão falso; RN-53 e RN-55)
+- CHECK ck_users_demo_operador: a conta de demonstração é sempre operador (RN-55).
 
 ## suppliers
 id, nome, cnpj (opcional; único quando informado), criado_em
@@ -30,6 +31,11 @@ id, tipo (estoque_baixo, vencimento_proximo ou vencido), produto_id, lote_id (op
 - Alerta ativo é o que tem resolvido_em vazio; o resolvido não é apagado (RN-39).
 - Unicidade de tipo + produto_id + lote_id só entre os ativos: índice único parcial (WHERE resolvido_em IS NULL) com NULLS NOT DISTINCT, para o estoque_baixo (lote vazio) também não duplicar (RN-16).
 - Chaves estrangeiras com RESTRICT: produto_id para products e (lote_id, produto_id) para batches (id, produto_id), para o lote ser do mesmo produto do alerta.
+
+## demo_resets
+id, recriado_em
+- Data da última recriação dos dados de demonstração (RN-54). Nasce vazia a cada recriação e ganha uma linha no fim dela.
+- Só o usuário dono lê e grava; o usuário da aplicação não tem nenhuma permissão nela (RN-50).
 
 ## Relações
 - Um fornecedor tem vários produtos; um produto tem no máximo um fornecedor.

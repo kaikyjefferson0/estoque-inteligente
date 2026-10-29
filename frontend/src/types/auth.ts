@@ -8,6 +8,8 @@ export interface Usuario {
   perfil: Perfil
   ativo: boolean
   criado_em: string
+  // RN-53: a conta de demonstração não troca a senha
+  demo: boolean
 }
 
 export interface Token {

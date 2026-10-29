@@ -128,3 +128,17 @@
 |---|---|---|---|
 | CT-65 | Listar com mais itens que o limite (ex.: 60 produtos, limite padrão 50) | Devolve só 50 itens, com total 60; a página seguinte (deslocamento 50) traz os 10 restantes, sem repetir nenhum | Devolve todos os itens, total errado ou itens repetidos entre as páginas |
 | CT-66 | Pedir uma lista com limite acima de 200 | Sistema recusa (422) | Lista devolvida com mais de 200 itens |
+
+## Demonstração
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-68 | Conta de demonstração tenta trocar a própria senha, com a senha atual certa | Sistema responde 403 "A conta de demonstração não pode trocar a senha." e a senha continua a mesma | Senha da conta de demonstração trocada |
+| CT-69 | Recriar os dados de demonstração num banco com dados antigos | Banco recriado pelas migrations: só o admin de `ADMIN_EMAIL` e a conta de demonstração (operador) existem, os dados de exemplo e os alertas estão lá, nada antigo sobra, nenhum `revisor-ui@estoque.local`, e a data da recriação fica gravada | Dado antigo sobrando, outro admin, conta de demonstração admin ou revisor-ui criado |
+| CT-70 | Pedir a recriação sem `DEMO_MODE=true`, sem a URL do dono ou sem `ADMIN_EMAIL`, `ADMIN_PASSWORD` ou `DEMO_PASSWORD` | Recusada com mensagem clara, sem tocar no banco | Banco apagado ou recriado |
+| CT-71 | Iniciar a API em modo de demonstração com a última recriação há mais de 24 horas (ou nenhuma) e há menos de 24 horas | Recria no primeiro caso; no segundo, não mexe nos dados | Recria antes das 24 horas ou não recria depois delas |
+| CT-72 | Usar um token emitido antes da recriação | Token recusado (401) | Token antigo continua valendo |
+| CT-73 | Admin tenta mudar o perfil da conta de demonstração para admin | Sistema recusa (409) e a conta continua operador | Conta de demonstração vira admin |
+| CT-74 | Abrir o login com e sem `VITE_DEMO` ligada, e "Minha conta" com a conta de demonstração | O botão "Entrar como demonstração" só aparece com `VITE_DEMO` e entra com a conta de demonstração; "Minha conta" esconde a troca de senha e explica o motivo | Botão sem `VITE_DEMO` ou formulário de troca de senha visível para a conta de demonstração |
+| CT-75 | Conta de demonstração faz a 31ª alteração no mesmo minuto | Sistema responde 429 e nada é gravado; uma conta comum, no mesmo ritmo, não é limitada | Alteração gravada ou conta comum bloqueada |
+| CT-76 | Em modo de demonstração, cadastrar o 101º produto ou fornecedor | Sistema recusa (409) e o cadastro não é salvo; fora do modo de demonstração, o cadastro é aceito | Produto ou fornecedor salvo acima do teto |
