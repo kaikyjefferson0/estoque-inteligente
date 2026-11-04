@@ -48,7 +48,7 @@ No celular (390 px):
 - **Segurança**: Argon2 para o hash de senha e JWT para autenticação.
 - **Frontend**: React, TypeScript e CSS, com Vite.
 - **Testes**: pytest (backend), Vitest (unidade do frontend) e Playwright (ponta a ponta).
-- **Deploy**: Render (API, site e banco em serviços separados, plano gratuito), com Cloudflare à frente.
+- **Deploy**: API e site no Render (serviços separados, plano gratuito), com Cloudflare à frente, e banco de produção PostgreSQL no Neon (região `us-east-1`, conexão direta, com `sslmode=require`).
 
 ## Arquitetura e decisões técnicas
 
@@ -56,7 +56,7 @@ No celular (390 px):
 
 **As regras também no banco.** Além das validações da aplicação, o PostgreSQL garante as invariantes com *constraints* e *triggers*: o histórico de movimentações não aceita UPDATE nem DELETE, os saldos não ficam negativos e as relações entre produto, lote e movimentação são protegidas. Assim as regras valem mesmo diante de um acesso fora da API.
 
-**Menor privilégio no banco.** A aplicação pode rodar com dois usuários: o *dono* aplica as migrations (DDL) e um *usuário da aplicação* só tem o necessário para ler e gravar dados, sem poder alterar a estrutura. Isso limita o estrago de uma eventual falha na API.
+**Menor privilégio no banco.** A aplicação pode rodar com dois usuários: o *dono* aplica as migrations (DDL) e um *usuário da aplicação* só tem o necessário para ler e gravar dados, sem poder alterar a estrutura. Isso limita o estrago de uma eventual falha na API. As permissões do usuário da aplicação são sincronizadas e verificadas a cada deploy e, se estiverem erradas, a API não sobe.
 
 **Concorrência.** Entradas, saídas e ajustes simultâneos sobre o mesmo produto são serializados com travas de linha (`FOR NO KEY UPDATE`) numa ordem fixa de aquisição, evitando *deadlocks* e condições de corrida no saldo. Há testes com duas conexões reais cobrindo esses cenários.
 
@@ -139,7 +139,6 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
 
 ## Limitações conhecidas
 
-- **Banco gratuito com prazo.** O PostgreSQL do plano gratuito do Render expira cerca de 30 dias após a criação; depois disso é preciso recriá-lo. Por isso o ambiente público é de demonstração, não de produção.
 - **Partida a frio.** Como a API gratuita hiberna, o primeiro acesso depois de um período ocioso pode levar até um minuto.
 - **CNPJ apenas numérico.** O cadastro de fornecedor aceita o CNPJ só com 14 dígitos numéricos. O novo formato alfanumérico da Receita (em uso desde 31/07/2026) ainda não é aceito.
 
