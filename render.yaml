@@ -1,16 +1,7 @@
-# Blueprint do Render: banco, API e site. Passo a passo em docs\deploy.md.
-# Nenhum segredo neste arquivo: a URL do banco vem do próprio banco, a SECRET_KEY é gerada
-# pelo Render e as contas e os endereços públicos (sync: false) são preenchidos no painel na
-# criação do Blueprint. Um sync: false nunca é sobrescrito por uma sincronização do Blueprint.
-
-databases:
-  - name: estoque-db
-    plan: free
-    region: virginia
-    databaseName: estoque_inteligente
-    user: estoque
-    # Lista vazia: só os serviços do Render (rede privada) acessam o banco, nada da internet
-    ipAllowList: []
+# Blueprint do Render: API e site. O banco fica no Neon, fora do Blueprint.
+# Nenhum segredo neste arquivo: a SECRET_KEY é gerada pelo Render e as URLs do banco, as contas
+# e os endereços públicos (sync: false) são preenchidos no painel. Um sync: false nunca é
+# sobrescrito por uma sincronização do Blueprint.
 
 services:
   - type: web
@@ -27,17 +18,17 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.14.8
-      # O Render entrega postgresql://; o config.py troca para postgresql+psycopg://
+      # RN-50: URL do Neon com o usuário da aplicação, conexão direta (sem -pooler).
+      # O config.py troca postgresql:// por postgresql+psycopg://
       - key: DATABASE_URL
-        fromDatabase:
-          name: estoque-db
-          property: connectionString
-      # RN-54: a recriação da demo exige a URL do dono escrita de propósito. Aqui há um
-      # usuário só (sem APP_DB_ROLE), então é a mesma URL da DATABASE_URL.
+        sync: false
+      # RN-50 e RN-54: URL do Neon com o usuário dono, conexão direta (sem -pooler): as migrations
+      # e a trava de sessão da recriação da demo não funcionam pelo pooler
       - key: MIGRATIONS_DATABASE_URL
-        fromDatabase:
-          name: estoque-db
-          property: connectionString
+        sync: false
+      # RN-50: nome do usuário da aplicação, que recebe as permissões nas migrations
+      - key: APP_DB_ROLE
+        sync: false
       - key: SECRET_KEY
         generateValue: true
       - key: APP_ENV
