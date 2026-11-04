@@ -121,6 +121,11 @@
 | CT-62 | Duas entradas simultâneas no mesmo lote | O lote soma as duas quantidades e há duas entradas no histórico | Quantidade perdida ou lote duplicado |
 | CT-63 | Duas saídas simultâneas que juntas passam do saldo | Uma é atendida e a outra recusada com 409; o saldo nunca fica negativo | As duas atendidas ou saldo negativo |
 | CT-64 | Entrada e saída simultâneas no mesmo produto | O saldo final é o inicial + entrada − saída | Saldo final diferente |
+| CT-77 | Aplicar as migrations sem `APP_DB_ROLE`, rodar `alembic upgrade head` com ela e depois a sincronização, duas vezes | Negado até a sincronização; depois, a API lê e insere com o usuário da aplicação, e a segunda execução não dá erro. O resumo no log não mostra URL nem senha | Permissão concedida só pela migration, erro na segunda execução ou segredo no log |
+| CT-78 | Sincronizar com permissões a mais (GRANT ALL no histórico), sem CONNECT e USAGE explícitos e criar uma tabela nova como dono | Permissões a mais removidas; CONNECT e USAGE concedidos ao usuário; tabela nova com leitura e escrita e sequência só com USAGE | Histórico alterável, CONNECT ou USAGE perdidos, ou tabela nova sem acesso |
+| CT-79 | Sincronizar com usuário inexistente, com o próprio dono, sem as migrations ou sem as variáveis | Recusada com mensagem clara, sem mudar nada | Permissões alteradas ou erro confuso |
+| CT-80 | Em `APP_ENV=production`, subir sem `APP_DB_ROLE`, sem `MIGRATIONS_DATABASE_URL`, com a `DATABASE_URL` em outro usuário ou com o dono como usuário da aplicação | Recusa com mensagem clara, sem mostrar a URL, antes de qualquer migration; fora de produção, um usuário só continua valendo | Sobe mesmo assim ou mostra a URL |
+| CT-81 | Subir a API em produção com o usuário da aplicação sem permissão, com UPDATE no histórico e depois da sincronização | Não sobe nos dois primeiros casos; sobe no terceiro | API no ar com permissões erradas |
 
 ## Listas paginadas
 

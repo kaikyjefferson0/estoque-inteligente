@@ -65,6 +65,7 @@
 
 ## Banco de dados
 - RN-50: a API usa um usuário de banco sem poder de alterar a estrutura; no histórico (stock_movements) ele só lê e insere. Só as migrations usam o usuário dono.
+- RN-58: em produção (`APP_ENV=production`), o usuário separado da RN-50 é obrigatório: sem `APP_DB_ROLE` e `MIGRATIONS_DATABASE_URL`, com a `DATABASE_URL` em outro usuário ou com o dono como usuário da aplicação, a API e as migrations se recusam a rodar, com mensagem clara. A cada deploy, depois das migrations, o comando `app.scripts.sincronizar_permissoes` deixa o usuário da aplicação exatamente com: CONNECT no banco; USAGE no schema public, sem CREATE; SELECT, INSERT, UPDATE e DELETE nas tabelas; só SELECT e INSERT em `stock_movements`; nada em `alembic_version` e `demo_resets`; só USAGE nas sequências, exceto a de `demo_resets`. As tabelas novas do dono seguem o mesmo padrão pelas default privileges. O comando pode rodar quantas vezes for preciso, em banco novo ou já migrado, e não exige GRANT manual. Ao subir em produção, a API confere essas permissões com o próprio usuário e não abre a porta se faltar ou sobrar alguma.
 
 ## Demonstração
 - RN-53: a conta de demonstração não troca a própria senha: a troca (RN-48) responde 403 "A conta de demonstração não pode trocar a senha." e a senha continua a mesma, para um visitante não trancar o demo para os outros. A tela "Minha conta" dessa conta esconde o formulário de troca e explica o motivo.

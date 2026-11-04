@@ -11,9 +11,10 @@ services:
     region: virginia
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    # As migrations rodam antes de a API subir; 1 processo, porque os limites de tentativas
-    # (RN-47, RN-52 e RN-56) ficam na memória do processo
-    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
+    # As migrations e a sincronização das permissões (RN-58) rodam antes de a API subir; se uma
+    # falhar, a API não sobe. 1 processo, porque os limites de tentativas (RN-47, RN-52 e RN-56)
+    # ficam na memória do processo
+    startCommand: alembic upgrade head && python -m app.scripts.sincronizar_permissoes && uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -26,7 +27,8 @@ services:
       # e a trava de sessão da recriação da demo não funcionam pelo pooler
       - key: MIGRATIONS_DATABASE_URL
         sync: false
-      # RN-50: nome do usuário da aplicação, que recebe as permissões nas migrations
+      # RN-50 e RN-58: nome do usuário da aplicação (o mesmo da DATABASE_URL). Obrigatório: sem ele,
+      # o deploy falha antes das migrations
       - key: APP_DB_ROLE
         sync: false
       - key: SECRET_KEY

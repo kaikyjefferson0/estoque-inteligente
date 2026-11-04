@@ -4,7 +4,9 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
+from app.core import permissoes
 from app.core.config import settings
+from app.core.database import engine
 from app.core.limiter import limite_excedido, limiter
 from app.routers import alerts, auth, dashboard, products, stock, suppliers, users
 from app.services import demo
@@ -25,6 +27,10 @@ async def ciclo_de_vida(app: FastAPI):
     # de 24 horas. Configuração errada impede a API de subir (melhor que um demo quebrado).
     if settings.DEMO_MODE:
         demo.recriar_se_preciso(demo.ler_config_demo(settings))
+    # RN-58: em produção, a API não abre a porta sem as permissões certas no banco
+    if settings.em_producao:
+        with engine.connect() as conexao:
+            permissoes.verificar_usuario_da_aplicacao(conexao)
     yield
 
 
