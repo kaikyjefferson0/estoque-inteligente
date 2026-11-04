@@ -12,6 +12,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
 import app.models  # noqa: F401  (registra as tabelas no Base.metadata)
+from app.core import permissoes
 from app.core.database import Base
 
 PASTA_BACKEND = Path(__file__).resolve().parents[2]
@@ -26,8 +27,16 @@ def apagar_estrutura(engine: Engine) -> None:
 
 
 def aplicar_migrations(engine: Engine, app_db_role: str) -> None:
-    """Sobe até a última migration, com as permissões do usuário da aplicação (RN-50)
-    quando `app_db_role` tiver valor."""
+    """Sobe até a última migration e, quando `app_db_role` tiver valor, sincroniza as permissões
+    do usuário da aplicação (RN-50 e RN-58)."""
+    subir_migrations(engine, app_db_role)
+    if app_db_role:
+        with engine.begin() as conexao:
+            permissoes.sincronizar(conexao, app_db_role, engine.url.username)
+
+
+def subir_migrations(engine: Engine, app_db_role: str) -> None:
+    """Só o Alembic, como o `alembic upgrade head` do deploy: uma revisão já aplicada não roda de novo."""
     config = Config()
     config.set_main_option("script_location", str(PASTA_BACKEND / "alembic"))
     # Lidos pelo alembic\env.py e pelas migrations de permissões

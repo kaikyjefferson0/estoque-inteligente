@@ -179,8 +179,8 @@ def test_ct70_recriacao_recusada_sem_configuracao_completa(valores, mensagem):
 
 
 def test_um_usuario_so_aceita_a_mesma_url_nas_duas_variaveis():
-    """Render: um usuário só, sem APP_DB_ROLE; DATABASE_URL e MIGRATIONS_DATABASE_URL vêm do mesmo banco."""
-    url = "postgresql+psycopg://estoque:x@dpg-abc-a/estoque_inteligente"
+    """Fora de produção: um usuário só, sem APP_DB_ROLE (em produção, a RN-58 recusa ao subir)."""
+    url = "postgresql+psycopg://estoque:x@localhost/estoque_inteligente"
     config = demo.ler_config_demo(_settings(MIGRATIONS_DATABASE_URL=url, APP_DB_ROLE=""))
     assert config.url_dono == url and config.app_db_role == ""
 
@@ -268,9 +268,9 @@ def test_ct69_recriacao_deixa_so_as_duas_contas_e_os_dados_de_exemplo(engine, re
 
 
 def test_ao_iniciar_com_um_usuario_so_recria_sem_o_revisor_ui(engine, recriacao):
-    """Render: sem APP_DB_ROLE, a migration de permissões não faz nada e a recriação ao iniciar
-    funciona com o dono. Só as duas contas existem; o revisor-ui@estoque.local, nunca (RN-55)."""
-    # Primeira subida no Render: banco vazio, nenhuma recriação ainda
+    """Fora de produção: sem APP_DB_ROLE, a migration de permissões não faz nada e a recriação ao
+    iniciar funciona com o dono. Só as duas contas existem; o revisor-ui@estoque.local, nunca (RN-55)."""
+    # Primeira subida: banco vazio, nenhuma recriação ainda
     migracoes.apagar_estrutura(engine)
 
     assert demo.recriar_se_preciso(replace(recriacao, app_db_role="")) is True

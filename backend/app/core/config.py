@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from sqlalchemy.engine import make_url
+from sqlalchemy.exc import ArgumentError
 
 # backend\.env
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -73,6 +75,29 @@ def validar_ambiente(app_env: str, no_render: bool, confia_no_proxy: bool) -> No
         raise RuntimeError("Em production, defina TRUST_PROXY_HEADERS=true (a API fica atrás do proxy do Render).")
 
 
+def _usuario_da_url(variavel: str, url: str) -> str | None:
+    try:
+        return make_url(url).username
+    except ArgumentError:
+        raise RuntimeError(f"{variavel} não é uma URL de banco válida.") from None
+
+
+def validar_usuarios_do_banco(app_env: str, database_url: str, migrations_url: str, app_db_role: str) -> None:
+    """RN-58: em produção a API usa um usuário separado do dono. Conferido antes de qualquer migration,
+    porque rodar sem a APP_DB_ROLE deixaria o banco com as permissões erradas. Nunca mostra as URLs.
+    `migrations_url` é vazia quando a MIGRATIONS_DATABASE_URL não foi definida."""
+    if app_env != "production":
+        return
+    if not app_db_role:
+        raise RuntimeError("Em production, defina APP_DB_ROLE com o nome do usuário de banco da aplicação (RN-58).")
+    if not migrations_url:
+        raise RuntimeError("Em production, defina MIGRATIONS_DATABASE_URL com a URL do usuário dono do banco (RN-58).")
+    if _usuario_da_url("DATABASE_URL", database_url) != app_db_role:
+        raise RuntimeError("Em production, a DATABASE_URL precisa usar o usuário da APP_DB_ROLE (RN-58).")
+    if _usuario_da_url("MIGRATIONS_DATABASE_URL", migrations_url) == app_db_role:
+        raise RuntimeError("Em production, a MIGRATIONS_DATABASE_URL precisa usar o dono, não o usuário da aplicação (RN-58).")
+
+
 class Settings:
     DATABASE_URL: str = normalizar_url_banco(os.getenv("DATABASE_URL", ""))
     # RN-50: as migrations usam o usuário dono; sem a variável, caem na DATABASE_URL
@@ -80,7 +105,8 @@ class Settings:
     MIGRATIONS_DATABASE_URL: str = normalizar_url_banco(os.getenv("MIGRATIONS_DATABASE_URL", "")) or DATABASE_URL
     # RN-54: a recriação do demo exige a URL do dono escrita de propósito, sem cair na DATABASE_URL
     MIGRATIONS_DATABASE_URL_DEFINIDA: bool = bool(os.getenv("MIGRATIONS_DATABASE_URL", "").strip())
-    # RN-50: opcional; com valor, a migration de permissões concede a esse usuário só o necessário
+    # RN-50 e RN-58: usuário da aplicação, que recebe só o necessário. Obrigatório em produção;
+    # em desenvolvimento, vazio significa um usuário só
     APP_DB_ROLE: str = os.getenv("APP_DB_ROLE", "").strip()
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
@@ -118,6 +144,12 @@ class Settings:
             )
         validar_secret_key(self.SECRET_KEY)
         validar_ambiente(self.APP_ENV, self.NO_RENDER, self.TRUST_PROXY_HEADERS)
+        validar_usuarios_do_banco(
+            self.APP_ENV,
+            self.DATABASE_URL,
+            self.MIGRATIONS_DATABASE_URL if self.MIGRATIONS_DATABASE_URL_DEFINIDA else "",
+            self.APP_DB_ROLE,
+        )
 
 
 settings = Settings()
