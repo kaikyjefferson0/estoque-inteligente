@@ -1,5 +1,7 @@
 # Estoque Inteligente
 
+[![CI](https://github.com/kaikyjefferson0/estoque-inteligente/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/kaikyjefferson0/estoque-inteligente/actions/workflows/ci.yml)
+
 Sistema web de controle de estoque com lotes e validade, alertas automáticos e dashboard.
 
 ## Destaques

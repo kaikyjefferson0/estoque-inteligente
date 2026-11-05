@@ -50,7 +50,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Comando: `npm run test:e2e` (dentro de `frontend`). Não precisa subir nada antes.
 - Pré-requisitos: banco `estoque_e2e` criado (dono `estoque`, CONNECT para `estoque_app`) e, no `backend\.env`, `E2E_DATABASE_URL` (dono), `E2E_APP_DATABASE_URL` (usuário da aplicação) e `APP_DB_ROLE`. Os scripts recusam banco cujo nome não termine em `_e2e`.
 - O que acontece (`frontend\e2e\rodar.mjs`): gera senhas aleatórias só em memória (variáveis de ambiente, nunca arquivo); recria o `estoque_e2e` pelas migrations e cria o admin e o operador (`backend\tests\e2e_preparar.py`); sobe a API na porta 8001 com o usuário da aplicação e CORS para `http://localhost:5175` (`backend\tests\e2e_api.py`) e o site na 5175; roda `frontend\e2e\*.spec.ts`; no fim, para a API e o site (no Windows, com `taskkill /T`), mesmo se um teste falhar.
-- Portas 8001 e 5175 precisam estar livres. Numa falha, a captura e o retrato da página ficam em `frontend\test-results\e2e` (fora do git), com as senhas trocadas por `***`.
+- Portas 8001 e 5175 precisam estar livres. Numa falha, a captura e o retrato da página ficam em `frontend\test-results\e2e\<etapa>` (fora do git; uma pasta por arquivo de teste), com as senhas trocadas por `***`.
 
 ## Roteiro de fases
 - [x] Fase 0: ambiente — concluída

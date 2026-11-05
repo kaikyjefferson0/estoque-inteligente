@@ -15,7 +15,7 @@
 import { spawn, spawnSync } from 'node:child_process'
 import { createConnection } from 'node:net'
 import { randomBytes } from 'node:crypto'
-import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -30,6 +30,8 @@ const API = `http://127.0.0.1:${PORTA_API}`
 const SITE = `http://localhost:${PORTA_SITE}`
 const ESPERA_MAXIMA_MS = 60_000
 const RESULTADOS = path.join(FRONTEND, 'test-results', 'e2e')
+// Relatório HTML, gerado só no CI (e2e\playwright.config.ts)
+const RELATORIO = path.join(FRONTEND, 'playwright-report')
 const SO_RESPONSIVIDADE = process.argv.includes('--responsividade')
 const PASTA_CAPTURAS = process.argv.find((a) => a.startsWith('--capturas='))?.slice('--capturas='.length)
 
@@ -125,7 +127,8 @@ async function principal() {
   // Um servidor esquecido de outra rodada responderia no lugar do novo, com outro estado em memória
   for (const porta of [PORTA_API, PORTA_SITE]) {
     if (await portaOcupada(porta)) {
-      throw new Error(`A porta ${porta} já está em uso. Pare o processo que a ocupa (netstat -ano | findstr :${porta}) e rode de novo.`)
+      const comoAchar = WINDOWS ? `netstat -ano | findstr :${porta}` : `lsof -i :${porta}`
+      throw new Error(`A porta ${porta} já está em uso. Pare o processo que a ocupa (${comoAchar}) e rode de novo.`)
     }
   }
 
@@ -139,18 +142,34 @@ async function principal() {
     if (preparo.status !== 0) throw new Error('A preparação do banco falhou.')
   }
 
+  /** Devolve 0 com o relatório limpo. Se a limpeza falhar, apaga o relatório, para ele não sair com as senhas. */
+  function limparRelatorio() {
+    if (!existsSync(RELATORIO)) return 0
+    apagarSegredos(RELATORIO, Object.values(segredos))
+    const limpeza = spawnSync(PYTHON, ['-m', 'tests.e2e_limpar_relatorio', RELATORIO], {
+      cwd: BACKEND,
+      env: { ...ambienteBase, ...segredos },
+      stdio: 'inherit',
+    })
+    if (limpeza.status === 0) return 0
+    rmSync(RELATORIO, { recursive: true, force: true })
+    log('Relatório do Playwright apagado: as senhas não puderam ser removidas dele.')
+    return 1
+  }
+
   function rodarPlaywright(arquivo, extras = {}) {
     // E2E_GREP: só os testes cujo nome contém o texto (ex.: uma largura)
     const filtro = process.env.E2E_GREP ? ['--grep', process.env.E2E_GREP] : []
     log(`Rodando ${arquivo} no Playwright…`)
     const testes = spawnSync(process.execPath, [PLAYWRIGHT, 'test', '-c', path.join('e2e', 'playwright.config.ts'), arquivo, ...filtro], {
       cwd: FRONTEND,
-      env: { ...ambienteBase, ...segredos, E2E_SITE: SITE, ...extras },
+      env: { ...ambienteBase, ...segredos, E2E_SITE: SITE, E2E_ETAPA: path.basename(arquivo, '.spec.ts'), ...extras },
       stdio: 'inherit',
     })
     // Numa falha, o Playwright grava o retrato da página (error-context.md); as senhas não podem ficar lá
     apagarSegredos(RESULTADOS, Object.values(segredos))
-    return testes.status ?? 1
+    const relatorio = limparRelatorio()
+    return (testes.status ?? 1) || relatorio
   }
 
   preparar(SO_RESPONSIVIDADE)
