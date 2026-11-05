@@ -1,0 +1,171 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# O CI só lê o código: nenhum job precisa escrever no repositório
+permissions:
+  contents: read
+
+# Todas as senhas e chaves abaixo são falsas e só valem dentro do contêiner descartável de cada job.
+jobs:
+  backend:
+    name: Backend (pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        # Mesma major do Neon de produção
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-senha-postgres-falsa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # O app.core.config exige as duas primeiras ao ser importado. A API usa o usuário da aplicação.
+      SECRET_KEY: ci-chave-falsa-usada-somente-nos-testes-0123456789
+      DATABASE_URL: postgresql+psycopg://estoque_app:ci-senha-app-falsa@localhost:5432/estoque_inteligente_test
+      # O nome termina em _test: sem isso, o conftest.py recusa rodar
+      TEST_DATABASE_URL: postgresql+psycopg://estoque:ci-senha-dono-falsa@localhost:5432/estoque_inteligente_test
+      # Sem estas duas, os testes de permissão seriam pulados ou não testariam o usuário certo
+      TEST_APP_DATABASE_URL: postgresql+psycopg://estoque_app:ci-senha-app-falsa@localhost:5432/estoque_inteligente_test
+      APP_DB_ROLE: estoque_app
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      - name: Instalar o Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Instalar as dependências
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Criar os usuários e o banco de testes
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE ROLE estoque LOGIN PASSWORD 'ci-senha-dono-falsa';
+          CREATE ROLE estoque_app LOGIN PASSWORD 'ci-senha-app-falsa';
+          CREATE DATABASE estoque_inteligente_test OWNER estoque;
+          GRANT CONNECT ON DATABASE estoque_inteligente_test TO estoque_app;
+          SQL
+
+      - name: Rodar o pytest
+        # -rs mostra no log o motivo de qualquer teste pulado
+        run: pytest -rs
+
+  frontend:
+    name: Frontend (Vitest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      - name: Instalar o Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar as dependências
+        run: npm ci
+
+      - name: Rodar os testes de unidade
+        run: npm run test
+
+  e2e:
+    name: Ponta a ponta (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        # Mesma major do Neon de produção
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-senha-postgres-falsa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # O e2e_ambiente.py monta o resto do ambiente da API a partir destas variáveis
+      SECRET_KEY: ci-chave-falsa-usada-somente-nos-testes-0123456789
+      APP_DB_ROLE: estoque_app
+      # O nome termina em _e2e: sem isso, os scripts recusam rodar
+      E2E_DATABASE_URL: postgresql+psycopg://estoque:ci-senha-dono-falsa@localhost:5432/estoque_e2e
+      E2E_APP_DATABASE_URL: postgresql+psycopg://estoque_app:ci-senha-app-falsa@localhost:5432/estoque_e2e
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      - name: Instalar o Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+
+      - name: Instalar o Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # O e2e/rodar.mjs procura o Python em backend/.venv, como na máquina local
+      - name: Criar o ambiente do backend
+        run: |
+          python -m venv backend/.venv
+          backend/.venv/bin/python -m pip install -r backend/requirements.txt
+
+      - name: Instalar as dependências do frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: Instalar o Chromium do Playwright
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Criar os usuários e o banco estoque_e2e
+        run: |
+          docker exec -i "${{ job.services.postgres.id }}" psql -v ON_ERROR_STOP=1 -U postgres <<'SQL'
+          CREATE ROLE estoque LOGIN PASSWORD 'ci-senha-dono-falsa';
+          CREATE ROLE estoque_app LOGIN PASSWORD 'ci-senha-app-falsa';
+          CREATE DATABASE estoque_e2e OWNER estoque;
+          GRANT CONNECT ON DATABASE estoque_e2e TO estoque_app;
+          SQL
+
+      - name: Rodar o teste de ponta a ponta
+        working-directory: frontend
+        run: npm run test:e2e
+
+      - name: Enviar o relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: relatorio-playwright
+          path: frontend/playwright-report/
+          retention-days: 14
