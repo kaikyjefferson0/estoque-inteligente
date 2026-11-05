@@ -1,0 +1,78 @@
+# Ambiente local completo: docker compose up --build -d
+# Site em http://localhost:8080 e API em http://localhost:8000
+#
+# Sem .env, valem os padrões abaixo, só para uso local. As URLs do banco têm o host "db" fixo e este
+# arquivo nunca lê o backend\.env: com DEMO_MODE=true a API apaga o banco apontado, então ela não
+# pode alcançar outro banco que não seja o deste Compose.
+name: estoque-inteligente
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-estoque}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-senha-local-do-dono}
+      POSTGRES_DB: ${POSTGRES_DB:-estoque_inteligente}
+      APP_DB_ROLE: ${APP_DB_ROLE:-estoque_app}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-senha-local-da-aplicacao}
+    volumes:
+      - dados_postgres:/var/lib/postgresql/data
+      - ./docker/postgres/criar-usuario-app.sh:/docker-entrypoint-initdb.d/10-criar-usuario-app.sh:ro
+    # Sem porta publicada: só a API acessa. Pelo TCP, porque o servidor temporário da inicialização
+    # só atende pelo socket e o pg_isready não pode dar "pronto" antes do usuário da aplicação existir
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  api:
+    build:
+      context: .
+      target: api
+    image: estoque-inteligente-api
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      TRUST_PROXY_HEADERS: "false"
+      SECRET_KEY: ${SECRET_KEY:-chave-local-do-docker-nunca-usar-em-producao}
+      DATABASE_URL: postgresql+psycopg://${APP_DB_ROLE:-estoque_app}:${APP_DB_PASSWORD:-senha-local-da-aplicacao}@db:5432/${POSTGRES_DB:-estoque_inteligente}
+      MIGRATIONS_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-estoque}:${POSTGRES_PASSWORD:-senha-local-do-dono}@db:5432/${POSTGRES_DB:-estoque_inteligente}
+      APP_DB_ROLE: ${APP_DB_ROLE:-estoque_app}
+      CORS_ORIGINS: http://localhost:${SITE_PORT:-8080},http://127.0.0.1:${SITE_PORT:-8080}
+      # RN-54: cria as tabelas, os dados de exemplo e as contas ao subir, e recria tudo se a última
+      # recriação passou de 24 horas
+      DEMO_MODE: "true"
+      DEMO_EMAIL: ${DEMO_EMAIL:-demo@exemplo.com.br}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-demo-local-docker}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@exemplo.com.br}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin-local-docker}
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    security_opt:
+      - no-new-privileges:true
+
+  site:
+    build:
+      context: .
+      target: site
+      args:
+        VITE_API_URL: http://localhost:${API_PORT:-8000}
+        VITE_DEMO: "true"
+        VITE_DEMO_EMAIL: ${DEMO_EMAIL:-demo@exemplo.com.br}
+        VITE_DEMO_SENHA: ${DEMO_PASSWORD:-demo-local-docker}
+    image: estoque-inteligente-site
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${SITE_PORT:-8080}:8080"
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  dados_postgres:
