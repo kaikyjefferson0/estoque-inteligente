@@ -8,7 +8,7 @@ name: estoque-inteligente
 
 services:
   db:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-estoque}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-senha-local-do-dono}
@@ -16,7 +16,8 @@ services:
       APP_DB_ROLE: ${APP_DB_ROLE:-estoque_app}
       APP_DB_PASSWORD: ${APP_DB_PASSWORD:-senha-local-da-aplicacao}
     volumes:
-      - dados_postgres:/var/lib/postgresql/data
+      # A partir do Postgres 18 o volume fica no diretório pai; os dados vão para a subpasta da versão
+      - dados_postgres:/var/lib/postgresql
       - ./docker/postgres/criar-usuario-app.sh:/docker-entrypoint-initdb.d/10-criar-usuario-app.sh:ro
     # Sem porta publicada: só a API acessa. Pelo TCP, porque o servidor temporário da inicialização
     # só atende pelo socket e o pg_isready não pode dar "pronto" antes do usuário da aplicação existir

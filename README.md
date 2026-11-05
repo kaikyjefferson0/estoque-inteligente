@@ -84,7 +84,7 @@ Pré-requisito: Docker com o Compose (no Windows, o Docker Desktop aberto). Na r
 docker compose up --build -d
 ```
 
-Pronto: o comando sobe o PostgreSQL 16, a API e o site, sem precisar de `.env`. Ao subir, a API cria as tabelas pelas migrations, os dados de exemplo e as contas abaixo.
+Pronto: o comando sobe o PostgreSQL 18, a API e o site, sem precisar de `.env`. Ao subir, a API cria as tabelas pelas migrations, os dados de exemplo e as contas abaixo.
 
 - **Site:** http://localhost:8080 (o botão "Entrar como demonstração" entra direto)
 - **API:** http://localhost:8000 (documentação em http://localhost:8000/docs)
