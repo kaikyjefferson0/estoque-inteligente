@@ -1,0 +1,39 @@
+# Segredos: nunca entram na imagem
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+
+# Git e ferramentas
+.git
+.gitattributes
+.gitignore
+.github
+.claude
+
+# Dependências e arquivos gerados
+**/.venv
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+**/dist
+**/test-results
+**/capturas
+**/.coverage
+**/htmlcov
+**/*.log
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# O que a imagem não usa
+backend/tests
+backend/requirements-dev.txt
+backend/pytest.ini
+docs
+*.md
+LICENSE
+render.yaml
+docker-compose.yml
+Dockerfile
+.dockerignore

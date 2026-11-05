@@ -76,6 +76,42 @@ Os números abaixo refletem a suíte atual do projeto:
 - **Frontend — Vitest: 50 testes.** Cobrem o cliente de API, a formatação e o fuso das datas (rodam com o computador no fuso de Tóquio para provar que as datas seguem America/Sao_Paulo), a paginação e a página de demonstração.
 - **Ponta a ponta — Playwright: 10 testes.** Rodam contra a API e um banco reais (recriado a cada execução), seguindo fluxos completos de cadastro, entrada, saída, ajuste e alertas, além da responsividade das telas.
 
+## Rodando com Docker
+
+Pré-requisito: Docker com o Compose (no Windows, o Docker Desktop aberto). Na raiz do projeto:
+
+```
+docker compose up --build -d
+```
+
+Pronto: o comando sobe o PostgreSQL 16, a API e o site, sem precisar de `.env`. Ao subir, a API cria as tabelas pelas migrations, os dados de exemplo e as contas abaixo.
+
+- **Site:** http://localhost:8080 (o botão "Entrar como demonstração" entra direto)
+- **API:** http://localhost:8000 (documentação em http://localhost:8000/docs)
+
+| Conta local | E-mail | Senha |
+|---|---|---|
+| Operador de demonstração | `demo@exemplo.com.br` | `demo-local-docker` |
+| Admin | `admin@exemplo.com.br` | `admin-local-docker` |
+
+Comandos úteis:
+
+```
+docker compose logs -f api                               (acompanhar os logs da API)
+docker compose down                                      (parar, mantendo os dados)
+docker compose down -v                                   (parar e apagar os dados)
+docker compose exec api python -m app.scripts.reset_demo (recriar os dados de exemplo na hora)
+```
+
+Bom saber:
+
+- **Os dados locais são de demonstração.** O ambiente roda com `DEMO_MODE=true`: os dados ficam no volume entre um `down` e um `up`, mas a API apaga e recria tudo ao subir se a última recriação passou de 24 horas (RN-54). Os limites da demonstração (RN-56 e RN-57) também valem aqui.
+- **Só para uso local.** As senhas e a `SECRET_KEY` padrão são públicas, por isso as portas só abrem em `127.0.0.1` e o banco não tem porta publicada (não conflita com um PostgreSQL instalado na 5432).
+- **Isolado de outros bancos.** O Compose não lê o `backend\.env` e as URLs do banco apontam sempre para o contêiner `db`.
+- **Para mudar portas, contas ou senhas,** copie o `.env.example` da raiz para `.env` e preencha só o que quiser (veja as instruções no arquivo). Se a porta 8000 ou 8080 estiver ocupada, é só definir `API_PORT` ou `SITE_PORT`.
+
+O deploy em produção não usa estes arquivos: veja o [guia de deploy](docs/deploy.md).
+
 ## Como rodar localmente (Windows)
 
 Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
