@@ -13,7 +13,9 @@ permissions:
 jobs:
   backend:
     name: Backend (pytest)
-    runs-on: ubuntu-latest
+    # Versão fixa: o ubuntu-latest passou a apontar para o Ubuntu 26.04, que o
+    # Playwright 1.56 ainda não suporta no "install --with-deps"
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
       postgres:
@@ -70,7 +72,7 @@ jobs:
 
   frontend:
     name: Frontend (Vitest)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     defaults:
       run:
@@ -94,7 +96,7 @@ jobs:
 
   e2e:
     name: Ponta a ponta (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     services:
       postgres:
