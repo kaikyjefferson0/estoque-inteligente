@@ -50,7 +50,8 @@ No celular (390 px):
 - **Segurança**: Argon2 para o hash de senha e JWT para autenticação.
 - **Frontend**: React, TypeScript e CSS, com Vite.
 - **Testes**: pytest (backend), Vitest (unidade do frontend) e Playwright (ponta a ponta).
-- **Deploy**: Render (API, site e banco em serviços separados, plano gratuito), com Cloudflare à frente.
+- **Infraestrutura**: Docker e Docker Compose (ambiente local completo) e GitHub Actions (CI com os três tipos de teste a cada push e pull request).
+- **Deploy**: API e site no Render (plano gratuito, com a Cloudflare à frente) e banco PostgreSQL no Neon.
 
 ## Arquitetura e decisões técnicas
 
@@ -58,13 +59,13 @@ No celular (390 px):
 
 **As regras também no banco.** Além das validações da aplicação, o PostgreSQL garante as invariantes com *constraints* e *triggers*: o histórico de movimentações não aceita UPDATE nem DELETE, os saldos não ficam negativos e as relações entre produto, lote e movimentação são protegidas. Assim as regras valem mesmo diante de um acesso fora da API.
 
-**Menor privilégio no banco.** A aplicação pode rodar com dois usuários: o *dono* aplica as migrations (DDL) e um *usuário da aplicação* só tem o necessário para ler e gravar dados, sem poder alterar a estrutura. Isso limita o estrago de uma eventual falha na API.
+**Menor privilégio no banco.** A aplicação pode rodar com dois usuários: o *dono* aplica as migrations (DDL) e um *usuário da aplicação* só tem o necessário para ler e gravar dados, sem poder alterar a estrutura. Isso limita o estrago de uma eventual falha na API. As permissões do usuário da aplicação são sincronizadas e verificadas a cada deploy e, se estiverem erradas, a API não sobe.
 
 **Concorrência.** Entradas, saídas e ajustes simultâneos sobre o mesmo produto são serializados com travas de linha (`FOR NO KEY UPDATE`) numa ordem fixa de aquisição, evitando *deadlocks* e condições de corrida no saldo. Há testes com duas conexões reais cobrindo esses cenários.
 
 **Limite de login com o IP real.** O login aceita no máximo 10 tentativas por minuto por IP. Atrás do proxy do Render (com a Cloudflare à frente), o IP vem do cabeçalho `True-Client-Ip` (ou `Cf-Connecting-Ip`), definidos pela Cloudflare. O `X-Forwarded-For` é deliberadamente ignorado, porque o proxy apenas acrescenta itens ao que o cliente enviou e ele poderia ser falsificado para ganhar tentativas novas.
 
-**Partida a frio.** No plano gratuito, a API hiberna quando fica ociosa. O frontend trata a primeira resposta lenta com tolerância e estado de carregando, e há um teste específico para esse comportamento.
+**Partida a frio.** No plano gratuito, a API hiberna quando fica ociosa, e o Neon também suspende o banco sem uso. O frontend trata a primeira resposta lenta com tolerância e estado de carregando, e há um teste específico para esse comportamento.
 
 **Modo de demonstração.** Com `DEMO_MODE` ligado, a API recria todo o banco com dados de exemplo pelas próprias regras (FEFO, lotes, alertas e histórico) uma vez por dia, e a conta de demonstração tem a troca de senha bloqueada. É o que mantém o site público sempre com dados coerentes e sem acúmulo.
 
@@ -177,8 +178,9 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
 
 ## Limitações conhecidas
 
-- **Banco gratuito com prazo.** O PostgreSQL do plano gratuito do Render expira cerca de 30 dias após a criação; depois disso é preciso recriá-lo. Por isso o ambiente público é de demonstração, não de produção.
-- **Partida a frio.** Como a API gratuita hiberna, o primeiro acesso depois de um período ocioso pode levar até um minuto.
+- **Ambiente de demonstração.** O site público roda em planos gratuitos e recria os dados de exemplo uma vez por dia, por isso é uma demonstração, não um ambiente de produção.
+- **Partida a frio.** Como a API gratuita hiberna e o banco do Neon suspende sem uso, o primeiro acesso depois de um período ocioso pode levar até um minuto.
+- **Uma única instância da API.** Os limites de tentativas (login, troca de senha e alterações da conta de demonstração) são contados na memória do processo, por isso a API roda com 1 processo. Para escalar, a contagem precisaria ir para um armazenamento compartilhado, como o Redis.
 - **CNPJ apenas numérico.** O cadastro de fornecedor aceita o CNPJ só com 14 dígitos numéricos. O novo formato alfanumérico da Receita (em uso desde 31/07/2026) ainda não é aceito.
 
 ## Como foi desenvolvido
@@ -203,3 +205,4 @@ O projeto foi conduzido com o engenheiro definindo a arquitetura, as regras de n
 ## Licença
 
 Distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE).
+
