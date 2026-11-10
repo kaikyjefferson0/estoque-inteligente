@@ -1,6 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/theme.css'
+// Classes do Tailwind ligadas ao tema (em camadas: o CSS do projeto, sem camada, continua valendo sobre elas)
+import './styles/tailwind.css'
 import './styles/global.css'
 import './styles/componentes.css'
 import './styles/layout.css'

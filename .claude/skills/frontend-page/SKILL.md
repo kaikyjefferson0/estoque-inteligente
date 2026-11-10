@@ -5,7 +5,7 @@ description: Use quando for criar ou alterar uma página ou componente do fronte
 
 # Padrão das páginas do frontend
 
-Antes de começar, leia `frontend\src\styles\theme.css` e uma página pronta como referência (`frontend\src\pages\DashboardPage.tsx`). Não leia nem mostre `frontend\.env`.
+Antes de começar, leia `frontend\src\styles\theme.css`, `frontend\src\styles\tailwind.css` e uma página pronta como referência (`frontend\src\pages\DashboardPage.tsx`). Não leia nem mostre `frontend\.env`.
 
 ## Dados e API
 
@@ -63,9 +63,11 @@ async function aoEnviar(evento: FormEvent<HTMLFormElement>) {
 
 ## Visual
 
-- **Só variáveis do `theme.css`** para cor, fonte, tamanho, raio, sombra, duração e dimensões. Nada literal nos `.css` das páginas, e nada de `style={{}}`.
-- **Escala de espaçamento:** margin, padding e gap só com `var(--esp-1)` a `var(--esp-7)` (4 a 48px).
-- CSS puro: o CSS da página fica ao lado dela (`NomePage.css`), com classes em português no formato `bloco__parte--variante`. Sem Tailwind.
+- **Só tokens do `theme.css`** para cor, fonte, tamanho, raio, sombra, duração e dimensões. Nada literal nos `.css` das páginas, nada de `style={{}}`.
+- **Fluxo dos tokens (Tailwind CSS v4):** valor no `theme.css` (única fonte) → `@theme inline` no `tailwind.css`, só com `var(--...)` → classe. A classe repete o nome do token: `--cor-primaria` → `bg-primaria`/`text-primaria`/`border-primaria`, `--esp-4` → `p-esp-4`/`gap-esp-4`, `--raio-p` → `rounded-p`, `--sombra-flutuante` → `shadow-flutuante`, `--fs-2` → `text-fs-2`, `--peso-medio` → `font-medio`, `--lh-corpo` → `leading-corpo`. Os padrões do Tailwind estão desligados: `p-4`, `bg-blue-500`, `rounded-lg`, `shadow-md`, `text-sm` e `font-semibold` não existem. Token novo entra primeiro no `theme.css` e depois no `@theme`, sem repetir valor.
+- **Escala de espaçamento:** margin, padding e gap só de `esp-0` a `esp-7` (0 a 48px): `p-esp-5` nas classes, `var(--esp-5)` no CSS.
+- **Sem valores arbitrários:** `p-[13px]`, `w-[3px]`, `p-(--esp-4)` e `p-px` são erro no `npm run lint` (`eslint-plugin-better-tailwindcss`, configurado em `frontend\oxlint.config.ts`). Uma classe que o Tailwind não gera e que nenhum `.css` do `src` define também é erro.
+- **Transição para o Tailwind:** as telas ainda não migradas usam o CSS ao lado delas (`NomePage.css`), com classes em português no formato `bloco__parte--variante`. Sem Preflight: o reset continua no `global.css`. As classes do Tailwind ficam em camadas (`@layer utilities`) e o CSS do projeto não tem camada, então **o CSS do projeto sempre vence**: num mesmo elemento, não misture uma classe do projeto com um utilitário para a mesma propriedade. Ao migrar um elemento, troque o estilo inteiro dele e apague o CSS que ficou sem uso.
 - **Um único botão primário por tela.** Os demais são `secundaria` ou `fantasma`.
 - Quantidades e saldos com a classe `numero` (`tabular-nums`).
 - Alvos de toque: os controles usam `min-height: var(--alvo-min)` (44px no celular).
@@ -92,7 +94,7 @@ Valem para todas as telas, novas e alteradas. O `e2e\responsividade.spec.ts` (de
 - **Formulários em uma coluna no celular**, com o rótulo acima do campo (`<Campo>` já faz assim).
 - **Janelas de confirmação cabem inteiras na tela do celular**, com rolagem interna se precisar (`.dialogo`) (teste).
 - **Números alinhados** com a classe `numero` (`tabular-nums`). **Número e unidade não se separam:** nomes com quantidade passam por `semQuebraNaUnidade` (`src\utils\formato.ts`; o `NomeEmLista` já usa), que junta "500 g" com espaço inseparável.
-- **Espaçamentos só da escala do `theme.css`** (`--esp-0` a `--esp-7`).
+- **Espaçamentos só da escala do `theme.css`** (`--esp-0` a `--esp-7`; nas classes, `*-esp-0` a `*-esp-7`).
 - Fora das listas (cabeçalho, menu, célula de tabela larga), um texto livre pode usar uma linha só com `texto-cortado` e `title={texto}`. O pai precisa deixar o item encolher (`min-width: 0` em flex ou grid; em tabela, a célula com `width: 100%` e `max-width: 0`). Ícones e marcas ao lado de um texto que encolhe levam `flex-shrink: 0`.
 
 ## Etiqueta de prateleira
@@ -113,6 +115,6 @@ Itens de estoque, lotes e alertas levam a etiqueta: classe `etiqueta etiqueta--o
 
 ## Ao terminar
 
-1. `npm run build` (sem erros de TypeScript) e `npm run lint`, dentro de `frontend`.
+1. `npm run build` (sem erros de TypeScript) e `npm run lint` (inclui a checagem de classes do Tailwind), dentro de `frontend`.
 2. Rode `npm run test:e2e` (inclui o `responsividade.spec.ts`). Para as capturas, `node e2e\rodar.mjs --responsividade --capturas=<pasta>` (dados da demo, com textos de 60 caracteres e saldo de 99.999).
 3. Chame o subagente **ui-reviewer** com essas capturas, em todas as larguras de revisão. Corrija os itens Críticos e mostre ao usuário os Importantes.

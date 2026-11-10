@@ -194,7 +194,7 @@ components:
 
 # Design System: Estoque Inteligente
 
-> **Fonte dos tokens:** hoje todos os valores moram em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios, sombras e durações; cada chave do frontmatter acima corresponde a uma variável dele (`primaria` → `--cor-primaria`, `p` → `--raio-p`, `esp-4` → `--esp-4`). O `PRODUCT.md` registra a migração da estilização para Tailwind (branch `feat/tailwind-ui`). Ela deve manter exatamente estes tokens, com a mesma fonte única, e atualizar esta nota quando definir onde eles passam a morar.
+> **Fonte dos tokens:** todos os valores moram em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios, sombras e durações; cada chave do frontmatter acima corresponde a uma variável dele (`primaria` → `--cor-primaria`, `p` → `--raio-p`, `esp-4` → `--esp-4`). Com o Tailwind CSS v4 (branch `feat/tailwind-ui`), o fluxo é: tokens no `theme.css` → `@theme inline` em `frontend\src\styles\tailwind.css`, só com referências `var(--...)` → classes com o mesmo nome do token (`bg-primaria`, `p-esp-4`, `rounded-p`, `shadow-flutuante`, `text-fs-2`). Os padrões do Tailwind (cores, espaçamento, raios, sombras e fontes) estão desligados e o lint recusa valores arbitrários, por isso as regras abaixo valem igual para as classes. As telas migram uma a uma; até lá, as não migradas seguem no CSS delas.
 
 ## Overview
 

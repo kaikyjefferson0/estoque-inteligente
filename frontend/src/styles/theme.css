@@ -37,6 +37,8 @@
   --cor-pressionado-neutro: #e2e8ef;
   --cor-desabilitado-fundo: #e9edf2;
   --cor-desabilitado-texto: #8593a3;
+  /* Marcador dos campos (placeholder): 5,46:1 sobre branco. Ainda sem uso: entra com a migração */
+  --cor-marcador: var(--cor-texto-suave);
   --cor-foco: #2f5d8a;
   --cor-sobreposicao: rgba(27, 42, 58, 0.45);
   /* Lista sendo atualizada (ex.: busca): fica mais clara até chegar a resposta */

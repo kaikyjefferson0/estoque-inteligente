@@ -5,7 +5,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 ## Stack
 - Backend: Python, FastAPI, Uvicorn, SQLAlchemy, Alembic, Psycopg 3, PostgreSQL
 - Segurança: Argon2 (hash de senha) e JWT (autenticação)
-- Frontend: React, TypeScript, CSS (Vite)
+- Frontend: React, TypeScript, Vite, Tailwind CSS v4 (sem Preflight) e CSS das telas ainda não migradas
 - Deploy: Render (API, frontend e banco em serviços separados)
 
 ## Estrutura
@@ -23,7 +23,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Regra de negócio fica no service, nunca no router.
 - Nunca ler, mostrar nem commitar o arquivo `.env`.
 - Toda mudança de tabela passa por migration do Alembic.
-- O tema visual fica em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios e durações; páginas seguem a skill `frontend-page`.
+- O tema visual fica em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios e durações. Fluxo: tokens no `theme.css` → `@theme inline` em `frontend\src\styles\tailwind.css` (só `var(--...)`, nenhum valor repetido) → classes com o nome do token (`bg-primaria`, `p-esp-4`, `rounded-p`). Os padrões do Tailwind estão desligados, e valores arbitrários (`p-[13px]`) dão erro no lint. Páginas seguem a skill `frontend-page`.
 - Antes de qualquer trabalho no frontend, leia `PRODUCT.md` e `DESIGN.md` (estado atual e regras) e `design-system\estoque-inteligente\MASTER.md` (direção proposta, ainda não aplicada).
 - Estamos no Windows (cmd): use `py` e caminhos com barra invertida.
 - Trabalhe uma fase por vez e explique o que está fazendo; o usuário é o engenheiro e decide a arquitetura.
@@ -40,7 +40,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Instalar dependências: `npm install`
 - Rodar o site: `npm run dev` (http://localhost:5173)
 - Build com checagem de TypeScript: `npm run build`
-- Lint: `npm run lint`
+- Lint: `npm run lint` (oxlint com `oxlint.config.ts`; inclui as classes do Tailwind pelo `eslint-plugin-better-tailwindcss`)
 - Testes de unidade (Vitest): `npm run test` (arquivos `src\**\*.test.ts(x)`; rodam com o computador no fuso de Tóquio, para provar que as datas seguem America/Sao_Paulo)
 - Capturas para o ui-reviewer: `node scripts\capturas-ui.mjs <pasta>`
 
