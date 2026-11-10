@@ -618,6 +618,11 @@
   background: var(--cor-hover-neutro);
 }
 
+/* O item que é link (Minha conta) escurece no hover, como os links; antes vinha do a:hover do reset */
+a.suspenso__item:hover {
+  color: var(--cor-primaria-escura);
+}
+
 .suspenso__item:focus-visible {
   outline: var(--foco-anel);
   outline-offset: calc(-1 * var(--foco-distancia));
