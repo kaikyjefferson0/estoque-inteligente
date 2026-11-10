@@ -194,7 +194,7 @@ components:
 
 # Design System: Estoque Inteligente
 
-> **Fonte dos tokens:** todos os valores moram em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios, sombras e durações; cada chave do frontmatter acima corresponde a uma variável dele (`primaria` → `--cor-primaria`, `p` → `--raio-p`, `esp-4` → `--esp-4`). Com o Tailwind CSS v4 (branch `feat/tailwind-ui`), o fluxo é: tokens no `theme.css` → `@theme inline` em `frontend\src\styles\tailwind.css`, só com referências `var(--...)` → classes com o mesmo nome do token (`bg-primaria`, `p-esp-4`, `rounded-p`, `shadow-flutuante`, `text-fs-2`, `max-w-largura-conteudo`). A classe `border` usa a largura do tema (`--borda-largura`), não o 1px embutido do Tailwind. Os padrões do Tailwind (cores, espaçamento, raios, sombras e fontes) estão desligados e o lint recusa valores arbitrários, por isso as regras abaixo valem igual para as classes. As telas migram uma a uma; até lá, as não migradas seguem no CSS delas.
+> **Fonte dos tokens:** todos os valores moram em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios, sombras e durações; cada chave do frontmatter acima corresponde a uma variável dele (`primaria` → `--cor-primaria`, `p` → `--raio-p`, `esp-4` → `--esp-4`). Com o Tailwind CSS v4 (branch `feat/tailwind-ui`), o fluxo é: tokens no `theme.css` → `@theme inline` em `frontend\src\styles\tailwind.css`, só com referências `var(--...)` → classes com o mesmo nome do token (`bg-primaria`, `p-esp-4`, `rounded-p`, `shadow-flutuante`, `text-fs-2`, `max-w-largura-conteudo`, `max-w-largura-formulario`, `grid-cols-rotulo-valor`). A classe `border` usa a largura do tema (`--borda-largura`), não o 1px embutido do Tailwind. Os padrões do Tailwind (cores, espaçamento, raios, sombras e fontes) estão desligados e o lint recusa valores arbitrários, por isso as regras abaixo valem igual para as classes; `min-w-esp-0` faz o papel do `min-w-0`. Os cortes do layout viram variantes com o mesmo valor do CSS antigo (`ate-640:` é `@media (max-width: 640px)`), nunca `max-sm:`, que erra exatamente em 640px. O reset do `global.css` (margem de `h1` a `h3`, `p`, `ul`, `ol`, `dl` e `dd`; recuo de `ul` e `ol`; peso e entrelinha de `h1` a `h3`; tamanho de `h1` e `h2`) fica fora de camada e vence os utilitários nessas propriedades: o respiro de um `p` é `pt-esp-1`, não `mt-esp-1`. As telas migram uma a uma; até lá, as não migradas seguem no CSS delas.
 
 ## Overview
 
@@ -281,7 +281,7 @@ Cada página é uma coluna com espaço de 24px entre blocos. No topo vem o **cab
 
 **Responsivo:**
 - **≤ 900px:** o menu lateral vira uma gaveta (288px, até 85% da largura) aberta pelo botão do cabeçalho; os alvos de toque sobem de 40 para 44px; o conteúdo usa recuo de 24px por 16px; o painel de situações passa de 4 para 2 colunas.
-- **≤ 640px:** painéis e formulários reduzem o recuo interno para 16px.
+- **≤ 640px:** painéis e formulários reduzem o recuo interno para 16px (nas classes, `ate-640:p-esp-4`); a lista de rótulo e valor põe o valor embaixo do rótulo.
 - **≤ 480px:** as ações da página descem para baixo do título; o perfil do usuário some do cabeçalho.
 - **≤ 400px:** o nome do usuário vira um ícone; os botões do diálogo empilham com largura total, com a ação principal em cima.
 - **Tabelas** viram listas empilhadas por container query, quando o próprio painel tem menos de 48rem: nome numa linha própria, as outras células como etiquetas de metadado embaixo e a ação no fim.
@@ -339,6 +339,12 @@ Firmes e contidos: o alvo de toque é generoso, os cantos são discretos e a fir
 - **Internal Padding:** cabeçalho em 16px por 24px; linhas de lista em 12px por 24px; no celular, 12px por 16px.
 - Não há grade de cartões repetidos: o conteúdo é uma lista ou tabela dentro de um painel.
 
+### Lista de rótulo e valor (detalhe)
+Dados de um registro mostrados por inteiro (Minha conta: nome, e-mail, perfil), num `<dl>` dentro do painel.
+- **Grade:** rótulo numa coluna fixa de 128px e o valor no resto, podendo encolher (`--colunas-rotulo-valor`, classe `grid-cols-rotulo-valor`); 16px entre as colunas, 4px entre linhas e 12px entre um item e o próximo.
+- **Rótulo:** `body-small` em `texto-suave`. **Valor:** `body` em `texto`, inteiro, quebrando entre palavras; só um texto que sozinho não cabe na linha (um e-mail longo) quebra no meio.
+- **≤ 640px:** uma coluna só, com o valor embaixo do rótulo.
+
 ### Inputs / Fields
 - **Style:** rótulo `label` acima; caixa branca com borda de 1px na Linha Firme, cantos de 6px, altura do alvo de toque, recuo de 12px, texto `body`. O acessório (mostrar senha, abrir lista) fica dentro da caixa.
 - **Hover:** a borda escurece para `texto-suave`.
@@ -383,6 +389,7 @@ Só em resposta a uma ação: 120ms (`mov-rapido`) para hover, pressão e troca 
 - **Do** garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.
 - **Do** usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.
 - **Do** levar o texto de atenção para `atencao-texto` (#8a5300); a cor da faixa (#b26b00) não serve para texto.
+- **Do** escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`), para a tela mudar exatamente na mesma largura.
 
 ### Don't:
 - **Don't** usar gradiente, vidro (desfoque de fundo), grade de cartões idênticos com sombra, CAIXA ALTA, setas "→" em botões ou emojis.
@@ -393,3 +400,4 @@ Só em resposta a uma ação: 120ms (`mov-rapido`) para hover, pressão e troca 
 - **Don't** usar espaçamento fora da escala de 4px (`esp-1` a `esp-7`).
 - **Don't** quebrar nomes no meio da palavra (`word-break: break-all`, `overflow-wrap: anywhere`), nem pôr outro texto na linha do nome numa lista.
 - **Don't** animar nada que não seja resposta a uma ação do usuário.
+- **Don't** pôr utilitário numa propriedade que o reset do `global.css` já define (margem de `h1` a `h3`, `p`, `ul`, `ol`, `dl` e `dd`; recuo de `ul` e `ol`; peso e entrelinha de `h1` a `h3`; tamanho de `h1` e `h2`): o reset vence e a classe fica sem efeito.

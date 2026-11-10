@@ -108,6 +108,8 @@
   --largura-coluna-numero: 128px;
   --largura-coluna-situacao: 160px;
   --largura-coluna-tempo: 224px;
+  /* Lista de rótulo e valor (detalhe): rótulo numa coluna fixa e o valor no resto, podendo encolher */
+  --colunas-rotulo-valor: var(--largura-coluna-numero) minmax(0, 1fr);
   --camada-cabecalho: 10;
   /* Lista de opções do campo com busca: acima da página, abaixo das janelas */
   --camada-lista: 20;

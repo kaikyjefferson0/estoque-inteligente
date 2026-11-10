@@ -73,6 +73,10 @@
 
   /* Larguras máximas (max-w-) */
   --max-width-largura-conteudo: var(--largura-conteudo);
+  --max-width-largura-formulario: var(--largura-formulario);
+
+  /* Grades (grid-cols-) */
+  --grid-template-columns-rotulo-valor: var(--colunas-rotulo-valor);
 
   /* Borda: a classe border usa a largura do tema, não o 1px embutido do Tailwind */
   --default-border-width: var(--borda-largura);
@@ -98,3 +102,10 @@
   --leading-titulo: var(--lh-titulo);
   --leading-numero: var(--lh-numero);
 }
+
+/*
+ * Cortes do layout, com o mesmo valor do CSS antigo (@media (max-width: ...), ou seja, largura ≤ corte).
+ * Media query não lê var(), por isso o número fica aqui. Não use max-sm, max-md…: eles geram
+ * width < corte e erram exatamente na largura do corte (640px é o teste de zoom de 200%).
+ */
+@custom-variant ate-640 (@media (max-width: 640px));
