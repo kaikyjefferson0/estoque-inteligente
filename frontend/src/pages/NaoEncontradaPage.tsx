@@ -6,11 +6,11 @@ import { useTituloDaPagina } from '../components/useTituloDaPagina'
 export function NaoEncontradaPage() {
   useTituloDaPagina('Página não encontrada')
   return (
-    <div className="pagina">
-      <header className="pagina__cabecalho">
+    <div className="flex max-w-largura-conteudo flex-col gap-esp-5">
+      <header className="flex flex-wrap items-end justify-between gap-esp-4">
         <h1>Página não encontrada</h1>
       </header>
-      <div className="painel">
+      <div className="rounded-m border border-borda bg-superficie">
         <Vazio
           icone={IconMapOff}
           titulo="Este endereço não existe no sistema"
