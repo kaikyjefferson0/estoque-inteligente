@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-10T14:46:58+00:00",
+  "generatedAt": "2026-11-10T20:11:55.358Z",
   "title": "Design System: Estoque Inteligente",
   "extensions": {
-    "tokenSource": "frontend/src/styles/theme.css (variáveis --cor-*, --esp-*, --raio-*, --fs-*, --mov-*)",
+    "tokenSource": "frontend/src/styles/theme.css (variáveis --cor-*, --esp-*, --raio-*, --fs-*, --mov-*), a única fonte de valores; frontend/src/styles/tailwind.css liga cada token ao Tailwind CSS v4 por @theme inline, só com var(--...) (bg-primaria, p-esp-4, rounded-m, max-w-largura-conteudo; a classe border usa --borda-largura)",
     "colorMeta": {
       "primaria": {
         "role": "primary",
@@ -574,6 +574,10 @@
       {
         "name": "largura-gaveta",
         "value": "288px"
+      },
+      {
+        "name": "borda-largura",
+        "value": "1px"
       },
       {
         "name": "etiqueta-largura",

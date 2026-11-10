@@ -71,6 +71,12 @@
   --spacing-esp-6: var(--esp-6);
   --spacing-esp-7: var(--esp-7);
 
+  /* Larguras máximas (max-w-) */
+  --max-width-largura-conteudo: var(--largura-conteudo);
+
+  /* Borda: a classe border usa a largura do tema, não o 1px embutido do Tailwind */
+  --default-border-width: var(--borda-largura);
+
   /* Raios */
   --radius-p: var(--raio-p);
   --radius-m: var(--raio-m);
