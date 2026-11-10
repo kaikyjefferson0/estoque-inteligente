@@ -24,6 +24,7 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - Nunca ler, mostrar nem commitar o arquivo `.env`.
 - Toda mudança de tabela passa por migration do Alembic.
 - O tema visual fica em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios e durações; páginas seguem a skill `frontend-page`.
+- Antes de qualquer trabalho no frontend, leia `PRODUCT.md` e `DESIGN.md` (estado atual e regras) e `design-system\estoque-inteligente\MASTER.md` (direção proposta, ainda não aplicada).
 - Estamos no Windows (cmd): use `py` e caminhos com barra invertida.
 - Trabalhe uma fase por vez e explique o que está fazendo; o usuário é o engenheiro e decide a arquitetura.
 - Ao final de cada sessão, pare os servidores (API e site) que você iniciou.
