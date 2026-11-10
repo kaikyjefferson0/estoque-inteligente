@@ -1,83 +1,94 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+/*
+ * Reset e estilos de elemento, na camada base do Tailwind (o lugar do Preflight, que está desligado).
+ * A ordem das camadas (theme, base, components, utilities) é declarada no tailwind.css, importado
+ * antes deste arquivo no main.tsx. Em camada, o reset perde para os utilitários e para todo CSS
+ * sem camada (componentes.css, layout.css e o CSS das telas ainda não migradas), qualquer que seja
+ * a especificidade do seletor.
+ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: var(--esp-0);
+    min-height: 100vh;
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: var(--fonte);
+    font-size: var(--fs-3);
+    font-weight: var(--peso-normal);
+    line-height: var(--lh-corpo);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  ul,
+  ol,
+  dl,
+  dd {
+    margin: var(--esp-0);
+  }
+
+  ul,
+  ol {
+    padding: var(--esp-0);
+    list-style: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: var(--peso-medio);
+    line-height: var(--lh-titulo);
+  }
+
+  h1 {
+    font-size: var(--fs-5);
+  }
+
+  h2 {
+    font-size: var(--fs-4);
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
+
+  a {
+    color: var(--cor-primaria);
+    text-underline-offset: var(--sublinhado-distancia);
+  }
+
+  a:hover {
+    color: var(--cor-primaria-escura);
+  }
+
+  /* Foco visível só para quem navega pelo teclado */
+  :focus-visible {
+    outline: var(--foco-anel);
+    outline-offset: var(--foco-distancia);
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
-}
-
-body {
-  margin: var(--esp-0);
-  min-height: 100vh;
-  background: var(--cor-fundo);
-  color: var(--cor-texto);
-  font-family: var(--fonte);
-  font-size: var(--fs-3);
-  font-weight: var(--peso-normal);
-  line-height: var(--lh-corpo);
-  -webkit-font-smoothing: antialiased;
-}
-
-h1,
-h2,
-h3,
-p,
-ul,
-ol,
-dl,
-dd {
-  margin: var(--esp-0);
-}
-
-ul,
-ol {
-  padding: var(--esp-0);
-  list-style: none;
-}
-
-h1,
-h2,
-h3 {
-  font-weight: var(--peso-medio);
-  line-height: var(--lh-titulo);
-}
-
-h1 {
-  font-size: var(--fs-5);
-}
-
-h2 {
-  font-size: var(--fs-4);
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
-
-a {
-  color: var(--cor-primaria);
-  text-underline-offset: var(--sublinhado-distancia);
-}
-
-a:hover {
-  color: var(--cor-primaria-escura);
-}
-
-/* Foco visível só para quem navega pelo teclado */
-:focus-visible {
-  outline: var(--foco-anel);
-  outline-offset: var(--foco-distancia);
-}
-
-:focus:not(:focus-visible) {
-  outline: none;
-}
+/* Classes do projeto: fora de camada, como o resto do CSS do projeto */
 
 /* Quantidades e saldos alinham por coluna */
 .numero {

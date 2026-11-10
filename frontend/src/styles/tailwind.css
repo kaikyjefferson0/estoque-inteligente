@@ -7,7 +7,11 @@
  * --esp-4 → p-esp-4, --raio-p → rounded-p, --fs-2 → text-fs-2.
  */
 
-/* Sem o Preflight: o reset é do global.css. Só a camada de tema e a de utilitários. */
+/*
+ * Sem o Preflight: o reset é o do global.css, que entra na camada base (@layer base).
+ * Esta linha fixa a ordem das camadas (a do Tailwind v4) e por isso o main.tsx importa este
+ * arquivo antes do global.css. O CSS do projeto sem camada vence todas elas.
+ */
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
