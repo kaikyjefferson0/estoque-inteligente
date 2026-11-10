@@ -17,3 +17,6 @@ htmlcov/
 
 # Capturas de referência (só locais, nunca no Git)
 capturas/
+
+# Configuração local do Impeccable (por máquina)
+.impeccable/config.local.json

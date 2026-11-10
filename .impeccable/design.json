@@ -1,0 +1,762 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-10T14:46:58+00:00",
+  "title": "Design System: Estoque Inteligente",
+  "extensions": {
+    "tokenSource": "frontend/src/styles/theme.css (variáveis --cor-*, --esp-*, --raio-*, --fs-*, --mov-*)",
+    "colorMeta": {
+      "primaria": {
+        "role": "primary",
+        "displayName": "Azul Ardósia",
+        "canonical": "#2f5d8a",
+        "oklch": "oklch(46.7% 0.089 249.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.041 249.8)",
+          "oklch(26.4% 0.054 249.8)",
+          "oklch(37.9% 0.068 249.8)",
+          "oklch(49.3% 0.082 249.8)",
+          "oklch(60.7% 0.082 249.8)",
+          "oklch(72.1% 0.068 249.8)",
+          "oklch(83.6% 0.054 249.8)",
+          "oklch(95.0% 0.041 249.8)"
+        ]
+      },
+      "primaria-escura": {
+        "role": "primary",
+        "displayName": "Azul Ardósia Escuro",
+        "canonical": "#1f4266",
+        "oklch": "oklch(37.2% 0.074 251.1)",
+        "tonalRamp": [
+          "oklch(15.0% 0.034 251.1)",
+          "oklch(26.4% 0.045 251.1)",
+          "oklch(37.9% 0.057 251.1)",
+          "oklch(49.3% 0.069 251.1)",
+          "oklch(60.7% 0.069 251.1)",
+          "oklch(72.1% 0.057 251.1)",
+          "oklch(83.6% 0.045 251.1)",
+          "oklch(95.0% 0.034 251.1)"
+        ]
+      },
+      "primaria-pressionada": {
+        "role": "primary",
+        "displayName": "Azul Ardósia Pressionado",
+        "canonical": "#183552",
+        "oklch": "oklch(32.2% 0.063 250.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.028 250.4)",
+          "oklch(26.4% 0.038 250.4)",
+          "oklch(37.9% 0.048 250.4)",
+          "oklch(49.3% 0.058 250.4)",
+          "oklch(60.7% 0.058 250.4)",
+          "oklch(72.1% 0.048 250.4)",
+          "oklch(83.6% 0.038 250.4)",
+          "oklch(95.0% 0.028 250.4)"
+        ]
+      },
+      "primaria-clara": {
+        "role": "primary",
+        "displayName": "Névoa Ardósia",
+        "canonical": "#eaf1f8",
+        "oklch": "oklch(95.5% 0.012 248.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 248.0)",
+          "oklch(26.4% 0.007 248.0)",
+          "oklch(37.9% 0.009 248.0)",
+          "oklch(49.3% 0.011 248.0)",
+          "oklch(60.7% 0.011 248.0)",
+          "oklch(72.1% 0.009 248.0)",
+          "oklch(83.6% 0.007 248.0)",
+          "oklch(95.0% 0.005 248.0)"
+        ]
+      },
+      "primaria-clara-pressionada": {
+        "role": "primary",
+        "displayName": "Névoa Ardósia Pressionada",
+        "canonical": "#dbe7f3",
+        "oklch": "oklch(92.3% 0.021 248.1)",
+        "tonalRamp": [
+          "oklch(15.0% 0.009 248.1)",
+          "oklch(26.4% 0.013 248.1)",
+          "oklch(37.9% 0.016 248.1)",
+          "oklch(49.3% 0.019 248.1)",
+          "oklch(60.7% 0.019 248.1)",
+          "oklch(72.1% 0.016 248.1)",
+          "oklch(83.6% 0.013 248.1)",
+          "oklch(95.0% 0.009 248.1)"
+        ]
+      },
+      "superficie": {
+        "role": "neutral",
+        "displayName": "Branco Superfície",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 250.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 250.0)",
+          "oklch(26.4% 0.007 250.0)",
+          "oklch(37.9% 0.009 250.0)",
+          "oklch(49.3% 0.011 250.0)",
+          "oklch(60.7% 0.011 250.0)",
+          "oklch(72.1% 0.009 250.0)",
+          "oklch(83.6% 0.007 250.0)",
+          "oklch(95.0% 0.005 250.0)"
+        ]
+      },
+      "fundo": {
+        "role": "neutral",
+        "displayName": "Cinza Gôndola",
+        "canonical": "#f4f7fa",
+        "oklch": "oklch(97.5% 0.005 247.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 247.9)",
+          "oklch(26.4% 0.007 247.9)",
+          "oklch(37.9% 0.009 247.9)",
+          "oklch(49.3% 0.011 247.9)",
+          "oklch(60.7% 0.011 247.9)",
+          "oklch(72.1% 0.009 247.9)",
+          "oklch(83.6% 0.007 247.9)",
+          "oklch(95.0% 0.005 247.9)"
+        ]
+      },
+      "texto": {
+        "role": "neutral",
+        "displayName": "Tinta Azul-Noite",
+        "canonical": "#1b2a3a",
+        "oklch": "oklch(27.9% 0.036 250.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 250.8)",
+          "oklch(26.4% 0.022 250.8)",
+          "oklch(37.9% 0.028 250.8)",
+          "oklch(49.3% 0.033 250.8)",
+          "oklch(60.7% 0.033 250.8)",
+          "oklch(72.1% 0.028 250.8)",
+          "oklch(83.6% 0.022 250.8)",
+          "oklch(95.0% 0.016 250.8)"
+        ]
+      },
+      "texto-suave": {
+        "role": "neutral",
+        "displayName": "Grafite Suave",
+        "canonical": "#5b6b7d",
+        "oklch": "oklch(52.1% 0.034 251.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.016 251.5)",
+          "oklch(26.4% 0.021 251.5)",
+          "oklch(37.9% 0.026 251.5)",
+          "oklch(49.3% 0.032 251.5)",
+          "oklch(60.7% 0.032 251.5)",
+          "oklch(72.1% 0.026 251.5)",
+          "oklch(83.6% 0.021 251.5)",
+          "oklch(95.0% 0.016 251.5)"
+        ]
+      },
+      "texto-inverso": {
+        "role": "neutral",
+        "displayName": "Branco Inverso",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 250.0)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 250.0)",
+          "oklch(26.4% 0.007 250.0)",
+          "oklch(37.9% 0.009 250.0)",
+          "oklch(49.3% 0.011 250.0)",
+          "oklch(60.7% 0.011 250.0)",
+          "oklch(72.1% 0.009 250.0)",
+          "oklch(83.6% 0.007 250.0)",
+          "oklch(95.0% 0.005 250.0)"
+        ]
+      },
+      "borda": {
+        "role": "neutral",
+        "displayName": "Linha de Prateleira",
+        "canonical": "#dce3eb",
+        "oklch": "oklch(91.3% 0.013 251.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.006 251.6)",
+          "oklch(26.4% 0.008 251.6)",
+          "oklch(37.9% 0.010 251.6)",
+          "oklch(49.3% 0.012 251.6)",
+          "oklch(60.7% 0.012 251.6)",
+          "oklch(72.1% 0.010 251.6)",
+          "oklch(83.6% 0.008 251.6)",
+          "oklch(95.0% 0.006 251.6)"
+        ]
+      },
+      "borda-forte": {
+        "role": "neutral",
+        "displayName": "Linha Firme",
+        "canonical": "#a9b6c4",
+        "oklch": "oklch(77.1% 0.025 250.1)",
+        "tonalRamp": [
+          "oklch(15.0% 0.011 250.1)",
+          "oklch(26.4% 0.015 250.1)",
+          "oklch(37.9% 0.019 250.1)",
+          "oklch(49.3% 0.023 250.1)",
+          "oklch(60.7% 0.023 250.1)",
+          "oklch(72.1% 0.019 250.1)",
+          "oklch(83.6% 0.015 250.1)",
+          "oklch(95.0% 0.011 250.1)"
+        ]
+      },
+      "hover-neutro": {
+        "role": "neutral",
+        "displayName": "Toque Neutro",
+        "canonical": "#eef2f6",
+        "oklch": "oklch(95.9% 0.007 247.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 247.9)",
+          "oklch(26.4% 0.007 247.9)",
+          "oklch(37.9% 0.009 247.9)",
+          "oklch(49.3% 0.011 247.9)",
+          "oklch(60.7% 0.011 247.9)",
+          "oklch(72.1% 0.009 247.9)",
+          "oklch(83.6% 0.007 247.9)",
+          "oklch(95.0% 0.005 247.9)"
+        ]
+      },
+      "pressionado-neutro": {
+        "role": "neutral",
+        "displayName": "Pressão Neutra",
+        "canonical": "#e2e8ef",
+        "oklch": "oklch(92.8% 0.011 252.1)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 252.1)",
+          "oklch(26.4% 0.007 252.1)",
+          "oklch(37.9% 0.009 252.1)",
+          "oklch(49.3% 0.011 252.1)",
+          "oklch(60.7% 0.011 252.1)",
+          "oklch(72.1% 0.009 252.1)",
+          "oklch(83.6% 0.007 252.1)",
+          "oklch(95.0% 0.005 252.1)"
+        ]
+      },
+      "desabilitado-fundo": {
+        "role": "neutral",
+        "displayName": "Fundo Bloqueado",
+        "canonical": "#e9edf2",
+        "oklch": "oklch(94.4% 0.008 253.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 253.9)",
+          "oklch(26.4% 0.007 253.9)",
+          "oklch(37.9% 0.009 253.9)",
+          "oklch(49.3% 0.011 253.9)",
+          "oklch(60.7% 0.011 253.9)",
+          "oklch(72.1% 0.009 253.9)",
+          "oklch(83.6% 0.007 253.9)",
+          "oklch(95.0% 0.005 253.9)"
+        ]
+      },
+      "desabilitado-texto": {
+        "role": "neutral",
+        "displayName": "Texto Bloqueado",
+        "canonical": "#8593a3",
+        "oklch": "oklch(65.7% 0.029 251.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.013 251.8)",
+          "oklch(26.4% 0.018 251.8)",
+          "oklch(37.9% 0.022 251.8)",
+          "oklch(49.3% 0.027 251.8)",
+          "oklch(60.7% 0.027 251.8)",
+          "oklch(72.1% 0.022 251.8)",
+          "oklch(83.6% 0.018 251.8)",
+          "oklch(95.0% 0.013 251.8)"
+        ]
+      },
+      "ok": {
+        "role": "status",
+        "displayName": "Verde Conferido",
+        "canonical": "#2e7d5b",
+        "oklch": "oklch(53.1% 0.095 161.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.043 161.9)",
+          "oklch(26.4% 0.058 161.9)",
+          "oklch(37.9% 0.072 161.9)",
+          "oklch(49.3% 0.087 161.9)",
+          "oklch(60.7% 0.087 161.9)",
+          "oklch(72.1% 0.072 161.9)",
+          "oklch(83.6% 0.058 161.9)",
+          "oklch(95.0% 0.043 161.9)"
+        ]
+      },
+      "ok-texto": {
+        "role": "status",
+        "displayName": "Verde Conferido (texto)",
+        "canonical": "#2e7d5b",
+        "oklch": "oklch(53.1% 0.095 161.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.043 161.9)",
+          "oklch(26.4% 0.058 161.9)",
+          "oklch(37.9% 0.072 161.9)",
+          "oklch(49.3% 0.087 161.9)",
+          "oklch(60.7% 0.087 161.9)",
+          "oklch(72.1% 0.072 161.9)",
+          "oklch(83.6% 0.058 161.9)",
+          "oklch(95.0% 0.043 161.9)"
+        ]
+      },
+      "ok-fundo": {
+        "role": "status",
+        "displayName": "Verde Conferido Claro",
+        "canonical": "#e8f4ee",
+        "oklch": "oklch(95.7% 0.015 164.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.007 164.7)",
+          "oklch(26.4% 0.009 164.7)",
+          "oklch(37.9% 0.011 164.7)",
+          "oklch(49.3% 0.014 164.7)",
+          "oklch(60.7% 0.014 164.7)",
+          "oklch(72.1% 0.011 164.7)",
+          "oklch(83.6% 0.009 164.7)",
+          "oklch(95.0% 0.007 164.7)"
+        ]
+      },
+      "atencao": {
+        "role": "status",
+        "displayName": "Âmbar Validade",
+        "canonical": "#b26b00",
+        "oklch": "oklch(59.3% 0.132 65.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.060 65.8)",
+          "oklch(26.4% 0.081 65.8)",
+          "oklch(37.9% 0.101 65.8)",
+          "oklch(49.3% 0.122 65.8)",
+          "oklch(60.7% 0.122 65.8)",
+          "oklch(72.1% 0.101 65.8)",
+          "oklch(83.6% 0.081 65.8)",
+          "oklch(95.0% 0.060 65.8)"
+        ]
+      },
+      "atencao-texto": {
+        "role": "status",
+        "displayName": "Âmbar Validade (texto)",
+        "canonical": "#8a5300",
+        "oklch": "oklch(49.4% 0.109 66.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.050 66.9)",
+          "oklch(26.4% 0.067 66.9)",
+          "oklch(37.9% 0.084 66.9)",
+          "oklch(49.3% 0.101 66.9)",
+          "oklch(60.7% 0.101 66.9)",
+          "oklch(72.1% 0.084 66.9)",
+          "oklch(83.6% 0.067 66.9)",
+          "oklch(95.0% 0.050 66.9)"
+        ]
+      },
+      "atencao-fundo": {
+        "role": "status",
+        "displayName": "Âmbar Validade Claro",
+        "canonical": "#fdf3e3",
+        "oklch": "oklch(96.8% 0.024 79.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.011 79.7)",
+          "oklch(26.4% 0.014 79.7)",
+          "oklch(37.9% 0.018 79.7)",
+          "oklch(49.3% 0.022 79.7)",
+          "oklch(60.7% 0.022 79.7)",
+          "oklch(72.1% 0.018 79.7)",
+          "oklch(83.6% 0.014 79.7)",
+          "oklch(95.0% 0.011 79.7)"
+        ]
+      },
+      "critico": {
+        "role": "status",
+        "displayName": "Vermelho Vencido",
+        "canonical": "#b42318",
+        "oklch": "oklch(50.0% 0.182 29.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.083 29.5)",
+          "oklch(26.4% 0.111 29.5)",
+          "oklch(37.9% 0.139 29.5)",
+          "oklch(49.3% 0.168 29.5)",
+          "oklch(60.7% 0.168 29.5)",
+          "oklch(72.1% 0.139 29.5)",
+          "oklch(83.6% 0.111 29.5)",
+          "oklch(95.0% 0.083 29.5)"
+        ]
+      },
+      "critico-texto": {
+        "role": "status",
+        "displayName": "Vermelho Vencido (texto)",
+        "canonical": "#b42318",
+        "oklch": "oklch(50.0% 0.182 29.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.083 29.5)",
+          "oklch(26.4% 0.111 29.5)",
+          "oklch(37.9% 0.139 29.5)",
+          "oklch(49.3% 0.168 29.5)",
+          "oklch(60.7% 0.168 29.5)",
+          "oklch(72.1% 0.139 29.5)",
+          "oklch(83.6% 0.111 29.5)",
+          "oklch(95.0% 0.083 29.5)"
+        ]
+      },
+      "critico-fundo": {
+        "role": "status",
+        "displayName": "Vermelho Vencido Claro",
+        "canonical": "#fcecea",
+        "oklch": "oklch(95.5% 0.018 26.1)",
+        "tonalRamp": [
+          "oklch(15.0% 0.008 26.1)",
+          "oklch(26.4% 0.011 26.1)",
+          "oklch(37.9% 0.014 26.1)",
+          "oklch(49.3% 0.016 26.1)",
+          "oklch(60.7% 0.016 26.1)",
+          "oklch(72.1% 0.014 26.1)",
+          "oklch(83.6% 0.011 26.1)",
+          "oklch(95.0% 0.008 26.1)"
+        ]
+      },
+      "critico-escura": {
+        "role": "status",
+        "displayName": "Vermelho Vencido Escuro",
+        "canonical": "#921c13",
+        "oklch": "oklch(43.0% 0.155 29.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.070 29.4)",
+          "oklch(26.4% 0.094 29.4)",
+          "oklch(37.9% 0.119 29.4)",
+          "oklch(49.3% 0.143 29.4)",
+          "oklch(60.7% 0.143 29.4)",
+          "oklch(72.1% 0.119 29.4)",
+          "oklch(83.6% 0.094 29.4)",
+          "oklch(95.0% 0.070 29.4)"
+        ]
+      },
+      "critico-pressionada": {
+        "role": "status",
+        "displayName": "Vermelho Vencido Pressionado",
+        "canonical": "#76170f",
+        "oklch": "oklch(37.1% 0.131 29.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.059 29.6)",
+          "oklch(26.4% 0.080 29.6)",
+          "oklch(37.9% 0.100 29.6)",
+          "oklch(49.3% 0.120 29.6)",
+          "oklch(60.7% 0.120 29.6)",
+          "oklch(72.1% 0.100 29.6)",
+          "oklch(83.6% 0.080 29.6)",
+          "oklch(95.0% 0.059 29.6)"
+        ]
+      },
+      "sobreposicao": {
+        "role": "neutral",
+        "displayName": "Sobreposição",
+        "canonical": "rgba(27, 42, 58, 0.45)",
+        "tonalRamp": []
+      }
+    },
+    "typographyMeta": {
+      "numero-situacao": {
+        "displayName": "Número de situação",
+        "purpose": "Os quatro números do painel; só aparece ali."
+      },
+      "headline": {
+        "displayName": "Título da página",
+        "purpose": "h1, um por tela."
+      },
+      "title": {
+        "displayName": "Título de seção",
+        "purpose": "h2, cabeçalho de painel e título de diálogo."
+      },
+      "body": {
+        "displayName": "Corpo",
+        "purpose": "Texto corrido, valores de campo e nomes em listas (em 500)."
+      },
+      "body-small": {
+        "displayName": "Corpo pequeno",
+        "purpose": "Apoio, dicas, erros de campo, menu, avisos, paginação."
+      },
+      "label": {
+        "displayName": "Rótulo",
+        "purpose": "Rótulos de campo, texto de botão, cabeçalhos de tabela."
+      },
+      "meta": {
+        "displayName": "Metadado",
+        "purpose": "Etiquetas de metadado e descrições curtas abaixo de números."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sombra-flutuante",
+        "value": "0 8px 24px rgba(27, 42, 58, 0.14)",
+        "purpose": "Só para o que flutua: diálogo, gaveta, menu suspenso e lista de opções."
+      }
+    ],
+    "focus": [
+      {
+        "name": "foco-anel",
+        "value": "outline: 2px solid #2f5d8a; outline-offset: 2px",
+        "purpose": "Foco pelo teclado em todos os controles."
+      },
+      {
+        "name": "foco-anel-forte",
+        "value": "outline: 3px solid #1b2a3a",
+        "purpose": "Foco dentro de itens com fundo âmbar ou vermelho, para não sumir na cor."
+      }
+    ],
+    "motion": [
+      {
+        "name": "mov-rapido",
+        "value": "120ms",
+        "purpose": "Hover, pressão e troca de cor."
+      },
+      {
+        "name": "mov-medio",
+        "value": "200ms",
+        "purpose": "Entrada de diálogo, véu e gaveta."
+      },
+      {
+        "name": "mov-curva",
+        "value": "cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "Curva de todas as transições."
+      },
+      {
+        "name": "mov-giro",
+        "value": "800ms",
+        "purpose": "Giro do indicador de carregando; para com reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "gaveta",
+        "value": "900px",
+        "purpose": "Menu lateral vira gaveta; alvos de toque sobem para 44px."
+      },
+      {
+        "name": "compacto",
+        "value": "640px",
+        "purpose": "Painéis e formulários reduzem o recuo para 16px."
+      },
+      {
+        "name": "celular",
+        "value": "480px",
+        "purpose": "Ações descem para baixo do título."
+      },
+      {
+        "name": "estreito",
+        "value": "400px",
+        "purpose": "Nome do usuário vira ícone; botões do diálogo empilham."
+      },
+      {
+        "name": "tabela-empilhada",
+        "value": "48rem (container query)",
+        "purpose": "Tabela vira lista empilhada pela largura do próprio painel."
+      }
+    ],
+    "dimensions": [
+      {
+        "name": "alvo-min",
+        "value": "40px (44px até 900px)"
+      },
+      {
+        "name": "altura-cabecalho",
+        "value": "56px"
+      },
+      {
+        "name": "largura-menu",
+        "value": "240px"
+      },
+      {
+        "name": "largura-conteudo",
+        "value": "1120px"
+      },
+      {
+        "name": "largura-formulario",
+        "value": "560px"
+      },
+      {
+        "name": "largura-login",
+        "value": "400px"
+      },
+      {
+        "name": "largura-dialogo",
+        "value": "440px"
+      },
+      {
+        "name": "largura-gaveta",
+        "value": "288px"
+      },
+      {
+        "name": "etiqueta-largura",
+        "value": "4px"
+      },
+      {
+        "name": "icone-p",
+        "value": "18px"
+      },
+      {
+        "name": "icone-m",
+        "value": "20px"
+      },
+      {
+        "name": "medida-texto",
+        "value": "68ch"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão primário",
+      "kind": "button",
+      "refersTo": "botao-primaria",
+      "description": "A única ação principal da tela, sempre com verbo.",
+      "html": "<button class=\"ds-botao-primaria\" type=\"button\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 21l-8 -4.5v-9l8 -4.5l8 4.5v4.5\"/><path d=\"M12 12l8 -4.5\"/><path d=\"M12 12v9\"/><path d=\"M12 12l-8 -4.5\"/><path d=\"M22 18h-7\"/><path d=\"M18 15l-3 3l3 3\"/></svg>Registrar entrada</button>",
+      "css": ".ds-botao-primaria { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: var(--cor-primaria, #2f5d8a); color: #fff; } .ds-botao-primaria svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-primaria:hover { background: var(--cor-primaria-escura, #1f4266); } .ds-botao-primaria:active { background: var(--cor-primaria-pressionada, #183552); } .ds-botao-primaria:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "botao-secundaria",
+      "description": "Ações de apoio com peso visual próprio (ex.: Cancelar num formulário).",
+      "html": "<button class=\"ds-botao-secundaria\" type=\"button\">Cancelar</button>",
+      "css": ".ds-botao-secundaria { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: var(--cor-superficie, #ffffff); border-color: var(--cor-borda, #dce3eb); color: var(--cor-texto, #1b2a3a); } .ds-botao-secundaria svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-secundaria:hover { background: var(--cor-hover-neutro, #eef2f6); border-color: var(--cor-borda-forte, #a9b6c4); } .ds-botao-secundaria:active { background: var(--cor-pressionado-neutro, #e2e8ef); } .ds-botao-secundaria:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão fantasma",
+      "kind": "button",
+      "refersTo": "botao-fantasma",
+      "description": "Ação de apoio no cabeçalho da página ou dentro de painéis (ex.: Atualizar).",
+      "html": "<button class=\"ds-botao-fantasma\" type=\"button\">Atualizar</button>",
+      "css": ".ds-botao-fantasma { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: transparent; color: var(--cor-primaria, #2f5d8a); } .ds-botao-fantasma svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-fantasma:hover { background: var(--cor-primaria-clara, #eaf1f8); color: var(--cor-primaria-escura, #1f4266); } .ds-botao-fantasma:active { background: var(--cor-primaria-clara-pressionada, #dbe7f3); } .ds-botao-fantasma:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão de perigo",
+      "kind": "button",
+      "refersTo": "botao-perigo",
+      "description": "Só na confirmação de ação irreversível (ajuste, desativar usuário).",
+      "html": "<button class=\"ds-botao-perigo\" type=\"button\">Desativar usuário</button>",
+      "css": ".ds-botao-perigo { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: var(--cor-critico, #b42318); color: #fff; } .ds-botao-perigo svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-perigo:hover { background: var(--cor-critico-escura, #921c13); } .ds-botao-perigo:active { background: var(--cor-critico-pressionada, #76170f); } .ds-botao-perigo:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+    },
+    {
+      "name": "Campo",
+      "kind": "input",
+      "refersTo": "campo",
+      "description": "Rótulo acima, caixa com borda firme; erro em vermelho em todos os estados.",
+      "html": "<div class=\"ds-campo\"><label class=\"ds-campo__rotulo\" for=\"ds-qtd\">Quantidade</label><div class=\"ds-campo__caixa\"><input class=\"ds-campo__entrada\" id=\"ds-qtd\" inputmode=\"numeric\"></div><p class=\"ds-campo__dica\">Em unidades do produto.</p></div>",
+      "css": ".ds-campo { display: flex; flex-direction: column; gap: 4px; max-width: 320px; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); color: var(--cor-texto, #1b2a3a); } .ds-campo__rotulo { font-size: 0.875rem; font-weight: 500; } .ds-campo__caixa { display: flex; background: var(--cor-superficie, #ffffff); border: 1px solid var(--cor-borda-forte, #a9b6c4); border-radius: var(--raio-p, 6px); transition: border-color 120ms cubic-bezier(0.2, 0, 0, 1); } .ds-campo__caixa:hover { border-color: var(--cor-texto-suave, #5b6b7d); } .ds-campo__caixa:focus-within { border-color: var(--cor-primaria, #2f5d8a); outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 0; } .ds-campo__entrada { flex: 1; min-width: 0; min-height: 40px; padding: 0 12px; border: 0; background: transparent; font: inherit; font-size: 1rem; color: inherit; font-variant-numeric: tabular-nums; } .ds-campo__entrada:focus { outline: none; } .ds-campo__dica { margin: 0; font-size: 0.875rem; line-height: 1.55; color: var(--cor-texto-suave, #5b6b7d); }"
+    },
+    {
+      "name": "Menu lateral",
+      "kind": "nav",
+      "refersTo": "menu-link",
+      "description": "Navegação principal: página atual em Névoa Ardósia, contagem de alertas em âmbar.",
+      "html": "<nav class=\"ds-menu\" aria-label=\"Principal\"><a class=\"ds-menu__link\" href=\"#\" aria-current=\"page\"><svg class=\"ds-menu__icone\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1\"/><path d=\"M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1\"/><path d=\"M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1\"/><path d=\"M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1\"/></svg><span class=\"ds-menu__rotulo\">Painel</span></a><a class=\"ds-menu__link\" href=\"#\"><svg class=\"ds-menu__icone\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5\"/><path d=\"M12 12l8 -4.5\"/><path d=\"M12 12l0 9\"/><path d=\"M12 12l-8 -4.5\"/></svg><span class=\"ds-menu__rotulo\">Produtos</span></a><a class=\"ds-menu__link\" href=\"#\" aria-label=\"Alertas, 8 ativos\"><svg class=\"ds-menu__icone\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6\"/><path d=\"M9 17v1a3 3 0 0 0 6 0v-1\"/></svg><span class=\"ds-menu__rotulo\">Alertas</span><span class=\"ds-menu__contagem\">8</span></a></nav>",
+      "css": ".ds-menu { display: flex; flex-direction: column; gap: 4px; width: 216px; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); } .ds-menu__link { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: var(--raio-p, 6px); color: var(--cor-texto-suave, #5b6b7d); font-size: 0.875rem; text-decoration: none; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); } .ds-menu__icone { width: 20px; height: 20px; flex-shrink: 0; } .ds-menu__rotulo { flex: 1; } .ds-menu__link:hover { background: var(--cor-hover-neutro, #eef2f6); color: var(--cor-texto, #1b2a3a); } .ds-menu__link:active { background: var(--cor-pressionado-neutro, #e2e8ef); } .ds-menu__link:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; } .ds-menu__link[aria-current='page'] { background: var(--cor-primaria-clara, #eaf1f8); color: var(--cor-primaria-escura, #1f4266); font-weight: 500; } .ds-menu__contagem { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; padding: 0 8px; border-radius: var(--raio-p, 6px); background: var(--cor-atencao-fundo, #fdf3e3); color: var(--cor-atencao-texto, #8a5300); font-size: 0.8125rem; font-weight: 500; line-height: 1.55; }"
+    },
+    {
+      "name": "Etiquetas de metadado",
+      "kind": "chip",
+      "refersTo": "metadado",
+      "description": "Metadados abaixo do nome do item, que passam para a linha de baixo quando não cabem.",
+      "html": "<dl class=\"ds-metadados\"><div class=\"ds-metadado\"><dt class=\"ds-oculto\">Tipo</dt><dd>Saída</dd></div><div class=\"ds-metadado\"><dt class=\"ds-oculto\">Lote</dt><dd>Lote 3, validade 01/11/2026</dd></div><div class=\"ds-metadado\"><dt class=\"ds-oculto\">Data</dt><dd>29/10/2026, 19:32</dd></div></dl>",
+      "css": ".ds-metadados { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.8125rem; line-height: 1.55; color: var(--cor-texto-suave, #5b6b7d); } .ds-metadado { padding: 0 8px; border: 1px solid var(--cor-borda, #dce3eb); border-radius: var(--raio-p, 6px); background: var(--cor-superficie, #ffffff); white-space: nowrap; } .ds-metadado dd { margin: 0; font-variant-numeric: tabular-nums; } .ds-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }"
+    },
+    {
+      "name": "Alerta com etiqueta de prateleira",
+      "kind": "custom",
+      "refersTo": "aviso-atencao",
+      "description": "Assinatura do sistema: faixa de 4px na cor da situação, lado esquerdo reto, fundo claro só quando há problema.",
+      "html": "<ul class=\"ds-alertas\"><li class=\"ds-alerta ds-alerta--critico\"><a class=\"ds-alerta__link\" href=\"#\"><span class=\"ds-alerta__produto\">Iogurte natural 170 g</span><span class=\"ds-alerta__tipo\">Lote vencido</span></a></li><li class=\"ds-alerta ds-alerta--atencao\"><a class=\"ds-alerta__link\" href=\"#\"><span class=\"ds-alerta__produto\">Café torrado e moído 500 g</span><span class=\"ds-alerta__tipo\">Estoque baixo</span></a></li><li class=\"ds-alerta ds-alerta--resolvido\"><a class=\"ds-alerta__link\" href=\"#\"><span class=\"ds-alerta__produto\">Detergente neutro 500 ml</span><span class=\"ds-alerta__tipo\">Resolvido</span></a></li></ul>",
+      "css": ".ds-alertas { max-width: 520px; margin: 0; padding: 0; list-style: none; background: var(--cor-superficie, #ffffff); border: 1px solid var(--cor-borda, #dce3eb); border-left: 0; border-radius: 0 var(--raio-m, 10px) var(--raio-m, 10px) 0; overflow: hidden; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); } .ds-alerta { border-left: 4px solid var(--ds-faixa); background: var(--ds-fundo, transparent); } .ds-alerta + .ds-alerta { border-top: 1px solid var(--cor-borda, #dce3eb); } .ds-alerta--critico { --ds-faixa: var(--cor-critico, #b42318); --ds-fundo: var(--cor-critico-fundo, #fcecea); --ds-texto: var(--cor-critico-texto, #b42318); } .ds-alerta--atencao { --ds-faixa: var(--cor-atencao, #b26b00); --ds-fundo: var(--cor-atencao-fundo, #fdf3e3); --ds-texto: var(--cor-atencao-texto, #8a5300); } .ds-alerta--resolvido { --ds-faixa: var(--cor-borda, #dce3eb); --ds-texto: var(--cor-texto-suave, #5b6b7d); } .ds-alerta__link { display: flex; flex-direction: column; gap: 8px; min-height: 40px; padding: 12px 24px; color: var(--cor-texto, #1b2a3a); text-decoration: none; } .ds-alerta__link:focus-visible { outline: 3px solid var(--cor-texto, #1b2a3a); outline-offset: -2px; } .ds-alerta__produto { font-weight: 500; color: var(--cor-primaria, #2f5d8a); text-decoration: underline; text-underline-offset: 3px; } .ds-alerta__link:hover .ds-alerta__produto { color: var(--cor-primaria-escura, #1f4266); } .ds-alerta__tipo { font-size: 0.875rem; font-weight: 500; color: var(--ds-texto); }"
+    },
+    {
+      "name": "Painel de situações",
+      "kind": "custom",
+      "refersTo": "painel",
+      "description": "Assinatura do painel: um único painel dividido pelas etiquetas; a célula só ganha cor quando o número passa de zero.",
+      "html": "<section class=\"ds-situacoes\"><div class=\"ds-situacao ds-situacao--atencao\" data-ativo><span class=\"ds-situacao__titulo\">Estoque baixo</span><span class=\"ds-situacao__valor\">4</span><span class=\"ds-situacao__descricao\">produtos no mínimo ou abaixo</span></div><div class=\"ds-situacao ds-situacao--critico\" data-ativo><span class=\"ds-situacao__titulo\">Sem estoque</span><span class=\"ds-situacao__valor\">1</span><span class=\"ds-situacao__descricao\">produto com saldo zero</span></div><div class=\"ds-situacao ds-situacao--ok\"><span class=\"ds-situacao__titulo\">Vencidos</span><span class=\"ds-situacao__valor\">0</span><span class=\"ds-situacao__descricao\">Nada pendente</span></div></section>",
+      "css": ".ds-situacoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--cor-superficie, #ffffff); border: 1px solid var(--cor-borda, #dce3eb); border-left: 0; border-radius: 0 var(--raio-m, 10px) var(--raio-m, 10px) 0; overflow: hidden; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); color: var(--cor-texto, #1b2a3a); } .ds-situacao { display: flex; flex-direction: column; gap: 4px; padding: 16px 24px; border-left: 4px solid var(--ds-faixa); } .ds-situacao--ok { --ds-faixa: var(--cor-ok, #2e7d5b); } .ds-situacao--atencao { --ds-faixa: var(--cor-atencao, #b26b00); --ds-fundo: var(--cor-atencao-fundo, #fdf3e3); --ds-texto: var(--cor-atencao-texto, #8a5300); } .ds-situacao--critico { --ds-faixa: var(--cor-critico, #b42318); --ds-fundo: var(--cor-critico-fundo, #fcecea); --ds-texto: var(--cor-critico-texto, #b42318); } .ds-situacao[data-ativo] { background: var(--ds-fundo); } .ds-situacao__titulo { font-size: 0.875rem; font-weight: 500; } .ds-situacao__valor { font-size: 2rem; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--cor-texto-suave, #5b6b7d); } .ds-situacao[data-ativo] .ds-situacao__valor { color: var(--ds-texto); } .ds-situacao__descricao { font-size: 0.8125rem; color: var(--cor-texto-suave, #5b6b7d); }"
+    },
+    {
+      "name": "Segmentos",
+      "kind": "custom",
+      "refersTo": "segmento-escolhido",
+      "description": "Escolha única entre poucas opções, com rádios nativos cobrindo a opção inteira.",
+      "html": "<fieldset class=\"ds-segmentos\"><legend class=\"ds-oculto\">Situação</legend><label class=\"ds-segmento\"><input type=\"radio\" name=\"ds-seg\" checked><span>Ativos</span></label><label class=\"ds-segmento\"><input type=\"radio\" name=\"ds-seg\"><span>Resolvidos</span></label><label class=\"ds-segmento\"><input type=\"radio\" name=\"ds-seg\"><span>Todos</span></label></fieldset>",
+      "css": ".ds-segmentos { display: inline-flex; margin: 0; padding: 0; border: 1px solid var(--cor-borda, #dce3eb); border-radius: var(--raio-p, 6px); background: var(--cor-superficie, #ffffff); overflow: hidden; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); } .ds-segmento { position: relative; display: inline-flex; } .ds-segmento + .ds-segmento { border-left: 1px solid var(--cor-borda, #dce3eb); } .ds-segmento input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; } .ds-segmento span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; font-size: 0.875rem; font-weight: 500; color: var(--cor-texto-suave, #5b6b7d); transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); } .ds-segmento:hover input:not(:checked) + span { background: var(--cor-hover-neutro, #eef2f6); color: var(--cor-texto, #1b2a3a); } .ds-segmento input:checked + span { background: var(--cor-primaria, #2f5d8a); color: #fff; } .ds-segmento input:focus-visible + span { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: -2px; } .ds-segmento input:checked:focus-visible + span { outline: 3px solid #fff; outline-offset: -5px; } .ds-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A Prateleira Etiquetada",
+    "overview": "Numa gôndola bem organizada, as prateleiras são neutras e quem fala é a etiqueta: preço, validade, aviso de \"últimas unidades\". O Estoque Inteligente segue a mesma lógica. A superfície é calma, branca sobre um cinza azulado muito leve, com bordas finas e texto em azul-noite. A cor de situação (verde conferido, âmbar de validade, vermelho de vencido) só aparece numa faixa de 4px na esquerda do item, a **etiqueta de prateleira**, e no fundo claro do item com problema. Quando nada precisa de atenção, a tela fica quieta; quando algo precisa, o olho vai direto para lá.\n\nO clima é **calmo, preciso e honesto**. Calmo, porque é uma ferramenta de trabalho usada no meio do expediente, muitas vezes no celular e com uma mão. Preciso, porque números se alinham por coluna, datas e quantidades nunca se separam da unidade e cada metadado tem seu lugar fixo. Honesto, porque nada é decorativo: nenhum número de enfeite, nenhum gradiente, nenhuma sombra fingindo profundidade, nenhum estado que a regra de negócio não confirma. A densidade é média: linhas de lista com ar suficiente para o toque (alvos de 40px no computador, 44px no celular), sem virar painel de cartões espaçados.\n\nO sistema é só claro, sem tema escuro. Um único azul, o Azul Ardósia, carrega toda a identidade: marca, ação primária, link, página atual e foco. Até os neutros são puxados para o mesmo matiz (cerca de 250° em OKLCH), por isso o cinza nunca parece morto.",
+    "keyCharacteristics": [
+      "Superfícies planas com borda de 1px; sombra só no que flutua sobre a página.",
+      "Um único destaque (Azul Ardósia) e três cores de situação que só aparecem na etiqueta.",
+      "IBM Plex Sans em dois pesos (400 e 500); hierarquia por tamanho e cor, nunca por negrito pesado.",
+      "Escala de espaçamento de 4px, sem exceções.",
+      "Etiqueta de prateleira: faixa de 4px à esquerda, com o canto daquele lado sempre reto.",
+      "Movimento curto (120 a 200ms) e só em resposta a uma ação."
+    ],
+    "rules": [
+      {
+        "name": "A Regra da Etiqueta",
+        "body": "A cor de situação aparece só na faixa da etiqueta de prateleira, no fundo claro do item com problema e no texto que nomeia a situação. Nunca em título de página, botão comum, ícone decorativo ou borda de painel.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra da Voz Única",
+        "body": "O Azul Ardósia é o único destaque. Cada tela tem um só botão primário; as outras ações são secundárias ou fantasmas.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra da Cor que Não Fala Sozinha",
+        "body": "Toda situação vem acompanhada de texto (\"Estoque baixo\", \"Vencido\", \"Sem estoque\") e, no item, de um rótulo de tipo. A cor reforça, nunca é a única informação.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra dos Dois Pesos",
+        "body": "Só existem 400 e 500. A hierarquia vem do tamanho e da cor (`texto` contra `texto-suave`), nunca de 600 ou 700.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Coluna Alinhada",
+        "body": "Quantidade, saldo, data e contagem usam algarismos tabulares (classe `numero`). Número e unidade nunca se separam: \"500 g\" leva espaço inseparável.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Caixa Normal",
+        "body": "Nenhum texto em CAIXA ALTA, nem em rótulo pequeno.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Escala de 4px",
+        "body": "Nenhum espaçamento fora de `esp-1` a `esp-7`. Um valor que não está na escala é um erro, não um ajuste fino.",
+        "section": "layout"
+      },
+      {
+        "name": "A Regra do Nome na Própria Linha",
+        "body": "Em listas, o nome do item fica sozinho na sua linha (no máximo 2 linhas, com reticências); só uma quantidade pode ficar à direita dele. O resto vai embaixo, como etiquetas.",
+        "section": "layout"
+      },
+      {
+        "name": "A Regra do Que Flutua",
+        "body": "Nada que está na página tem sombra, nem no hover. A sombra flutuante é só para camadas que se sobrepõem ao conteúdo (diálogo, gaveta, menu suspenso, lista de opções). O hover de um elemento da página muda o fundo, nunca a elevação.",
+        "section": "elevation"
+      },
+      {
+        "name": "A Regra do Canto Reto",
+        "body": "O lado que leva a etiqueta de prateleira nunca é arredondado. Painéis cujos itens têm etiqueta (situações do painel, lista de alertas) dispensam a borda esquerda e arredondam só o lado direito (`0 10px 10px 0`), porque é ali que as faixas ficam.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** usar só os tokens do tema para cor, fonte, tamanho, raio, sombra, duração e dimensão, sem valores literais no CSS das páginas e sem `style={{}}`.",
+      "**Do** manter um único botão primário por tela, com verbo; o resto é secundário ou fantasma.",
+      "**Do** marcar itens de estoque, lotes e alertas com a etiqueta de prateleira (`etiqueta--ok`, `--atencao`, `--critico`), com o lado esquerdo reto, e deixar o resto da tela calmo.",
+      "**Do** escrever o nome da situação junto da cor (\"Vencido\", \"Estoque baixo\").",
+      "**Do** usar algarismos tabulares em toda quantidade, saldo, data e contagem.",
+      "**Do** garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.",
+      "**Do** usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.",
+      "**Do** levar o texto de atenção para `atencao-texto` (#8a5300); a cor da faixa (#b26b00) não serve para texto."
+    ],
+    "donts": [
+      "**Don't** usar gradiente, vidro (desfoque de fundo), grade de cartões idênticos com sombra, CAIXA ALTA, setas \"→\" em botões ou emojis.",
+      "**Don't** pôr sombra em nada que esteja na página, nem no hover; sombra é só para diálogo, gaveta, menu suspenso e lista de opções.",
+      "**Don't** usar peso 600 ou 700; a hierarquia vem do tamanho e da cor.",
+      "**Don't** usar âmbar ou vermelho fora da etiqueta, dos avisos, dos erros e da ação de perigo, nem como enfeite.",
+      "**Don't** arredondar o lado esquerdo de um contêiner que leva etiqueta.",
+      "**Don't** usar espaçamento fora da escala de 4px (`esp-1` a `esp-7`).",
+      "**Don't** quebrar nomes no meio da palavra (`word-break: break-all`, `overflow-wrap: anywhere`), nem pôr outro texto na linha do nome numa lista.",
+      "**Don't** animar nada que não seja resposta a uma ação do usuário."
+    ]
+  }
+}
