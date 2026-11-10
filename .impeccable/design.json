@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-10T20:11:55.358Z",
+  "generatedAt": "2026-11-10T21:13:35.273Z",
   "title": "Design System: Estoque Inteligente",
   "extensions": {
-    "tokenSource": "frontend/src/styles/theme.css (variáveis --cor-*, --esp-*, --raio-*, --fs-*, --mov-*), a única fonte de valores; frontend/src/styles/tailwind.css liga cada token ao Tailwind CSS v4 por @theme inline, só com var(--...) (bg-primaria, p-esp-4, rounded-m, max-w-largura-conteudo; a classe border usa --borda-largura)",
+    "tokenSource": "frontend/src/styles/theme.css (variáveis --cor-*, --esp-*, --raio-*, --fs-*, --mov-*), a única fonte de valores; frontend/src/styles/tailwind.css liga cada token ao Tailwind CSS v4 por @theme inline, só com var(--...) (bg-primaria, p-esp-4, rounded-m, max-w-largura-conteudo, max-w-largura-formulario, grid-cols-rotulo-valor; a classe border usa --borda-largura); os cortes do layout são variantes com o mesmo valor do CSS antigo (ate-640: = @media (max-width: 640px)); o reset do global.css fica fora de camada e vence utilitários nas propriedades que define",
     "colorMeta": {
       "primaria": {
         "role": "primary",
@@ -524,7 +524,7 @@
       {
         "name": "compacto",
         "value": "640px",
-        "purpose": "Painéis e formulários reduzem o recuo para 16px."
+        "purpose": "Painéis e formulários reduzem o recuo para 16px; a lista de rótulo e valor vira uma coluna. Nas classes, a variante ate-640: (max-width: 640px, inclusive 640)."
       },
       {
         "name": "celular",
@@ -562,6 +562,10 @@
       {
         "name": "largura-formulario",
         "value": "560px"
+      },
+      {
+        "name": "colunas-rotulo-valor",
+        "value": "var(--largura-coluna-numero) minmax(0, 1fr) (128px + resto)"
       },
       {
         "name": "largura-login",
@@ -750,7 +754,8 @@
       "**Do** usar algarismos tabulares em toda quantidade, saldo, data e contagem.",
       "**Do** garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.",
       "**Do** usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.",
-      "**Do** levar o texto de atenção para `atencao-texto` (#8a5300); a cor da faixa (#b26b00) não serve para texto."
+      "**Do** levar o texto de atenção para `atencao-texto` (#8a5300); a cor da faixa (#b26b00) não serve para texto.",
+      "**Do** escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`), para a tela mudar exatamente na mesma largura."
     ],
     "donts": [
       "**Don't** usar gradiente, vidro (desfoque de fundo), grade de cartões idênticos com sombra, CAIXA ALTA, setas \"→\" em botões ou emojis.",
@@ -760,7 +765,8 @@
       "**Don't** arredondar o lado esquerdo de um contêiner que leva etiqueta.",
       "**Don't** usar espaçamento fora da escala de 4px (`esp-1` a `esp-7`).",
       "**Don't** quebrar nomes no meio da palavra (`word-break: break-all`, `overflow-wrap: anywhere`), nem pôr outro texto na linha do nome numa lista.",
-      "**Don't** animar nada que não seja resposta a uma ação do usuário."
+      "**Don't** animar nada que não seja resposta a uma ação do usuário.",
+      "**Don't** pôr utilitário numa propriedade que o reset do `global.css` já define (margem de `h1` a `h3`, `p`, `ul`, `ol`, `dl` e `dd`; recuo de `ul` e `ol`; peso e entrelinha de `h1` a `h3`; tamanho de `h1` e `h2`): o reset vence e a classe fica sem efeito."
     ]
   }
 }
