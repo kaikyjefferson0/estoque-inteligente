@@ -35,7 +35,7 @@ Um controle de estoque em que as regras valem de verdade, não só na tela: saí
 - Dois perfis, admin e operador; o operador não vê a área de usuários nem os ajustes. Não há auto-cadastro. Erro de login sempre genérico.
 - Produtos e fornecedores nunca são apagados; movimentações nunca são editadas nem apagadas. A interface não oferece exclusão nem edição desses registros.
 - Listas paginadas (padrão 50, máximo 200) com busca em produtos, estoque e fornecedores.
-- **Stack do frontend:** React, TypeScript e Vite. **Decisão confirmada (11/2026): migrar a estilização para Tailwind** (branch `feat/tailwind-ui`). Os tokens do tema continuam com uma fonte única; o `CLAUDE.md` ainda cita `theme.css` como essa fonte e precisa ser atualizado quando a migração definir onde ela passa a morar.
+- **Stack do frontend:** React, TypeScript e Vite. **Decisão confirmada (11/2026): migrar a estilização para Tailwind** (branch `feat/tailwind-ui`). Os tokens do tema continuam com uma fonte única, o `frontend\src\styles\theme.css`; o fluxo (tokens no `theme.css` → `@theme inline` no `tailwind.css` → classes com o nome do token) já está descrito no `CLAUDE.md`, no `DESIGN.md` e na skill `frontend-page`.
 - Estados obrigatórios em toda página que busca dados: carregando, erro (diz o que fazer) e vazio (convida a uma ação). Formulários seguem o padrão da skill `frontend-page` (erro some ao editar, foco no primeiro campo inválido, anúncio na região viva).
 - Idioma da interface: português do Brasil.
 

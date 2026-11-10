@@ -1,0 +1,94 @@
+/*
+ * Ponte entre o tema e o Tailwind CSS v4.
+ *
+ * Fluxo: tokens no theme.css (única fonte de valores) → @theme abaixo → classes.
+ * Aqui só há referências var(--...) ao theme.css: nenhum valor é definido neste arquivo.
+ * O nome da classe repete o nome do token: --cor-primaria → bg-primaria,
+ * --esp-4 → p-esp-4, --raio-p → rounded-p, --fs-2 → text-fs-2.
+ */
+
+/* Sem o Preflight: o reset é do global.css. Só a camada de tema e a de utilitários. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* inline: a classe usa var(--cor-primaria) direto, e não uma cópia do valor */
+@theme inline {
+  /* Desliga os padrões do Tailwind: só existem classes dos nossos tokens */
+  --color-*: initial;
+  --spacing: initial;
+  --spacing-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --inset-shadow-*: initial;
+  --drop-shadow-*: initial;
+  --text-shadow-*: initial;
+  --font-*: initial;
+  --font-weight-*: initial;
+  --text-*: initial;
+  --leading-*: initial;
+  --tracking-*: initial;
+
+  /* Cores (bg-, text-, border-, outline-, fill-, stroke-…) */
+  --color-primaria: var(--cor-primaria);
+  --color-primaria-escura: var(--cor-primaria-escura);
+  --color-primaria-clara: var(--cor-primaria-clara);
+  --color-superficie: var(--cor-superficie);
+  --color-fundo: var(--cor-fundo);
+  --color-texto: var(--cor-texto);
+  --color-texto-suave: var(--cor-texto-suave);
+  --color-borda: var(--cor-borda);
+  --color-texto-inverso: var(--cor-texto-inverso);
+  --color-ok: var(--cor-ok);
+  --color-ok-texto: var(--cor-ok-texto);
+  --color-ok-fundo: var(--cor-ok-fundo);
+  --color-atencao: var(--cor-atencao);
+  --color-atencao-texto: var(--cor-atencao-texto);
+  --color-atencao-fundo: var(--cor-atencao-fundo);
+  --color-critico: var(--cor-critico);
+  --color-critico-texto: var(--cor-critico-texto);
+  --color-critico-fundo: var(--cor-critico-fundo);
+  --color-primaria-pressionada: var(--cor-primaria-pressionada);
+  --color-primaria-clara-pressionada: var(--cor-primaria-clara-pressionada);
+  --color-critico-escura: var(--cor-critico-escura);
+  --color-critico-pressionada: var(--cor-critico-pressionada);
+  --color-borda-forte: var(--cor-borda-forte);
+  --color-hover-neutro: var(--cor-hover-neutro);
+  --color-pressionado-neutro: var(--cor-pressionado-neutro);
+  --color-desabilitado-fundo: var(--cor-desabilitado-fundo);
+  --color-desabilitado-texto: var(--cor-desabilitado-texto);
+  --color-marcador: var(--cor-marcador);
+  --color-foco: var(--cor-foco);
+  --color-sobreposicao: var(--cor-sobreposicao);
+
+  /* Espaçamento: só a escala de 4px (p-, m-, gap-, space-, inset-, w-, h-…) */
+  --spacing-esp-0: var(--esp-0);
+  --spacing-esp-1: var(--esp-1);
+  --spacing-esp-2: var(--esp-2);
+  --spacing-esp-3: var(--esp-3);
+  --spacing-esp-4: var(--esp-4);
+  --spacing-esp-5: var(--esp-5);
+  --spacing-esp-6: var(--esp-6);
+  --spacing-esp-7: var(--esp-7);
+
+  /* Raios */
+  --radius-p: var(--raio-p);
+  --radius-m: var(--raio-m);
+
+  /* Sombra: só a flutuante (Regra do Que Flutua) */
+  --shadow-flutuante: var(--sombra-flutuante);
+
+  /* Tipografia */
+  --font-fonte: var(--fonte);
+  --font-weight-normal: var(--peso-normal);
+  --font-weight-medio: var(--peso-medio);
+  --text-fs-1: var(--fs-1);
+  --text-fs-2: var(--fs-2);
+  --text-fs-3: var(--fs-3);
+  --text-fs-4: var(--fs-4);
+  --text-fs-5: var(--fs-5);
+  --text-fs-6: var(--fs-6);
+  --leading-corpo: var(--lh-corpo);
+  --leading-titulo: var(--lh-titulo);
+  --leading-numero: var(--lh-numero);
+}
