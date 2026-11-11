@@ -44,7 +44,8 @@ services:
       DATABASE_URL: postgresql+psycopg://${APP_DB_ROLE:-estoque_app}:${APP_DB_PASSWORD:-senha-local-da-aplicacao}@db:5432/${POSTGRES_DB:-estoque_inteligente}
       MIGRATIONS_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-estoque}:${POSTGRES_PASSWORD:-senha-local-do-dono}@db:5432/${POSTGRES_DB:-estoque_inteligente}
       APP_DB_ROLE: ${APP_DB_ROLE:-estoque_app}
-      CORS_ORIGINS: http://localhost:${SITE_PORT:-8080},http://127.0.0.1:${SITE_PORT:-8080}
+      # Site do Compose e também o Vite (npm run dev na 5173) apontando para esta API
+      CORS_ORIGINS: http://localhost:${SITE_PORT:-8080},http://127.0.0.1:${SITE_PORT:-8080},http://localhost:5173,http://127.0.0.1:5173
       # RN-54: cria as tabelas, os dados de exemplo e as contas ao subir, e recria tudo se a última
       # recriação passou de 24 horas
       DEMO_MODE: "true"

@@ -11,6 +11,7 @@ import { CaixaDeMarcar } from '../components/CaixaDeMarcar'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { Metadados, NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
+import { SinalSituacao } from '../components/SinalSituacao'
 import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Alerta, GeracaoDeAlertas, TipoAlerta } from '../types/alerta'
@@ -52,13 +53,18 @@ function ItemAlerta({ alerta }: { alerta: Alerta }) {
   const { rotulo, etiqueta } = TIPO[alerta.tipo]
   const resolvido = alerta.resolvido_em !== null
   return (
-    <li className={`alerta etiqueta etiqueta--${etiqueta}`} data-resolvido={resolvido || undefined}>
+    <li className={`alerta etiqueta--${etiqueta}`} data-resolvido={resolvido || undefined}>
       {/* O item inteiro leva ao produto: nome numa linha própria, etiquetas embaixo */}
       <Link to={`/produtos/${alerta.produto_id}`} className="alerta__link">
         <NomeEmLista nome={alerta.produto_nome} className="alerta__produto" />
         <Metadados
           itens={[
-            { rotulo: 'Tipo', valor: rotulo, className: 'alerta__tipo' },
+            {
+              rotulo: 'Tipo',
+              // Resolvido (RN-39): o sinal vira o de "em dia", e o texto fica calmo
+              valor: <SinalSituacao situacao={resolvido ? 'ok' : etiqueta}>{rotulo}</SinalSituacao>,
+              className: 'alerta__tipo',
+            },
             alerta.validade ? { rotulo: 'Lote', valor: descreverLote(alerta.validade) } : null,
             // RN-39: o resolvido continua na lista, com a data em que a condição deixou de existir
             alerta.resolvido_em

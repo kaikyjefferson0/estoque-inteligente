@@ -1,13 +1,9 @@
 /* Componentes compartilhados. Só usa variáveis do theme.css. */
 
-/* ---------- Etiqueta de prateleira ---------- */
-/* Faixa à esquerda na cor da situação; o canto da faixa nunca é arredondado */
-.etiqueta {
-  border-left: var(--etiqueta-largura) solid var(--etiqueta-cor);
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
+/* ---------- Situação (identidade Folhinha) ---------- */
+/* As classes etiqueta--* só definem as cores da situação para o item e os filhos. A faixa de
+   4px da identidade anterior saiu: a situação aparece no <SinalSituacao> (ícone com forma
+   própria e texto) e, nos avisos, no fundo claro. */
 .etiqueta--ok {
   --etiqueta-cor: var(--cor-ok);
   --etiqueta-texto: var(--cor-ok-texto);
@@ -26,12 +22,176 @@
   --etiqueta-fundo: var(--cor-critico-fundo);
 }
 
-/* Foco pelo teclado dentro de avisos e linhas de atenção ou crítico: anel escuro e mais grosso */
-.etiqueta--atencao :focus-visible,
-.etiqueta--critico :focus-visible,
-.etiqueta--atencao:focus-visible,
-.etiqueta--critico:focus-visible {
+/* Foco pelo teclado dentro de avisos de atenção ou crítico (únicos com fundo colorido): anel mais grosso */
+.aviso.etiqueta--atencao :focus-visible,
+.aviso.etiqueta--critico :focus-visible {
   outline: var(--foco-anel-forte);
+}
+
+/* Sinal da situação: ícone na cor da situação e o texto que a nomeia */
+/* Alinha pela linha de base do texto (o ícone não tem base e se centraliza sozinho) */
+.sinal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--esp-1);
+}
+
+.sinal__icone {
+  flex-shrink: 0;
+  align-self: center;
+  width: var(--icone-p);
+  height: var(--icone-p);
+}
+
+.sinal--ok .sinal__icone {
+  color: var(--cor-ok);
+}
+
+.sinal--atencao .sinal__icone {
+  color: var(--cor-atencao);
+}
+
+.sinal--critico .sinal__icone {
+  color: var(--cor-critico);
+}
+
+.sinal--texto-na-cor.sinal--ok {
+  color: var(--cor-texto-suave);
+}
+
+.sinal--texto-na-cor.sinal--atencao {
+  font-weight: var(--peso-medio);
+  color: var(--cor-atencao-texto);
+}
+
+.sinal--texto-na-cor.sinal--critico {
+  font-weight: var(--peso-medio);
+  color: var(--cor-critico-texto);
+}
+
+/* Numeral da folhinha: condensado, pesado e tabular (datas, contagens, saldos grandes) */
+.numeral {
+  font-stretch: var(--largura-numeral);
+  font-weight: var(--peso-numeral);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--lh-numero);
+}
+
+/* ---------- Código de barras: um padrão só em todas as telas ---------- */
+.codigo-barras {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--esp-1);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.codigo-barras__icone {
+  flex-shrink: 0;
+  align-self: center;
+  width: var(--icone-p);
+  height: var(--icone-p);
+  color: var(--cor-texto-suave);
+}
+
+.codigo-barras__digitos {
+  display: inline-flex;
+  gap: var(--esp-1);
+}
+
+/* ---------- Folha da marca: a data de hoje no cabeçalho e no login ---------- */
+.folha-marca {
+  display: inline-grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: var(--tamanho-folha-marca);
+  padding-bottom: var(--esp-1);
+  border-top: var(--picote);
+  border-radius: var(--raio-p);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  line-height: var(--lh-numero);
+}
+
+.folha-marca__dia {
+  font-size: var(--fs-4);
+}
+
+.folha-marca__mes {
+  font-size: var(--fs-1);
+  font-weight: var(--peso-medio);
+}
+
+/* Folha do dia (login): a folhinha de parede, com o dia em numeral grande */
+.folha-do-dia {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--largura-login);
+  background: var(--cor-superficie);
+  box-shadow: var(--sombra-flutuante);
+}
+
+.folha-do-dia__argola {
+  height: var(--esp-5);
+  background: var(--cor-faixa);
+}
+
+.folha-do-dia__mes {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--esp-4) var(--esp-5) var(--esp-0);
+  font-weight: var(--peso-medio);
+}
+
+.folha-do-dia__mes span:first-child::first-letter {
+  text-transform: uppercase;
+}
+
+.folha-do-dia__mes .numero {
+  color: var(--cor-texto-suave);
+}
+
+/* Entrelinha de corpo: no tamanho gigante, a dos numerais (1,1) é menor que os glifos, e o dia
+   encostaria no dia da semana (também enquanto a Archivo carrega e a fonte do sistema aparece) */
+.folha-do-dia__dia {
+  font-size: var(--fs-folha);
+  line-height: var(--lh-corpo);
+  text-align: center;
+}
+
+.folha-do-dia__semana {
+  font-size: var(--fs-5);
+  font-weight: var(--peso-medio);
+  text-align: center;
+}
+
+.folha-do-dia__nota {
+  margin: var(--esp-5) var(--esp-5) var(--esp-0);
+  padding-top: var(--esp-3);
+  border-top: var(--borda);
+  font-size: var(--fs-2);
+  color: var(--cor-texto-suave);
+  text-align: center;
+}
+
+.folha-do-dia__rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--esp-3);
+  margin-top: var(--esp-5);
+  padding: var(--esp-4) var(--esp-5) var(--esp-5);
+  border-top: var(--picote);
+  font-size: var(--fs-1);
+  color: var(--cor-texto-suave);
+}
+
+.folha-do-dia__nome {
+  font-size: var(--fs-4);
+  font-weight: var(--peso-medio);
+  color: var(--cor-texto);
 }
 
 /* ---------- Botões ---------- */
@@ -474,6 +634,11 @@
   border-radius: var(--raio-m);
 }
 
+/* Painel de lista de dados (tabelas, movimentações, histórico): aberto pelo fio de tinta */
+.painel--dados {
+  border-top: var(--fio-tinta);
+}
+
 .painel__cabecalho {
   display: flex;
   align-items: baseline;
@@ -616,11 +781,6 @@
 
 .suspenso__item[data-highlighted] {
   background: var(--cor-hover-neutro);
-}
-
-/* O item que é link (Minha conta) escurece no hover, como os links; antes vinha do a:hover do reset */
-a.suspenso__item:hover {
-  color: var(--cor-primaria-escura);
 }
 
 .suspenso__item:focus-visible {
@@ -766,11 +926,18 @@ a.suspenso__item:hover {
 }
 
 /* Links dentro da tabela respeitam o alvo de toque */
+/* Nome em tinta; o sublinhado fica claro e escurece no hover, como em Estoque e Alertas */
 .tabela__link {
   display: inline-flex;
   align-items: center;
   min-height: var(--alvo-min);
+  color: var(--cor-texto);
   font-weight: var(--peso-medio);
+  text-decoration-color: var(--cor-borda-forte);
+}
+
+.tabela__link:hover {
+  text-decoration-color: currentColor;
 }
 
 .tabela[aria-busy='true'] tbody {
@@ -904,12 +1071,17 @@ a.suspenso__item:hover {
   align-items: center;
   min-height: var(--alvo-min);
   padding: var(--esp-0) var(--esp-4);
+  /* Contorno sempre presente e transparente: a opção escolhida só pinta a cor, sem mudar o tamanho */
+  border: var(--fio-tinta);
+  border-color: transparent;
+  border-radius: var(--raio-p);
   font-size: var(--fs-2);
   font-weight: var(--peso-medio);
   color: var(--cor-texto-suave);
   cursor: pointer;
   transition:
     background-color var(--mov-rapido) var(--mov-curva),
+    border-color var(--mov-rapido) var(--mov-curva),
     color var(--mov-rapido) var(--mov-curva);
 }
 
@@ -918,21 +1090,18 @@ a.suspenso__item:hover {
   color: var(--cor-texto);
 }
 
+/* Escolhida: circulada a tinta, como a página atual do menu. A placa preta é só do botão principal */
 .segmentos__opcao input:checked + span {
-  background: var(--cor-primaria);
-  color: var(--cor-texto-inverso);
+  border-color: var(--cor-texto);
+  color: var(--cor-texto);
 }
 
+/* Foco pelo teclado: fundo neutro e anel de 3px por dentro, diferente do circulado da escolhida */
 .segmentos__opcao input:focus-visible + span {
-  outline: var(--foco-anel);
-  outline-offset: calc(-1 * var(--foco-distancia));
-}
-
-/* Na opção escolhida (fundo primário), o anel fica claro e mais para dentro, com o azul em volta */
-.segmentos__opcao input:checked:focus-visible + span {
+  background: var(--cor-hover-neutro);
+  color: var(--cor-texto);
   outline: var(--foco-anel-forte);
-  outline-color: var(--cor-texto-inverso);
-  outline-offset: calc(-2 * var(--foco-distancia) - var(--borda-largura));
+  outline-offset: calc(-1 * var(--foco-distancia));
 }
 
 /* ---------- Paginação (RN-51) ---------- */

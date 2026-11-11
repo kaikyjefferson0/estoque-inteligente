@@ -115,7 +115,7 @@ export function UsuariosPage() {
       {/* Duas formas da mesma lista: o painel escolhe pela própria largura (container query).
           Estreito (celular e tablet): um usuário por bloco. Largo: tabela. A escondida sai da leitura de tela. */}
       {dados && !vazio && (
-        <div className="painel usuarios">
+        <div className="painel painel--dados usuarios">
           <ul className="usuarios__blocos" aria-label="Usuários cadastrados">
             {dados.map((u) => {
               const proprio = u.id === logado?.id

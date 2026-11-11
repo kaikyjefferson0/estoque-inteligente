@@ -18,6 +18,36 @@ export function hojeIso(): string {
   return DIA_ISO.format(new Date())
 }
 
+const PARTES_DO_DIA = new Intl.DateTimeFormat('pt-BR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  weekday: 'long',
+  timeZone: FUSO,
+})
+const MES_CURTO = new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: FUSO })
+
+export interface PartesDoDia {
+  dia: string
+  mes: string
+  mesCurto: string
+  ano: string
+  diaDaSemana: string
+}
+
+/** Partes do dia em Brasília, para a folha da marca e do login: dia "10", mês "novembro",
+ *  mês curto "nov", ano "2026" e dia da semana "terça-feira". */
+export function partesDoDia(agora = new Date()): PartesDoDia {
+  const partes = Object.fromEntries(PARTES_DO_DIA.formatToParts(agora).map((p) => [p.type, p.value]))
+  return {
+    dia: partes.day,
+    mes: partes.month,
+    mesCurto: MES_CURTO.format(agora).replace('.', ''),
+    ano: partes.year,
+    diaDaSemana: partes.weekday,
+  }
+}
+
 /** Dias de `de` até `ate` (datas AAAA-MM-DD); negativo se `ate` já passou. */
 export function diasEntre(de: string, ate: string): number {
   return Math.round((Date.parse(`${ate}T00:00:00Z`) - Date.parse(`${de}T00:00:00Z`)) / MS_DIA)
@@ -93,6 +123,21 @@ export function formatarTempoDecorrido(iso: string, agora = Date.now()): string 
   if (passado < MS_HORA) return RELATIVO.format(-Math.floor(passado / MS_MINUTO), 'minute')
   if (passado < MS_DIA) return RELATIVO.format(-Math.floor(passado / MS_HORA), 'hour')
   return RELATIVO.format(-Math.floor(passado / MS_DIA), 'day')
+}
+
+/** Grupos do código de barras como vêm impressos sob as barras: EAN-13 em 1-6-6, EAN-8 em 4-4 e
+ *  UPC-A em 1-5-5-1. Outro tamanho fica num grupo só. Os grupos vão em elementos separados e o
+ *  espaço entre eles é do CSS, então a cópia sai só com os dígitos. */
+export function agruparCodigoDeBarras(codigo: string): string[] {
+  const tamanhos: Record<number, number[]> = { 13: [1, 6, 6], 8: [4, 4], 12: [1, 5, 5, 1] }
+  const grupos = /^\d+$/.test(codigo) ? tamanhos[codigo.length] : undefined
+  if (!grupos) return [codigo]
+  let inicio = 0
+  return grupos.map((tamanho) => {
+    const grupo = codigo.slice(inicio, inicio + tamanho)
+    inicio += tamanho
+    return grupo
+  })
 }
 
 /** Junta o número à palavra seguinte com espaço inseparável ("800 g", "12 rolos", "5 L"):

@@ -5,6 +5,7 @@ import { formatarNumero } from '../utils/formato'
 import { AnuncioDeErros } from './AnuncioDeErros'
 import { Botao } from './Botao'
 import { Campo } from './Campo'
+import { CodigoDeBarras } from './CodigoDeBarras'
 import type { Leitura, ProdutoLido } from './useLeituraDeCodigo'
 
 const MAX_CODIGO = 50
@@ -72,7 +73,7 @@ export function ResumoDoProduto({ lido, children }: { lido: ProdutoLido; childre
           {produto.nome}
         </h2>
         <p className="resumo__meta">
-          <span className="numero">{produto.codigo_barras}</span>
+          <CodigoDeBarras codigo={produto.codigo_barras} />
           <span>{produto.controla_validade ? 'Controla validade' : 'Não controla validade'}</span>
           <Link to={`/produtos/${produto.id}`} className="link-acao">
             Ver produto
@@ -82,12 +83,12 @@ export function ResumoDoProduto({ lido, children }: { lido: ProdutoLido; childre
       <dl className="resumo__saldos">
         <div className="resumo__saldo">
           <dt>Disponível</dt>
-          <dd className="numero">{formatarNumero(saldo.saldo_disponivel)}</dd>
+          <dd className="numeral">{formatarNumero(saldo.saldo_disponivel)}</dd>
         </div>
         {vencidos > 0 && (
           <div className="resumo__saldo resumo__saldo--fisico">
             <dt>Físico</dt>
-            <dd className="numero">{formatarNumero(saldo.saldo_fisico)}</dd>
+            <dd className="numeral">{formatarNumero(saldo.saldo_fisico)}</dd>
           </div>
         )}
       </dl>

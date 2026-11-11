@@ -28,12 +28,12 @@
   color: var(--cor-texto-suave);
 }
 
-/* ---------- Lista: painel com o lado esquerdo reto, onde ficam as etiquetas ---------- */
+/* ---------- Lista: tabela de folha impressa, aberta pelo fio de tinta ---------- */
 .estoque__painel {
   background: var(--cor-superficie);
   border: var(--borda);
-  border-left: 0;
-  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  border-top: var(--fio-tinta);
+  border-radius: var(--raio-m);
   overflow: hidden;
 }
 
@@ -50,15 +50,6 @@
   width: var(--largura-coluna-situacao);
 }
 
-/* O cabeçalho ganha uma faixa neutra para alinhar com as etiquetas das linhas */
-.estoque thead tr {
-  border-left: var(--etiqueta-largura) solid var(--cor-borda);
-}
-
-.estoque__linha[data-problema] {
-  background: var(--etiqueta-fundo);
-}
-
 .estoque__link {
   display: flex;
   flex-direction: column;
@@ -68,10 +59,16 @@
   text-decoration: none;
 }
 
+/* Nome em tinta; o sublinhado fica claro e escurece no hover, para a lista não pesar */
 .estoque__nome {
   font-weight: var(--peso-medio);
   text-decoration: underline;
+  text-decoration-color: var(--cor-borda-forte);
   text-underline-offset: var(--sublinhado-distancia);
+}
+
+.estoque__link:hover .estoque__nome {
+  text-decoration-color: currentColor;
 }
 
 .estoque__codigo {
@@ -100,11 +97,6 @@
   white-space: nowrap;
 }
 
-.estoque__linha[data-problema] .estoque__situacao {
-  font-weight: var(--peso-medio);
-  color: var(--etiqueta-texto);
-}
-
 /* Lista empilhada: saldo, mínimo e situação viram etiquetas, no tamanho delas */
 @container (max-width: 48rem) {
   .estoque {
@@ -116,9 +108,6 @@
     font-size: var(--fs-1);
   }
 
-  .estoque__linha[data-problema] .estoque__situacao {
-    border-color: currentColor;
-  }
 }
 
 /* Celular: as três opções em uma grade de colunas iguais, ocupando a largura toda; o texto que

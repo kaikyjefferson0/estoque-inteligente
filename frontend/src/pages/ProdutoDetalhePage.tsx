@@ -13,9 +13,11 @@ import { useRecurso } from '../api/useRecurso'
 import { useAuth } from '../auth/useAuth'
 import { Aviso } from '../components/Aviso'
 import { BotaoLink } from '../components/Botao'
+import { CodigoDeBarras } from '../components/CodigoDeBarras'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { Metadados } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
+import { SinalSituacao } from '../components/SinalSituacao'
 import { useMensagemDaNavegacao } from '../components/useMensagemDaNavegacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { TipoMovimentacao } from '../types/dashboard'
@@ -38,7 +40,9 @@ function Ficha({ produto }: { produto: Produto }) {
       <dl className="ficha">
         <div className="ficha__item">
           <dt>Código de barras</dt>
-          <dd className="numero">{produto.codigo_barras}</dd>
+          <dd>
+            <CodigoDeBarras codigo={produto.codigo_barras} />
+          </dd>
         </div>
         <div className="ficha__item">
           <dt>Fornecedor</dt>
@@ -88,11 +92,11 @@ function Estoque({ produto }: { produto: Produto }) {
             <dl className="saldos__lista">
               <div className="saldos__item">
                 <dt>Disponível</dt>
-                <dd className="numero">{formatarNumero(dados.saldo_disponivel)}</dd>
+                <dd className="numeral">{formatarNumero(dados.saldo_disponivel)}</dd>
               </div>
               <div className="saldos__item saldos__item--fisico">
                 <dt>Físico</dt>
-                <dd className="numero">{formatarNumero(dados.saldo_fisico)}</dd>
+                <dd className="numeral">{formatarNumero(dados.saldo_fisico)}</dd>
               </div>
             </dl>
             {/* Com saldo zero não há o que explicar */}
@@ -118,17 +122,19 @@ function Estoque({ produto }: { produto: Produto }) {
             </Vazio>
           ) : (
             // RN-10: ordem FEFO, como vem da API (sem validade por último)
-            <ol className="lotes" aria-label="Lotes na ordem de saída">
+            <ol aria-label="Lotes na ordem de saída">
               {dados.lotes.map((lote) => {
                 const situacao = situacaoDoLote(lote, hoje)
                 return (
                   <li
                     key={lote.id}
-                    className={`lote etiqueta etiqueta--${situacao.etiqueta}`}
+                    className={`lote etiqueta--${situacao.etiqueta}`}
                     data-problema={situacao.etiqueta !== 'ok' || undefined}
                   >
                     <span className="lote__validade numero">{descreverLote(lote.validade)}</span>
-                    <span className="lote__situacao">{situacao.rotulo}</span>
+                    <SinalSituacao situacao={situacao.etiqueta} className="lote__situacao">
+                      {situacao.rotulo}
+                    </SinalSituacao>
                     <span className="lote__quantidade numero">{formatarNumero(lote.quantidade)}</span>
                   </li>
                 )
@@ -159,7 +165,7 @@ function Historico({ produtoId }: { produtoId: number }) {
   const total = recurso.dados?.total ?? 0
 
   return (
-    <section className="painel" aria-labelledby="titulo-historico">
+    <section className="painel painel--dados" aria-labelledby="titulo-historico">
       <div className="painel__cabecalho">
         <h2 id="titulo-historico">Histórico</h2>
         {total > 0 && (

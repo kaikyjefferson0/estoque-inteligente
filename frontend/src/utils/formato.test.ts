@@ -1,5 +1,51 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { formatarCnpj, formatarData, formatarDataHora, formatarHora, hojeIso, lerData, semQuebraNaUnidade, somenteDigitos } from './formato'
+import {
+  agruparCodigoDeBarras,
+  formatarCnpj,
+  formatarData,
+  formatarDataHora,
+  formatarHora,
+  hojeIso,
+  lerData,
+  partesDoDia,
+  semQuebraNaUnidade,
+  somenteDigitos,
+} from './formato'
+
+describe('partesDoDia (folha da marca e do login)', () => {
+  it('usa o dia de Brasília, não o do computador em Tóquio', () => {
+    // 20:00 UTC de 10/11 = 17:00 de 10/11 em Brasília e 05:00 de 11/11 em Tóquio
+    expect(partesDoDia(new Date('2026-11-10T20:00:00Z'))).toEqual({
+      dia: '10',
+      mes: 'novembro',
+      mesCurto: 'nov',
+      ano: '2026',
+      diaDaSemana: 'terça-feira',
+    })
+  })
+
+  it('vira o dia à meia-noite de Brasília', () => {
+    // 03:00 UTC de 11/11 = 00:00 de 11/11 em Brasília
+    expect(partesDoDia(new Date('2026-11-11T03:00:00Z')).dia).toBe('11')
+    expect(partesDoDia(new Date('2026-11-11T02:59:00Z')).dia).toBe('10')
+  })
+})
+
+describe('agruparCodigoDeBarras', () => {
+  it('separa o EAN-13 em 1-6-6, como sai impresso sob as barras', () => {
+    expect(agruparCodigoDeBarras('7896000000011')).toEqual(['7', '896000', '000011'])
+  })
+
+  it('separa o EAN-8 em 4-4 e o UPC-A em 1-5-5-1', () => {
+    expect(agruparCodigoDeBarras('96385074')).toEqual(['9638', '5074'])
+    expect(agruparCodigoDeBarras('036000291452')).toEqual(['0', '36000', '29145', '2'])
+  })
+
+  it('mantém num grupo só o código de outro tamanho ou com letras', () => {
+    expect(agruparCodigoDeBarras('12345')).toEqual(['12345'])
+    expect(agruparCodigoDeBarras('ABC-123')).toEqual(['ABC-123'])
+  })
+})
 
 afterEach(() => {
   vi.useRealTimers()

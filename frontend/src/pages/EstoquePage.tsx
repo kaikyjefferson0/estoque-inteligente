@@ -5,8 +5,10 @@ import { montarCaminho } from '../api/caminho'
 import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
+import { CodigoDeBarras } from '../components/CodigoDeBarras'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { NomeEmLista } from '../components/Metadados'
+import { SinalSituacao } from '../components/SinalSituacao'
 import { Paginacao } from '../components/Paginacao'
 import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
@@ -43,12 +45,12 @@ function Linha({ item }: { item: ItemEstoque }) {
   // Diferença entre físico e disponível = lotes vencidos, que não saem (RN-36)
   const vencidos = item.saldo_fisico - item.saldo_disponivel
   return (
-    <tr className={`estoque__linha etiqueta etiqueta--${etiqueta}`} data-problema={item.situacao !== 'ok' || undefined}>
+    <tr className={`estoque__linha etiqueta--${etiqueta}`} data-problema={item.situacao !== 'ok' || undefined}>
       <td className="estoque__produto tabela__principal">
         {/* Código como segunda linha do link: o alvo cresce com o nome, sem sobrepor */}
         <Link to={`/produtos/${item.produto_id}`} className="estoque__link">
           <NomeEmLista nome={item.nome} className="estoque__nome" />
-          <span className="estoque__codigo numero">{item.codigo_barras}</span>
+          <CodigoDeBarras codigo={item.codigo_barras} className="estoque__codigo" />
         </Link>
       </td>
       <td className="estoque__saldo tabela__numero tabela__etiqueta">
@@ -67,7 +69,9 @@ function Linha({ item }: { item: ItemEstoque }) {
         {formatarNumero(item.estoque_minimo)}
       </td>
       {/* Sem rótulo oculto na mesma linha: ele gruda no valor ao copiar; a coluna já diz o que é */}
-      <td className="estoque__situacao tabela__etiqueta">{rotulo}</td>
+      <td className="estoque__situacao tabela__etiqueta">
+        <SinalSituacao situacao={etiqueta}>{rotulo}</SinalSituacao>
+      </td>
     </tr>
   )
 }

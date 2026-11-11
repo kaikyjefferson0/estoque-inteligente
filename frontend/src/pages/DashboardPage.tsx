@@ -11,6 +11,7 @@ import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { Metadados, NomeEmLista } from '../components/Metadados'
+import { SinalSituacao } from '../components/SinalSituacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Dashboard, MovimentacaoRecente, TipoMovimentacao } from '../types/dashboard'
 import type { Situacao } from '../types/situacao'
@@ -37,7 +38,8 @@ function indicadores(d: Dashboard): Indicador[] {
       titulo: 'Sem estoque',
       valor: d.produtos_sem_estoque,
       situacao: 'critico',
-      descricao: (n) => `${plural(n, 'produto', 'produtos')} com saldo zero`,
+      // RN-13: saldo zero também é saldo no mínimo ou abaixo, então já conta no estoque baixo
+      descricao: (n) => `${plural(n, 'produto', 'produtos')} com saldo zero, já no estoque baixo`,
     },
     {
       titulo: 'A vencer',
@@ -75,9 +77,11 @@ function Situacoes({ dashboard }: { dashboard: Dashboard }) {
         {indicadores(dashboard).map(({ titulo, valor, situacao, descricao }) => {
           const atual: Situacao = valor > 0 ? situacao : 'ok'
           return (
-            <li key={titulo} className={`situacao etiqueta etiqueta--${atual}`} data-ativo={valor > 0 || undefined}>
-              <span className="situacao__titulo">{titulo}</span>
-              <span className="situacao__valor numero">{formatarNumero(valor)}</span>
+            <li key={titulo} className={`situacao etiqueta--${atual}`} data-ativo={valor > 0 || undefined}>
+              <SinalSituacao situacao={atual} textoNaCor={false} className="situacao__titulo">
+                {titulo}
+              </SinalSituacao>
+              <span className="situacao__valor numeral">{formatarNumero(valor)}</span>
               <span className="situacao__descricao">{valor > 0 ? descricao(valor) : 'Nada pendente'}</span>
             </li>
           )
@@ -208,7 +212,7 @@ export function DashboardPage() {
             )}
           </div>
 
-          <section className="painel" aria-labelledby="titulo-movimentos">
+          <section className="painel painel--dados" aria-labelledby="titulo-movimentos">
             <div className="painel__cabecalho">
               <h2 id="titulo-movimentos">Últimas movimentações</h2>
               <Link to="/estoque">Ver estoque</Link>

@@ -6,6 +6,7 @@ import { useRecurso } from '../api/useRecurso'
 import { Aviso } from '../components/Aviso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Campo } from '../components/Campo'
+import { CodigoDeBarras } from '../components/CodigoDeBarras'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { NomeEmLista } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
@@ -125,7 +126,7 @@ export function ProdutosPage() {
       )}
 
       {dados && dados.length > 0 && (
-        <div className="painel tabela-empilhavel">
+        <div className="painel painel--dados tabela-empilhavel">
           <table className="tabela produtos" aria-busy={buscando}>
             <caption className="visualmente-oculto">Produtos cadastrados</caption>
             <thead>
@@ -146,7 +147,9 @@ export function ProdutosPage() {
                       <NomeEmLista nome={p.nome} />
                     </Link>
                   </td>
-                  <td className="produtos__codigo tabela__etiqueta numero">{p.codigo_barras}</td>
+                  <td className="produtos__codigo tabela__etiqueta">
+                    <CodigoDeBarras codigo={p.codigo_barras} />
+                  </td>
                   <td className="produtos__fornecedor tabela__etiqueta">
                     {p.fornecedor_nome === null ? (
                       <span className="tabela__vazio">Sem fornecedor</span>

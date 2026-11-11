@@ -16,7 +16,7 @@
   padding: var(--esp-5);
 }
 
-/* ---------- Escolha do lote: cada opção é uma etiqueta de prateleira ---------- */
+/* ---------- Escolha do lote: cada opção com o sinal da situação; a escolhida fica circulada ---------- */
 .ajuste__lotes {
   display: flex;
   flex-direction: column;
@@ -58,34 +58,26 @@
   min-height: var(--alvo-min);
   padding: var(--esp-2) var(--esp-4) var(--esp-2) var(--esp-3);
   border: var(--borda);
-  border-left-width: var(--etiqueta-largura);
-  border-left-color: var(--etiqueta-cor);
-  border-radius: 0 var(--raio-p) var(--raio-p) 0;
+  border-radius: var(--raio-p);
   background: var(--cor-superficie);
   cursor: pointer;
   transition: border-color var(--mov-rapido) var(--mov-curva);
 }
 
-.lote-opcao[data-problema] {
-  background: var(--etiqueta-fundo);
-}
-
 .lote-opcao:hover {
-  border-top-color: var(--cor-borda-forte);
-  border-right-color: var(--cor-borda-forte);
-  border-bottom-color: var(--cor-borda-forte);
+  border-color: var(--cor-borda-forte);
 }
 
-/* Escolhido: borda na cor primária, menos a faixa da etiqueta */
+/* Escolhido: circulado a tinta (borda e contorno interno somam 2px), como a página atual do menu */
 .lote-opcao:has(input:checked) {
-  border-top-color: var(--cor-primaria);
-  border-right-color: var(--cor-primaria);
-  border-bottom-color: var(--cor-primaria);
-  box-shadow: inset 0 0 0 var(--borda-largura) var(--cor-primaria);
+  border-color: var(--cor-texto);
+  box-shadow: inset 0 0 0 var(--borda-largura) var(--cor-texto);
 }
 
+/* Foco pelo teclado: fundo neutro e anel de 3px afastado; o circulado fica só para o lote escolhido */
 .lote-opcao:has(input:focus-visible) {
-  outline: var(--foco-anel);
+  background: var(--cor-hover-neutro);
+  outline: var(--foco-anel-forte);
   outline-offset: var(--foco-distancia);
 }
 
@@ -109,12 +101,6 @@
 .lote-opcao__situacao {
   grid-area: situacao;
   font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-}
-
-.lote-opcao[data-problema] .lote-opcao__situacao {
-  font-weight: var(--peso-medio);
-  color: var(--etiqueta-texto);
 }
 
 .lote-opcao__saldo {
@@ -132,9 +118,7 @@
 }
 
 .ajuste__lotes--erro .lote-opcao {
-  border-top-color: var(--cor-critico);
-  border-right-color: var(--cor-critico);
-  border-bottom-color: var(--cor-critico);
+  border-color: var(--cor-critico);
 }
 
 .ajuste__campos {

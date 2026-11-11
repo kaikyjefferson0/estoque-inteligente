@@ -5,13 +5,14 @@ import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { AlertasAtivosProvider } from '../alertas/AlertasAtivosProvider'
 import { useAuth } from '../auth/useAuth'
+import { FolhaMarca } from '../components/Folha'
 import { NOME_DO_PERFIL } from '../types/auth'
 import { MenuLateral } from './MenuLateral'
 
 function Marca() {
   return (
     <Link to="/" className="marca">
-      <span className="marca__etiqueta" aria-hidden />
+      <FolhaMarca />
       <span>Estoque Inteligente</span>
     </Link>
   )

@@ -2,47 +2,58 @@
  * Tema do Estoque Inteligente: única fonte de valores visuais.
  * Nenhum outro arquivo define cor, espaçamento, tamanho de fonte,
  * raio ou duração diretamente; todos usam estas variáveis.
+ *
+ * Identidade "Folhinha" (direção em .impeccable\surfaces\frontend-src-layout-applayout-tsx.md):
+ * papel branco, tinta preta, vermelho só para o crítico; a data é a figura principal.
  */
 
 :root {
-  /* Cores de base */
-  --cor-primaria: #2f5d8a;
-  --cor-primaria-escura: #1f4266;
-  --cor-primaria-clara: #eaf1f8;
+  /* Cores de base: papel e tinta */
+  --cor-primaria: #121212; /* tinta: ação principal, link, foco; branco por cima 18,7:1 */
+  --cor-primaria-escura: #353532; /* hover da tinta; branco por cima 12,3:1 */
+  --cor-primaria-clara: #efefea;
   --cor-superficie: #ffffff;
-  --cor-fundo: #f4f7fa;
-  --cor-texto: #1b2a3a;
-  --cor-texto-suave: #5b6b7d;
-  --cor-borda: #dce3eb;
+  --cor-fundo: #ffffff;
+  --cor-texto: #121212; /* 18,7:1 sobre o papel */
+  --cor-texto-suave: #5c5c58; /* 6,7:1 sobre o papel; 5,3:1 no pressionado */
+  --cor-borda: #dcdcd6;
   --cor-texto-inverso: #ffffff;
 
-  /* Situação: cor da faixa, cor de texto sobre branco e fundo claro */
-  --cor-ok: #2e7d5b;
-  --cor-ok-texto: #2e7d5b;
-  --cor-ok-fundo: #e8f4ee;
-  --cor-atencao: #b26b00;
-  --cor-atencao-texto: #8a5300;
-  --cor-atencao-fundo: #fdf3e3;
-  --cor-critico: #b42318;
-  --cor-critico-texto: #b42318;
-  --cor-critico-fundo: #fcecea;
+  /* Situação: cor do sinal, cor de texto sobre branco e fundo claro */
+  --cor-ok: #1f7442;
+  --cor-ok-texto: #1f7442; /* 5,8:1 no papel; 5,2:1 no fundo ok */
+  --cor-ok-fundo: #e9f5ee;
+  --cor-atencao: #c27a00; /* só sinal (3,5:1), nunca texto */
+  --cor-atencao-texto: #8a5300; /* 5,8:1 no fundo de atenção */
+  --cor-atencao-fundo: #fff4dc;
+  --cor-critico: #c40f2b; /* o vermelho da folhinha: só o que está crítico; 6,1:1 */
+  --cor-critico-texto: #c40f2b; /* 5,3:1 no fundo crítico */
+  --cor-critico-fundo: #fdebee;
 
   /* Estados de controle */
-  --cor-primaria-pressionada: #183552;
-  --cor-primaria-clara-pressionada: #dbe7f3;
-  --cor-critico-escura: #921c13;
-  --cor-critico-pressionada: #76170f;
-  --cor-borda-forte: #a9b6c4;
-  --cor-hover-neutro: #eef2f6;
-  --cor-pressionado-neutro: #e2e8ef;
-  --cor-desabilitado-fundo: #e9edf2;
-  --cor-desabilitado-texto: #8593a3;
-  /* Marcador dos campos (placeholder): 5,46:1 sobre branco. Ainda sem uso: entra com a migração */
+  --cor-primaria-pressionada: #000000;
+  --cor-primaria-clara-pressionada: #e4e4df;
+  --cor-critico-escura: #9e0c23; /* branco por cima 8,3:1 */
+  --cor-critico-pressionada: #7a0a1b; /* branco por cima 11,1:1 */
+  --cor-borda-forte: #8a8a84; /* contorno de campo: 3,5:1 sobre o papel */
+  --cor-hover-neutro: #f1f1ed;
+  --cor-pressionado-neutro: #e5e5e0;
+  --cor-desabilitado-fundo: #ecece8;
+  --cor-desabilitado-texto: #5f5f5a; /* 5,4:1: o texto desabilitado também se lê */
+  /* Marcador dos campos (placeholder): 6,7:1 sobre branco. Ainda sem uso: entra com a migração */
   --cor-marcador: var(--cor-texto-suave);
-  --cor-foco: #2f5d8a;
-  --cor-sobreposicao: rgba(27, 42, 58, 0.45);
+  --cor-foco: #121212;
+  --cor-sobreposicao: rgba(18, 18, 18, 0.45);
   /* Lista sendo atualizada (ex.: busca): fica mais clara até chegar a resposta */
   --opacidade-ocupado: 0.6;
+  /* Faixa preta do topo (cabeçalho da folhinha) e o texto secundário sobre ela (9,9:1) */
+  --cor-faixa: #121212;
+  --cor-faixa-suave: #bdbdb8;
+  /* Controles sobre a faixa: hover e pressionado (branco por cima 14,4:1 e 11,4:1) */
+  --cor-faixa-hover: #2a2a28;
+  --cor-faixa-pressionada: #3a3a37;
+  /* Parede atrás da folha do dia, no login (sem texto por cima) */
+  --cor-parede: #ecece7;
 
   /* Espaçamento: escala de 4px. Nenhum margin, padding ou gap fora dela */
   --esp-0: 0;
@@ -54,40 +65,51 @@
   --esp-6: 32px;
   --esp-7: 48px;
 
-  /* Tipografia */
-  --fonte: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Tipografia: Archivo, uma família com eixo de largura */
+  --fonte: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --peso-normal: 400;
   --peso-medio: 500;
+  /* Numerais da folhinha (datas, contagens): condensados e pesados */
+  --peso-numeral: 800;
+  --largura-numeral: 62%;
   --fs-1: 0.8125rem; /* 13px: metadados */
   --fs-2: 0.875rem; /* 14px: rótulos e texto secundário */
   --fs-3: 1rem; /* 16px: corpo */
   --fs-4: 1.125rem; /* 18px: títulos de seção */
   --fs-5: 1.5rem; /* 24px: título da página */
   --fs-6: 2rem; /* 32px: números de situação */
+  --fs-7: 3rem; /* 48px: numerais condensados do painel */
+  /* Dia da folha no login: cresce com a tela, entre 112px e 192px */
+  --fs-folha: clamp(7rem, 13vw, 12rem);
   --lh-corpo: 1.55;
   --lh-titulo: 1.25;
   --lh-numero: 1.1;
   --medida-texto: 68ch;
 
-  /* Raios: pequeno para controles, médio para painéis */
-  --raio-p: 6px;
-  --raio-m: 10px;
+  /* Raios: cantos de papel cortado, quase retos */
+  --raio-p: 2px;
+  --raio-m: 2px;
 
   /* Bordas e foco */
   --borda-largura: 1px;
   --borda: var(--borda-largura) solid var(--cor-borda);
+  /* Fio de tinta que abre tabelas e indicadores, e o picote da folha usado como divisor */
+  --fio-tinta: 2px solid var(--cor-texto);
+  --picote: 2px dotted var(--cor-borda-forte);
+  /* Faixa de etiqueta da identidade anterior: sem uso desde que as telas adotaram o sinal da situação.
+     Fica no tema até o dono decidir removê-la (decisão de 11/11/2026: não remover token sem perguntar) */
   --etiqueta-largura: 4px;
   /* Desconto no recuo de painéis com etiqueta: o texto alinha com os painéis de borda de 1px */
   --recuo-etiqueta: calc(var(--borda-largura) - var(--etiqueta-largura));
   --foco-anel: 2px solid var(--cor-foco);
-  /* Sobre fundo de atenção ou crítico, o anel fica mais grosso e escuro para não sumir na cor */
+  /* Sobre fundo de atenção ou crítico, o anel fica mais grosso para não sumir na cor */
   --foco-anel-forte: 3px solid var(--cor-texto);
   --foco-distancia: 2px;
   --sublinhado-distancia: 3px;
-  --sombra-flutuante: 0 8px 24px rgba(27, 42, 58, 0.14);
+  --sombra-flutuante: 0 8px 24px rgba(18, 18, 18, 0.14);
 
   /* Movimento: só em resposta a ações do usuário */
-  --mov-rapido: 120ms;
+  --mov-rapido: 140ms;
   --mov-medio: 200ms;
   --mov-curva: cubic-bezier(0.2, 0, 0, 1);
   /* Giro do indicador de carregando (não é transição; some com reduced-motion) */
@@ -95,7 +117,7 @@
 
   /* Dimensões */
   --alvo-min: 40px;
-  --largura-menu: 240px;
+  --largura-menu: 232px;
   --altura-cabecalho: 56px;
   --largura-conteudo: 1120px;
   --largura-login: 400px;
@@ -119,6 +141,8 @@
   --tamanho-oculto: 1px;
   --icone-p: 18px;
   --icone-m: 20px;
+  /* Folha da marca no cabeçalho e no login */
+  --tamanho-folha-marca: 32px;
 }
 
 /* Celular e tablet: alvos de toque com pelo menos 44px */
