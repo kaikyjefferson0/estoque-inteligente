@@ -12,6 +12,8 @@
   display: grid;
   grid-column: 1 / -1;
   grid-template-columns: subgrid;
+  /* Rótulo pequeno e valor maior na mesma linha de base */
+  align-items: baseline;
   column-gap: var(--esp-6);
   padding: var(--esp-3) var(--esp-5);
 }
@@ -47,24 +49,9 @@
 }
 
 /* ---------- Painel de estoque e lotes ---------- */
-/* Lado esquerdo reto: as etiquetas dos lotes chegam até a borda do painel */
+/* Aberto pelo fio de tinta: é o painel que mostra a validade, o assunto da folhinha */
 .detalhe__lotes {
-  border-left: 0;
-  border-radius: 0 var(--raio-m) var(--raio-m) 0;
-}
-
-/* Cabeçalho, saldos e estados ganham uma faixa neutra, alinhada com as etiquetas */
-.detalhe__lotes > :not(.lotes) {
-  border-left: var(--etiqueta-largura) solid var(--cor-borda);
-}
-
-/* A faixa tem 4px e a borda dos outros painéis 1px: o recuo desconta a diferença
-   para o texto começar na mesma linha que o do Cadastro e do Histórico */
-.detalhe__lotes .painel__cabecalho,
-.detalhe__lotes .saldos,
-.detalhe__lotes .lote,
-.detalhe__lotes.painel .estado--erro {
-  padding-left: calc(var(--esp-5) + var(--recuo-etiqueta));
+  border-top: var(--fio-tinta);
 }
 
 /* ---------- Saldos ---------- */
@@ -77,9 +64,19 @@
   border-bottom: var(--borda);
 }
 
+/* Quebra quando o número não cabe: com a fonte reserva (antes da Archivo carregar), o numeral
+   não condensa e fica mais largo */
 .saldos__lista {
   display: flex;
-  gap: var(--esp-6);
+  flex-wrap: wrap;
+  gap: var(--esp-3) var(--esp-6);
+}
+
+/* O gap separa o rótulo da caixa do numeral, que passa da entrelinha na fonte reserva */
+.saldos__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--esp-1);
 }
 
 .saldos__item dt {
@@ -88,9 +85,7 @@
 }
 
 .saldos__item dd {
-  font-size: var(--fs-6);
-  font-weight: var(--peso-medio);
-  line-height: var(--lh-numero);
+  font-size: var(--fs-7);
 }
 
 .saldos__item--fisico dd {
@@ -120,22 +115,12 @@
   border-top: var(--borda);
 }
 
-.lote[data-problema] {
-  background: var(--etiqueta-fundo);
-}
-
 .lote__validade {
   font-weight: var(--peso-medio);
 }
 
 .lote__situacao {
   font-size: var(--fs-2);
-  color: var(--cor-texto-suave);
-}
-
-.lote[data-problema] .lote__situacao {
-  font-weight: var(--peso-medio);
-  color: var(--etiqueta-texto);
 }
 
 .lote__quantidade {
@@ -229,7 +214,7 @@
   }
 
   .saldos__lista {
-    gap: var(--esp-5);
+    gap: var(--esp-3) var(--esp-5);
   }
 
   .lote {
@@ -242,13 +227,6 @@
 
   .lote__validade {
     grid-area: validade;
-  }
-
-  .detalhe__lotes .painel__cabecalho,
-  .detalhe__lotes .saldos,
-  .detalhe__lotes .lote,
-  .detalhe__lotes.painel .estado--erro {
-    padding-left: calc(var(--esp-4) + var(--recuo-etiqueta));
   }
 
   .lote__situacao {

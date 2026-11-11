@@ -103,9 +103,16 @@ Valem para todas as telas, novas e alteradas. O `e2e\responsividade.spec.ts` (de
 - **Espaçamentos só da escala do `theme.css`** (`--esp-0` a `--esp-7`; nas classes, `*-esp-0` a `*-esp-7`).
 - Fora das listas (cabeçalho, menu, célula de tabela larga), um texto livre pode usar uma linha só com `texto-cortado` e `title={texto}`. O pai precisa deixar o item encolher (`min-width: 0` em flex ou grid, `min-w-esp-0` nas classes; em tabela, a célula com `width: 100%` e `max-width: 0`). Ícones e marcas ao lado de um texto que encolhe levam `flex-shrink: 0`.
 
-## Etiqueta de prateleira
+## Situação, código de barras e marca (identidade Folhinha)
 
-Itens de estoque, lotes e alertas levam a etiqueta: classe `etiqueta etiqueta--ok | etiqueta--atencao | etiqueta--critico` (tipo `Situacao` de `src\types\situacao.ts`). Ela é a faixa de 4px à esquerda, na cor da situação, com o canto esquerdo reto: o contêiner não pode arredondar o lado esquerdo. Para itens com problema, use o fundo claro `var(--etiqueta-fundo)` e o texto `var(--etiqueta-texto)`. O resto da tela fica calmo.
+A direção visual está em `.impeccable\surfaces\frontend-src-layout-applayout-tsx.md`: papel branco, tinta preta, vermelho só para o crítico; a data é a figura principal.
+
+- **Situação:** a faixa de 4px à esquerda saiu (não use `border-left` colorido em item, cartão ou aviso). Itens de estoque, lotes e alertas mostram a situação com `<SinalSituacao situacao="ok | atencao | critico">Texto</SinalSituacao>` (`src\components\SinalSituacao.tsx`): ícone com forma própria por situação (check, triângulo, círculo com X) e o texto que a nomeia, em cor de situação para atenção e crítico. A classe `etiqueta--ok | --atencao | --critico` no item só define as cores (`--etiqueta-texto`, `--etiqueta-fundo`) para os filhos, como o saldo na cor da situação. Listas não ganham fundo tingido; só o `<Aviso>` usa o fundo claro da situação.
+- **Código de barras:** sempre `<CodigoDeBarras codigo={...} />` (`src\components\CodigoDeBarras.tsx`): ícone, grupos como os impressos (EAN-13 em 1-6-6) feitos pelo CSS, sem quebra; a cópia sai só com os dígitos.
+- **Números grandes** (indicadores, saldos): classe `numeral` (condensado, peso `--peso-numeral`, tabular).
+- **Fio de tinta:** tabelas e listas de dados abrem com `border-top: var(--fio-tinta)`; o divisor "picote" é `var(--picote)`.
+- **Atual e escolhido:** a página atual do menu e a opção escolhida (segmentos, lote) ficam "circuladas" (contorno de tinta de 2px), nunca com fundo colorido nem placa preta. O foco pelo teclado nesses elementos é outra forma: fundo `--cor-hover-neutro` com anel de 3px (`--foco-anel-forte`), para não parecer um segundo circulado.
+- **Marca:** `<FolhaMarca />` (`src\components\Folha.tsx`), a folha com o dia de hoje em Brasília.
 
 ## Menus e janelas
 

@@ -17,12 +17,12 @@
   color: var(--cor-texto-suave);
 }
 
-/* ---------- Lista: painel com o lado esquerdo reto, onde ficam as etiquetas ---------- */
+/* ---------- Lista: folha impressa, aberta pelo fio de tinta ---------- */
 .alertas__painel {
   background: var(--cor-superficie);
   border: var(--borda);
-  border-left: 0;
-  border-radius: 0 var(--raio-m) var(--raio-m) 0;
+  border-top: var(--fio-tinta);
+  border-radius: var(--raio-m);
   overflow: hidden;
 }
 
@@ -35,10 +35,6 @@
   margin: var(--esp-0);
   padding: var(--esp-0);
   list-style: none;
-}
-
-.alerta {
-  background: var(--etiqueta-fundo);
 }
 
 .alerta + .alerta {
@@ -61,35 +57,22 @@
   outline-offset: calc(-1 * var(--foco-distancia));
 }
 
+/* Nome em tinta; o sublinhado fica claro e escurece no hover, para a lista não pesar */
 .alerta__produto {
   font-weight: var(--peso-medio);
-  color: var(--cor-primaria);
+  color: var(--cor-texto);
   text-decoration: underline;
+  text-decoration-color: var(--cor-borda-forte);
   text-underline-offset: var(--sublinhado-distancia);
 }
 
 .alerta__link:hover .alerta__produto {
-  color: var(--cor-primaria-escura);
+  text-decoration-color: currentColor;
 }
 
-.alerta__tipo {
-  font-weight: var(--peso-medio);
-  color: var(--etiqueta-texto);
-}
-
-/* Resolvido: discreto, sem fundo e com a faixa neutra (RN-39) */
-.alerta[data-resolvido] {
-  --etiqueta-cor: var(--cor-borda-forte);
-  background: var(--cor-superficie);
-}
-
+/* Resolvido (RN-39): discreto, com o sinal de "em dia" */
 .alerta[data-resolvido] .alerta__produto {
   font-weight: var(--peso-normal);
-}
-
-.alerta[data-resolvido] .alerta__tipo {
-  font-weight: var(--peso-normal);
-  color: var(--cor-texto-suave);
 }
 
 /* Celular: produto em cima; tipo e lote no meio; tempo embaixo */

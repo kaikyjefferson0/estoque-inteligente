@@ -8,6 +8,7 @@ import { Aviso } from '../components/Aviso'
 import { Botao } from '../components/Botao'
 import { AnuncioDeErros } from '../components/AnuncioDeErros'
 import { Campo } from '../components/Campo'
+import { FolhaDoDia, FolhaMarca } from '../components/Folha'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import './LoginPage.css'
@@ -87,9 +88,13 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
 
   return (
     <div className="login">
+      {/* Computador: a folha do dia ao lado do formulário; no celular fica só a marca */}
+      <div className="login__parede">
+        <FolhaDoDia />
+      </div>
       <main className="login__painel">
         <p className="login__marca">
-          <span className="marca__etiqueta" aria-hidden />
+          <FolhaMarca />
           Estoque Inteligente
         </p>
         <div className="login__titulo">

@@ -1,14 +1,12 @@
-import { IconAlertCircle, IconAlertTriangle, IconCircleCheck } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
 import type { Situacao } from '../types/situacao'
+import { ICONE_DA_SITUACAO } from '../utils/situacao'
 
-const ICONE = { ok: IconCircleCheck, atencao: IconAlertTriangle, critico: IconAlertCircle }
-
-/** Mensagem dentro da página, com a etiqueta de prateleira na cor da situação. */
+/** Mensagem dentro da página: fundo claro da situação e o mesmo ícone do sinal dela. */
 export function Aviso({ situacao, children }: { situacao: Situacao; children: ReactNode }) {
-  const Icone = ICONE[situacao]
+  const Icone = ICONE_DA_SITUACAO[situacao]
   return (
-    <div className={`aviso etiqueta etiqueta--${situacao}`} role={situacao === 'ok' ? 'status' : 'alert'}>
+    <div className={`aviso etiqueta--${situacao}`} role={situacao === 'ok' ? 'status' : 'alert'}>
       <Icone className="aviso__icone" aria-hidden />
       <div className="aviso__texto">{children}</div>
     </div>

@@ -16,8 +16,28 @@
   gap: var(--esp-3);
   height: var(--altura-cabecalho);
   padding: var(--esp-0) var(--esp-5);
-  background: var(--cor-superficie);
-  border-bottom: var(--borda);
+  /* Faixa preta: o cabeçalho da folhinha */
+  background: var(--cor-faixa);
+  color: var(--cor-texto-inverso);
+}
+
+/* Sobre a faixa preta, o anel de foco fica branco */
+.cabecalho :focus-visible {
+  outline-color: var(--cor-texto-inverso);
+}
+
+/* Botão do menu (celular) sobre a faixa */
+.cabecalho .botao-icone {
+  color: var(--cor-faixa-suave);
+}
+
+.cabecalho .botao-icone:hover {
+  background: var(--cor-faixa-hover);
+  color: var(--cor-texto-inverso);
+}
+
+.cabecalho .botao-icone:active {
+  background: var(--cor-faixa-pressionada);
 }
 
 .cabecalho__inicio {
@@ -31,30 +51,25 @@
   display: none;
 }
 
+/* Marca: a folha com o dia de hoje e o nome do sistema */
 .marca {
   display: inline-flex;
   align-items: center;
-  gap: var(--esp-2);
+  gap: var(--esp-3);
   min-height: var(--alvo-min);
   padding: var(--esp-0) var(--esp-2);
   border-radius: var(--raio-p);
-  color: var(--cor-texto);
+  color: var(--cor-texto-inverso);
+  font-size: var(--fs-4);
   font-weight: var(--peso-medio);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
+  transition: background-color var(--mov-rapido) var(--mov-curva);
 }
 
 .marca:hover {
-  color: var(--cor-primaria-escura);
-}
-
-/* Eco da etiqueta de prateleira na marca */
-.marca__etiqueta {
-  display: inline-block;
-  width: var(--etiqueta-largura);
-  height: var(--icone-m);
-  background: var(--cor-primaria);
+  background: var(--cor-faixa-hover);
 }
 
 /* ---------- Usuário no cabeçalho ---------- */
@@ -68,17 +83,18 @@
   border: 0;
   border-radius: var(--raio-p);
   background: transparent;
+  color: var(--cor-texto-inverso);
   cursor: pointer;
   transition: background-color var(--mov-rapido) var(--mov-curva);
 }
 
 .usuario:hover {
-  background: var(--cor-hover-neutro);
+  background: var(--cor-faixa-hover);
 }
 
 .usuario:active,
 .usuario[data-state='open'] {
-  background: var(--cor-pressionado-neutro);
+  background: var(--cor-faixa-pressionada);
 }
 
 .usuario__textos {
@@ -100,7 +116,7 @@
 
 .usuario__perfil {
   font-size: var(--fs-1);
-  color: var(--cor-texto-suave);
+  color: var(--cor-faixa-suave);
 }
 
 /* Só aparece quando não cabe o nome (celular estreito) */
@@ -109,7 +125,7 @@
   flex-shrink: 0;
   width: var(--icone-m);
   height: var(--icone-m);
-  color: var(--cor-texto-suave);
+  color: var(--cor-faixa-suave);
 }
 
 /* A seta nunca encolhe, mesmo com nome longo */
@@ -117,7 +133,7 @@
   flex-shrink: 0;
   width: var(--icone-p);
   height: var(--icone-p);
-  color: var(--cor-texto-suave);
+  color: var(--cor-faixa-suave);
   transition: transform var(--mov-rapido) var(--mov-curva);
 }
 
@@ -166,6 +182,9 @@
   gap: var(--esp-3);
   min-height: var(--alvo-min);
   padding: var(--esp-0) var(--esp-3);
+  /* Contorno sempre presente e transparente: a página atual só pinta a cor, sem mudar o tamanho */
+  border: var(--fio-tinta);
+  border-color: transparent;
   border-radius: var(--raio-p);
   color: var(--cor-texto-suave);
   font-size: var(--fs-2);
@@ -210,15 +229,20 @@
   line-height: var(--lh-corpo);
 }
 
-/* Página atual */
+/* Página atual: circulada a tinta, como a data marcada na folhinha; hover e pressionado seguem os demais */
 .menu__link[aria-current='page'] {
-  background: var(--cor-primaria-clara);
-  color: var(--cor-primaria-escura);
+  border-color: var(--cor-texto);
+  color: var(--cor-texto);
   font-weight: var(--peso-medio);
 }
 
-.menu__link[aria-current='page']:active {
-  background: var(--cor-primaria-clara-pressionada);
+/* Foco pelo teclado: fundo neutro e anel mais grosso, afastado. Assim não parece um segundo
+   "circulado" (o contorno de 2px colado é só da página atual) */
+.menu__link:focus-visible {
+  background: var(--cor-hover-neutro);
+  color: var(--cor-texto);
+  outline: var(--foco-anel-forte);
+  outline-offset: var(--foco-distancia);
 }
 
 /* ---------- Gaveta do celular ---------- */
@@ -302,5 +326,18 @@
 
   .usuario__icone {
     display: block;
+  }
+
+  /* A marca encolhe o nome e os espaços, para o botão da conta caber com o ícone e a seta */
+  .marca {
+    gap: var(--esp-2);
+    padding: var(--esp-0) var(--esp-1);
+    font-size: var(--fs-3);
+  }
+}
+
+@media (max-width: 360px) {
+  .marca {
+    font-size: var(--fs-2);
   }
 }

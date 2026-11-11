@@ -1,32 +1,45 @@
+/* Computador: a folha do dia pendurada na parede, à esquerda, e o formulário no papel, à direita */
 .login {
   display: grid;
-  /* A coluna não cresce pelo conteúdo mínimo dos campos: o painel fica centrado em 320px */
-  grid-template-columns: minmax(0, 1fr);
-  place-items: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   min-height: 100vh;
-  padding: var(--esp-5) var(--esp-4);
+  background: var(--cor-superficie);
+}
+
+.login__parede {
+  display: grid;
+  place-items: center;
+  padding: var(--esp-7);
+  background: var(--cor-parede);
+  border-right: var(--fio-tinta);
 }
 
 .login__painel {
   display: flex;
   flex-direction: column;
+  align-self: center;
+  justify-self: center;
   gap: var(--esp-4);
   width: 100%;
   max-width: var(--largura-login);
-  padding: var(--esp-6);
-  background: var(--cor-superficie);
-  border: var(--borda);
-  border-radius: var(--raio-m);
+  padding: var(--esp-7) var(--esp-0);
 }
 
 .login__marca {
   display: flex;
   align-items: center;
-  gap: var(--esp-2);
+  gap: var(--esp-3);
   margin-bottom: var(--esp-2);
-  color: var(--cor-primaria-escura);
-  font-size: var(--fs-2);
+  font-size: var(--fs-4);
   font-weight: var(--peso-medio);
+}
+
+/* No papel branco, a folha da marca inverte: tinta preta com o dia em branco. No computador ela some,
+   porque a folha do dia ao lado já mostra a data */
+.login__marca .folha-marca {
+  display: none;
+  background: var(--cor-faixa);
+  color: var(--cor-texto-inverso);
 }
 
 .login__titulo {
@@ -50,23 +63,42 @@
   margin-top: var(--esp-2);
 }
 
-@media (max-width: 480px) {
-  .login__painel {
-    padding: var(--esp-5);
-  }
-}
-
-/* Entrada de demonstração (RN-55): separada do formulário por uma linha */
+/* Entrada de demonstração (RN-55): aberta pelo fio de tinta, para o avaliador achar logo */
 .login__demo {
   display: flex;
   flex-direction: column;
   gap: var(--esp-3);
-  padding-top: var(--esp-4);
-  border-top: var(--borda);
+  padding-top: var(--esp-5);
+  border-top: var(--fio-tinta);
 }
 
 .login__demo-titulo {
   margin: var(--esp-0);
-  font-size: var(--fs-3);
+  font-size: var(--fs-4);
   font-weight: var(--peso-medio);
+}
+
+/* Celular e tablet: só o formulário, com a marca e a data em cima */
+@media (max-width: 900px) {
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .login__parede {
+    display: none;
+  }
+
+  .login__painel {
+    align-self: start;
+    padding: var(--esp-5) var(--esp-4) var(--esp-7);
+  }
+
+  .login__marca {
+    padding-bottom: var(--esp-4);
+    border-bottom: var(--fio-tinta);
+  }
+
+  .login__marca .folha-marca {
+    display: inline-grid;
+  }
 }

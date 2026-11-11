@@ -72,7 +72,7 @@ export function FornecedoresPage() {
       )}
 
       {dados && !vazio && (
-        <div className="painel tabela-empilhavel">
+        <div className="painel painel--dados tabela-empilhavel">
           <table className="tabela fornecedores">
             <caption className="visualmente-oculto">Fornecedores cadastrados</caption>
             <thead>

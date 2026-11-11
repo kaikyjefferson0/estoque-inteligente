@@ -1,7 +1,11 @@
+import { IconAlertTriangle, IconCircleCheck, IconCircleX } from '@tabler/icons-react'
 import type { SituacaoEstoque } from '../types/estoque'
 import type { Lote } from '../types/produto'
 import type { Situacao } from '../types/situacao'
 import { diasEntre, formatarData, formatarNumero, plural } from './formato'
+
+/** Uma forma de ícone por situação (sinal e aviso), para a situação nunca depender só da cor. */
+export const ICONE_DA_SITUACAO = { ok: IconCircleCheck, atencao: IconAlertTriangle, critico: IconCircleX }
 
 export const SITUACAO_DO_ESTOQUE: Record<SituacaoEstoque, { etiqueta: Situacao; rotulo: string }> = {
   ok: { etiqueta: 'ok', rotulo: 'Em dia' },

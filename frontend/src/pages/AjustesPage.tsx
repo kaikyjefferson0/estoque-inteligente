@@ -12,12 +12,13 @@ import { Campo } from '../components/Campo'
 import { ConfirmarDialogo } from '../components/ConfirmarDialogo'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
 import { SelecaoComBusca, type OpcaoEscolhida } from '../components/SelecaoComBusca'
+import { SinalSituacao } from '../components/SinalSituacao'
 import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosDoFormulario'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { AjusteRegistrado } from '../types/estoque'
 import type { Pagina } from '../types/pagina'
 import type { Lote, Produto, SaldoProduto } from '../types/produto'
-import { formatarComSinal, formatarNumero, hojeIso, semQuebraNaUnidade } from '../utils/formato'
+import { agruparCodigoDeBarras, formatarComSinal, formatarNumero, hojeIso, semQuebraNaUnidade } from '../utils/formato'
 import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import { validarSaldoContado } from '../utils/validacao'
 import './AjustesPage.css'
@@ -165,7 +166,7 @@ function FormularioAjuste({
             const situacao = situacaoDoLote(l, hoje)
             return (
               <li key={l.id}>
-                <label className={`lote-opcao etiqueta etiqueta--${situacao.etiqueta}`} data-problema={situacao.etiqueta !== 'ok' || undefined}>
+                <label className={`lote-opcao etiqueta--${situacao.etiqueta}`} data-problema={situacao.etiqueta !== 'ok' || undefined}>
                   <input
                     type="radio"
                     name="lote_id"
@@ -178,7 +179,9 @@ function FormularioAjuste({
                     }}
                   />
                   <span className="lote-opcao__validade">{descreverLote(l.validade)}</span>
-                  <span className="lote-opcao__situacao">{situacao.rotulo}</span>
+                  <SinalSituacao situacao={situacao.etiqueta} className="lote-opcao__situacao">
+                    {situacao.rotulo}
+                  </SinalSituacao>
                   <span className="lote-opcao__saldo numero">
                     {formatarNumero(l.quantidade)} <span className="lote-opcao__unidade">no sistema</span>
                   </span>
@@ -285,7 +288,8 @@ function EscolhaDoProduto({
         placeholder="Digite o nome ou o código de barras"
         textoSemItens="Nenhum produto cadastrado."
         caminho={(termo) => montarCaminho('/products', { busca: termo, limite: OPCOES_POR_BUSCA })}
-        paraOpcao={(p) => ({ id: p.id, texto: p.nome, detalhe: p.codigo_barras })}
+        // Código nos grupos do padrão (1-6-6), como em todas as telas
+        paraOpcao={(p) => ({ id: p.id, texto: p.nome, detalhe: agruparCodigoDeBarras(p.codigo_barras).join(' ') })}
         valor={valor}
         aoEscolher={aoEscolher}
         autoFocus={focar}

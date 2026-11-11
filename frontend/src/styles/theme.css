@@ -49,6 +49,11 @@
   /* Faixa preta do topo (cabeçalho da folhinha) e o texto secundário sobre ela (9,9:1) */
   --cor-faixa: #121212;
   --cor-faixa-suave: #bdbdb8;
+  /* Controles sobre a faixa: hover e pressionado (branco por cima 14,4:1 e 11,4:1) */
+  --cor-faixa-hover: #2a2a28;
+  --cor-faixa-pressionada: #3a3a37;
+  /* Parede atrás da folha do dia, no login (sem texto por cima) */
+  --cor-parede: #ecece7;
 
   /* Espaçamento: escala de 4px. Nenhum margin, padding ou gap fora dela */
   --esp-0: 0;
@@ -73,6 +78,9 @@
   --fs-4: 1.125rem; /* 18px: títulos de seção */
   --fs-5: 1.5rem; /* 24px: título da página */
   --fs-6: 2rem; /* 32px: números de situação */
+  --fs-7: 3rem; /* 48px: numerais condensados do painel */
+  /* Dia da folha no login: cresce com a tela, entre 112px e 192px */
+  --fs-folha: clamp(7rem, 13vw, 12rem);
   --lh-corpo: 1.55;
   --lh-titulo: 1.25;
   --lh-numero: 1.1;
@@ -88,7 +96,8 @@
   /* Fio de tinta que abre tabelas e indicadores, e o picote da folha usado como divisor */
   --fio-tinta: 2px solid var(--cor-texto);
   --picote: 2px dotted var(--cor-borda-forte);
-  /* Faixa de etiqueta da identidade anterior: fica até o redesign de cada tela (decisão do dono, 11/11/2026) */
+  /* Faixa de etiqueta da identidade anterior: sem uso desde que as telas adotaram o sinal da situação.
+     Fica no tema até o dono decidir removê-la (decisão de 11/11/2026: não remover token sem perguntar) */
   --etiqueta-largura: 4px;
   /* Desconto no recuo de painéis com etiqueta: o texto alinha com os painéis de borda de 1px */
   --recuo-etiqueta: calc(var(--borda-largura) - var(--etiqueta-largura));
@@ -101,7 +110,7 @@
 
   /* Movimento: só em resposta a ações do usuário */
   --mov-rapido: 140ms;
-  --mov-medio: 220ms;
+  --mov-medio: 200ms;
   --mov-curva: cubic-bezier(0.2, 0, 0, 1);
   /* Giro do indicador de carregando (não é transição; some com reduced-motion) */
   --mov-giro: 800ms;
@@ -132,6 +141,8 @@
   --tamanho-oculto: 1px;
   --icone-p: 18px;
   --icone-m: 20px;
+  /* Folha da marca no cabeçalho e no login */
+  --tamanho-folha-marca: 32px;
 }
 
 /* Celular e tablet: alvos de toque com pelo menos 44px */
