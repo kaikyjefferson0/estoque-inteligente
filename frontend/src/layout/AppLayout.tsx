@@ -1,12 +1,13 @@
 import * as Dialog from '@radix-ui/react-dialog'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
-import { IconChevronDown, IconLogout, IconMenu2, IconUserCircle, IconX } from '@tabler/icons-react'
+import { IconChevronDown, IconLogout, IconUserCircle, IconX } from '@tabler/icons-react'
 import { useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { AlertasAtivosProvider } from '../alertas/AlertasAtivosProvider'
 import { useAuth } from '../auth/useAuth'
 import { FolhaMarca } from '../components/Folha'
 import { NOME_DO_PERFIL } from '../types/auth'
+import { BarraInferior } from './BarraInferior'
 import { MenuLateral } from './MenuLateral'
 
 function Marca() {
@@ -74,44 +75,43 @@ export function AppLayout() {
 
   return (
     <AlertasAtivosProvider>
-      <div className="app">
-        <a href="#conteudo" className="pular-conteudo">
-          Pular para o conteúdo
-        </a>
-        <header className="cabecalho">
-          <div className="cabecalho__inicio">
-            <Dialog.Root open={gavetaAberta} onOpenChange={setGavetaAberta}>
-              <Dialog.Trigger className="botao-icone cabecalho__menu" aria-label="Abrir menu">
-                <IconMenu2 aria-hidden />
-              </Dialog.Trigger>
-              <Dialog.Portal>
-                <Dialog.Overlay className="sobreposicao" />
-                <Dialog.Content className="gaveta" aria-describedby={undefined}>
-                  <div className="gaveta__topo">
-                    <Dialog.Title asChild>
-                      <span className="gaveta__titulo">Menu</span>
-                    </Dialog.Title>
-                    <Dialog.Close className="botao-icone" aria-label="Fechar menu">
-                      <IconX aria-hidden />
-                    </Dialog.Close>
-                  </div>
-                  <MenuLateral aoNavegar={() => setGavetaAberta(false)} />
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
-            <Marca />
+      {/* A gaveta abre pelo "Mais" da barra inferior (até 900px); acima disso o menu é a lateral */}
+      <Dialog.Root open={gavetaAberta} onOpenChange={setGavetaAberta}>
+        <div className="app">
+          <a href="#conteudo" className="pular-conteudo">
+            Pular para o conteúdo
+          </a>
+          <header className="cabecalho">
+            <div className="cabecalho__inicio">
+              <Marca />
+            </div>
+            <MenuDoUsuario />
+          </header>
+          <div className="app__corpo">
+            <aside className="lateral">
+              <MenuLateral />
+            </aside>
+            <main id="conteudo" className="conteudo" tabIndex={-1}>
+              <Outlet />
+            </main>
           </div>
-          <MenuDoUsuario />
-        </header>
-        <div className="app__corpo">
-          <aside className="lateral">
-            <MenuLateral />
-          </aside>
-          <main id="conteudo" className="conteudo" tabIndex={-1}>
-            <Outlet />
-          </main>
+          <BarraInferior />
         </div>
-      </div>
+        <Dialog.Portal>
+          <Dialog.Overlay className="sobreposicao" />
+          <Dialog.Content className="gaveta" aria-describedby={undefined}>
+            <div className="gaveta__topo">
+              <Dialog.Title asChild>
+                <span className="gaveta__titulo">Menu</span>
+              </Dialog.Title>
+              <Dialog.Close className="botao-icone" aria-label="Fechar menu">
+                <IconX aria-hidden />
+              </Dialog.Close>
+            </div>
+            <MenuLateral aoNavegar={() => setGavetaAberta(false)} />
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </AlertasAtivosProvider>
   )
 }

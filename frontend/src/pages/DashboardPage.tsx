@@ -7,10 +7,13 @@ import {
   IconRefresh,
 } from '@tabler/icons-react'
 import { Link } from 'react-router-dom'
+import { useVencimentos } from '../alertas/useVencimentos'
 import { useRecurso } from '../api/useRecurso'
 import { Botao, BotaoLink } from '../components/Botao'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { FolhaDaData } from '../components/Folha'
 import { Metadados, NomeEmLista } from '../components/Metadados'
+import { ReguaVencimentos } from '../components/ReguaVencimentos'
 import { SinalSituacao } from '../components/SinalSituacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Dashboard, MovimentacaoRecente, TipoMovimentacao } from '../types/dashboard'
@@ -116,6 +119,7 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
         const quantidade = quantidadeComSinal(m)
         return (
           <li key={m.id} className="movimento">
+            <FolhaDaData iso={m.criado_em} className="movimento__folha" />
             <NomeEmLista nome={m.produto_nome} className="movimento__nome" />
             {/* Rótulo e valor em blocos próprios: um rótulo oculto na mesma linha gruda ao copiar */}
             <dl className="movimento__quantidade">
@@ -153,7 +157,14 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
 
 export function DashboardPage() {
   useTituloDaPagina('Painel')
-  const { dados, erro, carregando, atualizadoEm, recarregar } = useRecurso<Dashboard>('/dashboard')
+  const { dados, erro, carregando, atualizadoEm, recarregar: recarregarPainel } = useRecurso<Dashboard>('/dashboard')
+  const vencimentos = useVencimentos()
+  const { recarregar: recarregarVencimentos } = vencimentos
+  // "Atualizar" e "Tentar de novo" refazem as duas leituras: a régua não fica mais velha que os números
+  const recarregar = () => {
+    recarregarPainel()
+    recarregarVencimentos()
+  }
   // Sem produtos, as faixas verdes dariam a falsa impressão de que está tudo em dia
   const semProdutos = dados?.total_produtos === 0
 
@@ -171,7 +182,7 @@ export function DashboardPage() {
         </div>
         <div className="pagina__acoes">
           {dados && (
-            <Botao variante="fantasma" icone={IconRefresh} onClick={recarregar} carregando={carregando} textoCarregando="Atualizando…">
+            <Botao variante="fantasma" icone={IconRefresh} onClick={recarregar} carregando={carregando || vencimentos.carregando} textoCarregando="Atualizando…">
               Atualizar
             </Botao>
           )}
@@ -224,6 +235,8 @@ export function DashboardPage() {
               </Link>
             )}
           </div>
+
+          <ReguaVencimentos vencimentos={vencimentos} />
 
           <section className="painel painel--dados" aria-labelledby="titulo-movimentos">
             <div className="painel__cabecalho">

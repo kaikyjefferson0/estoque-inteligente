@@ -5,11 +5,11 @@
 // 3. Sobe a API na porta 8001 (usuário da aplicação, CORS para a 5175) e o site na porta 5175.
 // 4. Roda o estoque.spec.ts (banco vazio).
 // 5. Recria o banco com os dados de exemplo da demo e os casos extremos (e2e_preparar.py --demo)
-//    e roda o responsividade.spec.ts.
+//    e roda o barra-inferior.spec.ts e o responsividade.spec.ts.
 // No fim, para a API e o site, mesmo se algo falhar.
 //
 // Opções:
-//   --responsividade      roda só a etapa 5
+//   --responsividade      roda só o responsividade.spec.ts da etapa 5
 //   --capturas=<pasta>    guarda uma captura de cada tela e largura (para o ui-reviewer)
 //   E2E_GREP=<texto>      roda só os testes cujo nome contém o texto (ex.: "em 320px")
 import { spawn, spawnSync } from 'node:child_process'
@@ -195,6 +195,8 @@ async function principal() {
     codigo = rodarPlaywright('estoque.spec.ts')
     // Mesmos servidores; a API lê o banco a cada requisição
     preparar(true)
+    // A barra inferior usa os dados da demo (alertas ativos para a contagem)
+    codigo = rodarPlaywright('barra-inferior.spec.ts') || codigo
   }
   const capturas = PASTA_CAPTURAS ? { E2E_CAPTURAS: path.resolve(PASTA_CAPTURAS) } : {}
   return rodarPlaywright('responsividade.spec.ts', capturas) || codigo

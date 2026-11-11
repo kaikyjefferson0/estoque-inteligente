@@ -145,6 +145,27 @@
   --icone-m: 20px;
   /* Folha da marca no cabeçalho e no login */
   --tamanho-folha-marca: 32px;
+  /* Mini-folha com a data de cada movimentação (Painel e Histórico) */
+  --tamanho-folha-data: 40px;
+  /* Contorno do "circulado" (página atual, escolhido, dia com vencimento): a largura do fio de tinta */
+  --largura-circulado: 2px;
+
+  /* Régua de vencimentos: 21 dias numa linha; numa largura estreita, a folha do mês (3 semanas de 7) */
+  --colunas-regua: repeat(21, minmax(0, 1fr));
+  --colunas-semana: repeat(7, minmax(0, 1fr));
+  --altura-dia-regua: 36px;
+  /* Largura máxima da caixa do dia: o circulado fica quase quadrado e os vizinhos não se colam */
+  --largura-dia-regua: 40px;
+
+  /* Barra inferior do celular (até 900px): itens com folga acima do alvo de toque, mais o
+     respiro da barra, o fio de tinta do topo e a área segura do aparelho. A área segura só passa
+     de zero com viewport-fit=cover no index.html, que não está ligado: sem ele, o navegador já
+     deixa a página fora da área do indicador do iPhone */
+  --altura-item-barra: 56px;
+  --area-segura-baixo: env(safe-area-inset-bottom, 0px);
+  --altura-barra-inferior: calc(
+    var(--altura-item-barra) + 2 * var(--esp-1) + var(--largura-circulado) + var(--area-segura-baixo)
+  );
 }
 
 /* Celular e tablet: alvos de toque com pelo menos 44px */

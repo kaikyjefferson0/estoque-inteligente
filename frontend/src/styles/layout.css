@@ -47,10 +47,6 @@
   gap: var(--esp-1);
 }
 
-.cabecalho__menu {
-  display: none;
-}
-
 /* Marca: a folha com o dia de hoje e o nome do sistema */
 .marca {
   display: inline-flex;
@@ -290,16 +286,18 @@
     gap: var(--esp-1);
   }
 
-  .cabecalho__menu {
-    display: inline-flex;
-  }
-
   .lateral {
     display: none;
   }
 
+  /* A barra inferior fica fixa embaixo: a página ganha a altura dela de folga, para o fim do
+     conteúdo não ficar por baixo, e a rolagem até um controle focado também desconta a barra */
+  html {
+    scroll-padding-bottom: calc(var(--altura-barra-inferior) + var(--esp-2));
+  }
+
   .conteudo {
-    padding: var(--esp-5) var(--esp-4);
+    padding: var(--esp-5) var(--esp-4) calc(var(--altura-barra-inferior) + var(--esp-5));
   }
 }
 

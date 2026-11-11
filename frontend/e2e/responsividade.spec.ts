@@ -154,7 +154,8 @@ const TELAS: Tela[] = [
     quando: (largura) => largura < LARGURA_CELULAR,
     abrir: async (p) => {
       await irPara(p, '/')
-      await p.getByRole('button', { name: 'Abrir menu', exact: true }).click()
+      // Até 900px a gaveta abre pelo "Mais" da barra inferior
+      await p.getByRole('navigation', { name: 'Atalhos' }).getByRole('button', { name: 'Mais', exact: true }).click()
       await expect(p.getByRole('dialog')).toBeVisible()
     },
   },
@@ -341,7 +342,17 @@ async function capturar(page: Page, nome: string) {
   if (!PASTA_CAPTURAS) return
   // Com janela aberta, só a tela: a captura da página inteira desloca o cabeçalho fixo atrás dela
   const janela = await page.locator('[role="dialog"], [role="alertdialog"], [role="menu"]').count()
-  await page.screenshot({ path: `${PASTA_CAPTURAS}/${nome}.png`, fullPage: janela === 0 })
+  if (janela > 0) {
+    await page.screenshot({ path: `${PASTA_CAPTURAS}/${nome}.png` })
+    return
+  }
+  // Página inteira com a janela da altura dela: a captura de página inteira deixaria o que é fixo
+  // (a barra inferior do celular) no meio da imagem, na altura da primeira tela
+  const tamanho = page.viewportSize()!
+  const altura = await page.evaluate(() => document.documentElement.scrollHeight)
+  await page.setViewportSize({ width: tamanho.width, height: Math.max(altura, tamanho.height) })
+  await page.screenshot({ path: `${PASTA_CAPTURAS}/${nome}.png` })
+  await page.setViewportSize(tamanho)
 }
 
 for (const largura of LARGURAS) {
