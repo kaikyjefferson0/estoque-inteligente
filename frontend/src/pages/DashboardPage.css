@@ -1,7 +1,8 @@
 /* ---------- Situação: uma linha da folhinha, aberta pelo fio de tinta ---------- */
+/* Três grupos: estoque baixo (com os sem estoque dentro, RN-13), a vencer e vencidos */
 .situacoes {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   border-top: var(--fio-tinta);
   border-bottom: var(--borda);
 }
@@ -39,6 +40,14 @@
 .situacao__descricao {
   font-size: var(--fs-1);
   color: var(--cor-texto-suave);
+}
+
+/* "1 sem estoque": a parte crítica do grupo, separada da descrição pelo picote */
+.situacao__parte {
+  padding-top: var(--esp-2);
+  border-top: var(--picote);
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
 }
 
 /* ---------- Totais discretos ---------- */
@@ -102,7 +111,7 @@
 .movimento__quantidade {
   grid-area: quantidade;
   margin: var(--esp-0);
-  font-weight: var(--peso-medio);
+  font-size: var(--fs-4);
   text-align: right;
   white-space: nowrap;
 }
@@ -129,20 +138,6 @@
 }
 
 @media (max-width: 900px) {
-  .situacoes {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .situacao:nth-child(n + 3) {
-    border-top: var(--borda);
-  }
-
-  /* Duas colunas: a terceira começa a linha, sem divisória à esquerda e sem recuo */
-  .situacao:nth-child(3) {
-    padding-left: var(--esp-0);
-    border-left: 0;
-  }
-
   .situacao {
     padding: var(--esp-3) var(--esp-4) var(--esp-4);
   }
@@ -157,7 +152,26 @@
 }
 
 @media (max-width: 640px) {
-  /* Título numa linha só ao lado do ícone, mesmo em 320px ("Sem estoque" quebrava) */
+  /* Celular: o estoque baixo ocupa a linha inteira; a vencer e vencidos dividem a de baixo */
+  .situacoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .situacao:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .situacao:nth-child(n + 2) {
+    border-top: var(--borda);
+  }
+
+  /* A segunda começa a linha de baixo: sem divisória à esquerda e sem recuo */
+  .situacao:nth-child(2) {
+    padding-left: var(--esp-0);
+    border-left: 0;
+  }
+
+  /* Título numa linha só ao lado do ícone, mesmo em 320px */
   .situacao__titulo {
     font-size: var(--fs-2);
   }

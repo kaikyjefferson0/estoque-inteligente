@@ -135,7 +135,7 @@ function Estoque({ produto }: { produto: Produto }) {
                     <SinalSituacao situacao={situacao.etiqueta} className="lote__situacao">
                       {situacao.rotulo}
                     </SinalSituacao>
-                    <span className="lote__quantidade numero">{formatarNumero(lote.quantidade)}</span>
+                    <span className="lote__quantidade numeral">{formatarNumero(lote.quantidade)}</span>
                   </li>
                 )
               })}
@@ -198,7 +198,7 @@ function Historico({ produtoId }: { produtoId: number }) {
                   {/* Rótulo e valor em blocos próprios: um rótulo oculto na mesma linha gruda ao copiar */}
                   <dl className="historico__quantidade">
                     <dt className="visualmente-oculto">Quantidade</dt>
-                    <dd className="numero">{formatarComSinal(quantidade)}</dd>
+                    <dd className="numeral">{formatarComSinal(quantidade)}</dd>
                   </dl>
                   <Metadados
                     className="historico__metadados"

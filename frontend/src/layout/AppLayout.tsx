@@ -22,11 +22,15 @@ function MenuDoUsuario() {
   const { usuario, sair } = useAuth()
   if (!usuario) return null
   const perfil = NOME_DO_PERFIL[usuario.perfil]
+  // Nome acessível começando pelo texto visível (WCAG 2.5.3: quem usa comando de voz diz o que vê),
+  // sem repetir o perfil quando ele é o próprio nome ("Administrador") e sem começar por
+  // "Abrir menu", que é o nome do botão da gaveta
+  const nomeAcessivel = usuario.nome === perfil ? `${usuario.nome}, menu da conta` : `${usuario.nome}, ${perfil}, menu da conta`
 
   return (
     <DropdownMenu.Root>
       {/* Nome longo ganha reticências; o texto inteiro aparece ao passar o mouse e no menu aberto */}
-      <DropdownMenu.Trigger className="usuario" aria-label={`${usuario.nome}, ${perfil}: abrir menu da conta`} title={usuario.nome}>
+      <DropdownMenu.Trigger className="usuario" aria-label={nomeAcessivel} title={usuario.nome}>
         <IconUserCircle className="usuario__icone" aria-hidden />
         <span className="usuario__textos">
           <span className="usuario__nome">{usuario.nome}</span>

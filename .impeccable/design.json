@@ -1,508 +1,637 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-10T21:13:35.273Z",
+  "generatedAt": "2026-11-11T18:16:18Z",
   "title": "Design System: Estoque Inteligente",
   "extensions": {
-    "tokenSource": "frontend/src/styles/theme.css (variáveis --cor-*, --esp-*, --raio-*, --fs-*, --mov-*), a única fonte de valores; frontend/src/styles/tailwind.css liga cada token ao Tailwind CSS v4 por @theme inline, só com var(--...) (bg-primaria, p-esp-4, rounded-m, max-w-largura-conteudo, max-w-largura-formulario, grid-cols-rotulo-valor; a classe border usa --borda-largura); os cortes do layout são variantes com o mesmo valor do CSS antigo (ate-640: = @media (max-width: 640px)); o reset do global.css fica fora de camada e vence utilitários nas propriedades que define",
+    "tokenSource": "frontend/src/styles/theme.css é a única fonte de valores; frontend/src/styles/tailwind.css liga os tokens ao Tailwind CSS v4 por @theme inline, só com var(--...), com os padrões do Tailwind desligados e os utilitários próprios font-stretch-titulo e border-t-picote.",
     "colorMeta": {
       "primaria": {
         "role": "primary",
-        "displayName": "Azul Ardósia",
-        "canonical": "#2f5d8a",
-        "oklch": "oklch(46.7% 0.089 249.8)",
+        "displayName": "Tinta",
+        "cssVar": "--cor-primaria",
+        "canonical": "#121212",
         "tonalRamp": [
-          "oklch(15.0% 0.041 249.8)",
-          "oklch(26.4% 0.054 249.8)",
-          "oklch(37.9% 0.068 249.8)",
-          "oklch(49.3% 0.082 249.8)",
-          "oklch(60.7% 0.082 249.8)",
-          "oklch(72.1% 0.068 249.8)",
-          "oklch(83.6% 0.054 249.8)",
-          "oklch(95.0% 0.041 249.8)"
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
         ]
       },
       "primaria-escura": {
         "role": "primary",
-        "displayName": "Azul Ardósia Escuro",
-        "canonical": "#1f4266",
-        "oklch": "oklch(37.2% 0.074 251.1)",
+        "displayName": "Tinta Gasta",
+        "cssVar": "--cor-primaria-escura",
+        "canonical": "#353532",
         "tonalRamp": [
-          "oklch(15.0% 0.034 251.1)",
-          "oklch(26.4% 0.045 251.1)",
-          "oklch(37.9% 0.057 251.1)",
-          "oklch(49.3% 0.069 251.1)",
-          "oklch(60.7% 0.069 251.1)",
-          "oklch(72.1% 0.057 251.1)",
-          "oklch(83.6% 0.045 251.1)",
-          "oklch(95.0% 0.034 251.1)"
+          "oklch(15.0% 0.005 106.7)",
+          "oklch(26.4% 0.005 106.7)",
+          "oklch(37.9% 0.005 106.7)",
+          "oklch(49.3% 0.005 106.7)",
+          "oklch(60.7% 0.005 106.7)",
+          "oklch(72.1% 0.005 106.7)",
+          "oklch(83.6% 0.005 106.7)",
+          "oklch(95.0% 0.005 106.7)"
         ]
       },
       "primaria-pressionada": {
         "role": "primary",
-        "displayName": "Azul Ardósia Pressionado",
-        "canonical": "#183552",
-        "oklch": "oklch(32.2% 0.063 250.4)",
+        "displayName": "Tinta Carregada",
+        "cssVar": "--cor-primaria-pressionada",
+        "canonical": "#000000",
         "tonalRamp": [
-          "oklch(15.0% 0.028 250.4)",
-          "oklch(26.4% 0.038 250.4)",
-          "oklch(37.9% 0.048 250.4)",
-          "oklch(49.3% 0.058 250.4)",
-          "oklch(60.7% 0.058 250.4)",
-          "oklch(72.1% 0.048 250.4)",
-          "oklch(83.6% 0.038 250.4)",
-          "oklch(95.0% 0.028 250.4)"
+          "oklch(15.0% 0.000 0.0)",
+          "oklch(26.4% 0.000 0.0)",
+          "oklch(37.9% 0.000 0.0)",
+          "oklch(49.3% 0.000 0.0)",
+          "oklch(60.7% 0.000 0.0)",
+          "oklch(72.1% 0.000 0.0)",
+          "oklch(83.6% 0.000 0.0)",
+          "oklch(95.0% 0.000 0.0)"
         ]
       },
       "primaria-clara": {
         "role": "primary",
-        "displayName": "Névoa Ardósia",
-        "canonical": "#eaf1f8",
-        "oklch": "oklch(95.5% 0.012 248.0)",
+        "displayName": "Papel Riscado",
+        "cssVar": "--cor-primaria-clara",
+        "canonical": "#efefea",
         "tonalRamp": [
-          "oklch(15.0% 0.005 248.0)",
-          "oklch(26.4% 0.007 248.0)",
-          "oklch(37.9% 0.009 248.0)",
-          "oklch(49.3% 0.011 248.0)",
-          "oklch(60.7% 0.011 248.0)",
-          "oklch(72.1% 0.009 248.0)",
-          "oklch(83.6% 0.007 248.0)",
-          "oklch(95.0% 0.005 248.0)"
+          "oklch(15.0% 0.007 106.5)",
+          "oklch(26.4% 0.007 106.5)",
+          "oklch(37.9% 0.007 106.5)",
+          "oklch(49.3% 0.007 106.5)",
+          "oklch(60.7% 0.007 106.5)",
+          "oklch(72.1% 0.007 106.5)",
+          "oklch(83.6% 0.007 106.5)",
+          "oklch(95.0% 0.007 106.5)"
         ]
       },
       "primaria-clara-pressionada": {
         "role": "primary",
-        "displayName": "Névoa Ardósia Pressionada",
-        "canonical": "#dbe7f3",
-        "oklch": "oklch(92.3% 0.021 248.1)",
+        "displayName": "Papel Riscado Pressionado",
+        "cssVar": "--cor-primaria-clara-pressionada",
+        "canonical": "#e4e4df",
         "tonalRamp": [
-          "oklch(15.0% 0.009 248.1)",
-          "oklch(26.4% 0.013 248.1)",
-          "oklch(37.9% 0.016 248.1)",
-          "oklch(49.3% 0.019 248.1)",
-          "oklch(60.7% 0.019 248.1)",
-          "oklch(72.1% 0.016 248.1)",
-          "oklch(83.6% 0.013 248.1)",
-          "oklch(95.0% 0.009 248.1)"
+          "oklch(15.0% 0.007 106.5)",
+          "oklch(26.4% 0.007 106.5)",
+          "oklch(37.9% 0.007 106.5)",
+          "oklch(49.3% 0.007 106.5)",
+          "oklch(60.7% 0.007 106.5)",
+          "oklch(72.1% 0.007 106.5)",
+          "oklch(83.6% 0.007 106.5)",
+          "oklch(95.0% 0.007 106.5)"
         ]
       },
       "superficie": {
         "role": "neutral",
-        "displayName": "Branco Superfície",
+        "displayName": "Papel",
+        "cssVar": "--cor-superficie",
         "canonical": "#ffffff",
-        "oklch": "oklch(100.0% 0.000 250.0)",
         "tonalRamp": [
-          "oklch(15.0% 0.005 250.0)",
-          "oklch(26.4% 0.007 250.0)",
-          "oklch(37.9% 0.009 250.0)",
-          "oklch(49.3% 0.011 250.0)",
-          "oklch(60.7% 0.011 250.0)",
-          "oklch(72.1% 0.009 250.0)",
-          "oklch(83.6% 0.007 250.0)",
-          "oklch(95.0% 0.005 250.0)"
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
         ]
       },
       "fundo": {
         "role": "neutral",
-        "displayName": "Cinza Gôndola",
-        "canonical": "#f4f7fa",
-        "oklch": "oklch(97.5% 0.005 247.9)",
+        "displayName": "Papel (fundo)",
+        "cssVar": "--cor-fundo",
+        "canonical": "#ffffff",
         "tonalRamp": [
-          "oklch(15.0% 0.005 247.9)",
-          "oklch(26.4% 0.007 247.9)",
-          "oklch(37.9% 0.009 247.9)",
-          "oklch(49.3% 0.011 247.9)",
-          "oklch(60.7% 0.011 247.9)",
-          "oklch(72.1% 0.009 247.9)",
-          "oklch(83.6% 0.007 247.9)",
-          "oklch(95.0% 0.005 247.9)"
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "parede": {
+        "role": "neutral",
+        "displayName": "Parede",
+        "cssVar": "--cor-parede",
+        "canonical": "#ecece7",
+        "tonalRamp": [
+          "oklch(15.0% 0.007 106.5)",
+          "oklch(26.4% 0.007 106.5)",
+          "oklch(37.9% 0.007 106.5)",
+          "oklch(49.3% 0.007 106.5)",
+          "oklch(60.7% 0.007 106.5)",
+          "oklch(72.1% 0.007 106.5)",
+          "oklch(83.6% 0.007 106.5)",
+          "oklch(95.0% 0.007 106.5)"
         ]
       },
       "texto": {
         "role": "neutral",
-        "displayName": "Tinta Azul-Noite",
-        "canonical": "#1b2a3a",
-        "oklch": "oklch(27.9% 0.036 250.8)",
+        "displayName": "Tinta (texto)",
+        "cssVar": "--cor-texto",
+        "canonical": "#121212",
         "tonalRamp": [
-          "oklch(15.0% 0.016 250.8)",
-          "oklch(26.4% 0.022 250.8)",
-          "oklch(37.9% 0.028 250.8)",
-          "oklch(49.3% 0.033 250.8)",
-          "oklch(60.7% 0.033 250.8)",
-          "oklch(72.1% 0.028 250.8)",
-          "oklch(83.6% 0.022 250.8)",
-          "oklch(95.0% 0.016 250.8)"
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
         ]
       },
       "texto-suave": {
         "role": "neutral",
-        "displayName": "Grafite Suave",
-        "canonical": "#5b6b7d",
-        "oklch": "oklch(52.1% 0.034 251.5)",
+        "displayName": "Tinta Suave",
+        "cssVar": "--cor-texto-suave",
+        "canonical": "#5c5c58",
         "tonalRamp": [
-          "oklch(15.0% 0.016 251.5)",
-          "oklch(26.4% 0.021 251.5)",
-          "oklch(37.9% 0.026 251.5)",
-          "oklch(49.3% 0.032 251.5)",
-          "oklch(60.7% 0.032 251.5)",
-          "oklch(72.1% 0.026 251.5)",
-          "oklch(83.6% 0.021 251.5)",
-          "oklch(95.0% 0.016 251.5)"
+          "oklch(15.0% 0.006 106.6)",
+          "oklch(26.4% 0.006 106.6)",
+          "oklch(37.9% 0.006 106.6)",
+          "oklch(49.3% 0.006 106.6)",
+          "oklch(60.7% 0.006 106.6)",
+          "oklch(72.1% 0.006 106.6)",
+          "oklch(83.6% 0.006 106.6)",
+          "oklch(95.0% 0.006 106.6)"
         ]
       },
       "texto-inverso": {
         "role": "neutral",
         "displayName": "Branco Inverso",
+        "cssVar": "--cor-texto-inverso",
         "canonical": "#ffffff",
-        "oklch": "oklch(100.0% 0.000 250.0)",
         "tonalRamp": [
-          "oklch(15.0% 0.005 250.0)",
-          "oklch(26.4% 0.007 250.0)",
-          "oklch(37.9% 0.009 250.0)",
-          "oklch(49.3% 0.011 250.0)",
-          "oklch(60.7% 0.011 250.0)",
-          "oklch(72.1% 0.009 250.0)",
-          "oklch(83.6% 0.007 250.0)",
-          "oklch(95.0% 0.005 250.0)"
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
         ]
       },
       "borda": {
         "role": "neutral",
-        "displayName": "Linha de Prateleira",
-        "canonical": "#dce3eb",
-        "oklch": "oklch(91.3% 0.013 251.6)",
+        "displayName": "Fio",
+        "cssVar": "--cor-borda",
+        "canonical": "#dcdcd6",
         "tonalRamp": [
-          "oklch(15.0% 0.006 251.6)",
-          "oklch(26.4% 0.008 251.6)",
-          "oklch(37.9% 0.010 251.6)",
-          "oklch(49.3% 0.012 251.6)",
-          "oklch(60.7% 0.012 251.6)",
-          "oklch(72.1% 0.010 251.6)",
-          "oklch(83.6% 0.008 251.6)",
-          "oklch(95.0% 0.006 251.6)"
+          "oklch(15.0% 0.008 106.6)",
+          "oklch(26.4% 0.008 106.6)",
+          "oklch(37.9% 0.008 106.6)",
+          "oklch(49.3% 0.008 106.6)",
+          "oklch(60.7% 0.008 106.6)",
+          "oklch(72.1% 0.008 106.6)",
+          "oklch(83.6% 0.008 106.6)",
+          "oklch(95.0% 0.008 106.6)"
         ]
       },
       "borda-forte": {
         "role": "neutral",
-        "displayName": "Linha Firme",
-        "canonical": "#a9b6c4",
-        "oklch": "oklch(77.1% 0.025 250.1)",
+        "displayName": "Grafite",
+        "cssVar": "--cor-borda-forte",
+        "canonical": "#8a8a84",
         "tonalRamp": [
-          "oklch(15.0% 0.011 250.1)",
-          "oklch(26.4% 0.015 250.1)",
-          "oklch(37.9% 0.019 250.1)",
-          "oklch(49.3% 0.023 250.1)",
-          "oklch(60.7% 0.023 250.1)",
-          "oklch(72.1% 0.019 250.1)",
-          "oklch(83.6% 0.015 250.1)",
-          "oklch(95.0% 0.011 250.1)"
+          "oklch(15.0% 0.009 106.6)",
+          "oklch(26.4% 0.009 106.6)",
+          "oklch(37.9% 0.009 106.6)",
+          "oklch(49.3% 0.009 106.6)",
+          "oklch(60.7% 0.009 106.6)",
+          "oklch(72.1% 0.009 106.6)",
+          "oklch(83.6% 0.009 106.6)",
+          "oklch(95.0% 0.009 106.6)"
         ]
       },
       "hover-neutro": {
         "role": "neutral",
         "displayName": "Toque Neutro",
-        "canonical": "#eef2f6",
-        "oklch": "oklch(95.9% 0.007 247.9)",
+        "cssVar": "--cor-hover-neutro",
+        "canonical": "#f1f1ed",
         "tonalRamp": [
-          "oklch(15.0% 0.005 247.9)",
-          "oklch(26.4% 0.007 247.9)",
-          "oklch(37.9% 0.009 247.9)",
-          "oklch(49.3% 0.011 247.9)",
-          "oklch(60.7% 0.011 247.9)",
-          "oklch(72.1% 0.009 247.9)",
-          "oklch(83.6% 0.007 247.9)",
-          "oklch(95.0% 0.005 247.9)"
+          "oklch(15.0% 0.005 106.5)",
+          "oklch(26.4% 0.005 106.5)",
+          "oklch(37.9% 0.005 106.5)",
+          "oklch(49.3% 0.005 106.5)",
+          "oklch(60.7% 0.005 106.5)",
+          "oklch(72.1% 0.005 106.5)",
+          "oklch(83.6% 0.005 106.5)",
+          "oklch(95.0% 0.005 106.5)"
         ]
       },
       "pressionado-neutro": {
         "role": "neutral",
         "displayName": "Pressão Neutra",
-        "canonical": "#e2e8ef",
-        "oklch": "oklch(92.8% 0.011 252.1)",
+        "cssVar": "--cor-pressionado-neutro",
+        "canonical": "#e5e5e0",
         "tonalRamp": [
-          "oklch(15.0% 0.005 252.1)",
-          "oklch(26.4% 0.007 252.1)",
-          "oklch(37.9% 0.009 252.1)",
-          "oklch(49.3% 0.011 252.1)",
-          "oklch(60.7% 0.011 252.1)",
-          "oklch(72.1% 0.009 252.1)",
-          "oklch(83.6% 0.007 252.1)",
-          "oklch(95.0% 0.005 252.1)"
+          "oklch(15.0% 0.007 106.5)",
+          "oklch(26.4% 0.007 106.5)",
+          "oklch(37.9% 0.007 106.5)",
+          "oklch(49.3% 0.007 106.5)",
+          "oklch(60.7% 0.007 106.5)",
+          "oklch(72.1% 0.007 106.5)",
+          "oklch(83.6% 0.007 106.5)",
+          "oklch(95.0% 0.007 106.5)"
         ]
       },
       "desabilitado-fundo": {
         "role": "neutral",
-        "displayName": "Fundo Bloqueado",
-        "canonical": "#e9edf2",
-        "oklch": "oklch(94.4% 0.008 253.9)",
+        "displayName": "Bloqueado (fundo)",
+        "cssVar": "--cor-desabilitado-fundo",
+        "canonical": "#ecece8",
         "tonalRamp": [
-          "oklch(15.0% 0.005 253.9)",
-          "oklch(26.4% 0.007 253.9)",
-          "oklch(37.9% 0.009 253.9)",
-          "oklch(49.3% 0.011 253.9)",
-          "oklch(60.7% 0.011 253.9)",
-          "oklch(72.1% 0.009 253.9)",
-          "oklch(83.6% 0.007 253.9)",
-          "oklch(95.0% 0.005 253.9)"
+          "oklch(15.0% 0.005 106.5)",
+          "oklch(26.4% 0.005 106.5)",
+          "oklch(37.9% 0.005 106.5)",
+          "oklch(49.3% 0.005 106.5)",
+          "oklch(60.7% 0.005 106.5)",
+          "oklch(72.1% 0.005 106.5)",
+          "oklch(83.6% 0.005 106.5)",
+          "oklch(95.0% 0.005 106.5)"
         ]
       },
       "desabilitado-texto": {
         "role": "neutral",
-        "displayName": "Texto Bloqueado",
-        "canonical": "#8593a3",
-        "oklch": "oklch(65.7% 0.029 251.8)",
+        "displayName": "Bloqueado (texto)",
+        "cssVar": "--cor-desabilitado-texto",
+        "canonical": "#5f5f5a",
         "tonalRamp": [
-          "oklch(15.0% 0.013 251.8)",
-          "oklch(26.4% 0.018 251.8)",
-          "oklch(37.9% 0.022 251.8)",
-          "oklch(49.3% 0.027 251.8)",
-          "oklch(60.7% 0.027 251.8)",
-          "oklch(72.1% 0.022 251.8)",
-          "oklch(83.6% 0.018 251.8)",
-          "oklch(95.0% 0.013 251.8)"
+          "oklch(15.0% 0.008 106.7)",
+          "oklch(26.4% 0.008 106.7)",
+          "oklch(37.9% 0.008 106.7)",
+          "oklch(49.3% 0.008 106.7)",
+          "oklch(60.7% 0.008 106.7)",
+          "oklch(72.1% 0.008 106.7)",
+          "oklch(83.6% 0.008 106.7)",
+          "oklch(95.0% 0.008 106.7)"
+        ]
+      },
+      "foco": {
+        "role": "primary",
+        "displayName": "Anel de Tinta",
+        "cssVar": "--cor-foco",
+        "canonical": "#121212",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "faixa": {
+        "role": "neutral",
+        "displayName": "Faixa",
+        "cssVar": "--cor-faixa",
+        "canonical": "#121212",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.4% 0.000 89.9)",
+          "oklch(37.9% 0.000 89.9)",
+          "oklch(49.3% 0.000 89.9)",
+          "oklch(60.7% 0.000 89.9)",
+          "oklch(72.1% 0.000 89.9)",
+          "oklch(83.6% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "faixa-suave": {
+        "role": "neutral",
+        "displayName": "Faixa Suave",
+        "cssVar": "--cor-faixa-suave",
+        "canonical": "#bdbdb8",
+        "tonalRamp": [
+          "oklch(15.0% 0.007 106.6)",
+          "oklch(26.4% 0.007 106.6)",
+          "oklch(37.9% 0.007 106.6)",
+          "oklch(49.3% 0.007 106.6)",
+          "oklch(60.7% 0.007 106.6)",
+          "oklch(72.1% 0.007 106.6)",
+          "oklch(83.6% 0.007 106.6)",
+          "oklch(95.0% 0.007 106.6)"
+        ]
+      },
+      "faixa-hover": {
+        "role": "neutral",
+        "displayName": "Faixa Hover",
+        "cssVar": "--cor-faixa-hover",
+        "canonical": "#2a2a28",
+        "tonalRamp": [
+          "oklch(15.0% 0.004 106.6)",
+          "oklch(26.4% 0.004 106.6)",
+          "oklch(37.9% 0.004 106.6)",
+          "oklch(49.3% 0.004 106.6)",
+          "oklch(60.7% 0.004 106.6)",
+          "oklch(72.1% 0.004 106.6)",
+          "oklch(83.6% 0.004 106.6)",
+          "oklch(95.0% 0.004 106.6)"
+        ]
+      },
+      "faixa-pressionada": {
+        "role": "neutral",
+        "displayName": "Faixa Pressionada",
+        "cssVar": "--cor-faixa-pressionada",
+        "canonical": "#3a3a37",
+        "tonalRamp": [
+          "oklch(15.0% 0.005 106.7)",
+          "oklch(26.4% 0.005 106.7)",
+          "oklch(37.9% 0.005 106.7)",
+          "oklch(49.3% 0.005 106.7)",
+          "oklch(60.7% 0.005 106.7)",
+          "oklch(72.1% 0.005 106.7)",
+          "oklch(83.6% 0.005 106.7)",
+          "oklch(95.0% 0.005 106.7)"
         ]
       },
       "ok": {
-        "role": "status",
+        "role": "secondary",
         "displayName": "Verde Conferido",
-        "canonical": "#2e7d5b",
-        "oklch": "oklch(53.1% 0.095 161.9)",
+        "cssVar": "--cor-ok",
+        "canonical": "#1f7442",
         "tonalRamp": [
-          "oklch(15.0% 0.043 161.9)",
-          "oklch(26.4% 0.058 161.9)",
-          "oklch(37.9% 0.072 161.9)",
-          "oklch(49.3% 0.087 161.9)",
-          "oklch(60.7% 0.087 161.9)",
-          "oklch(72.1% 0.072 161.9)",
-          "oklch(83.6% 0.058 161.9)",
-          "oklch(95.0% 0.043 161.9)"
+          "oklch(15.0% 0.031 153.0)",
+          "oklch(26.4% 0.054 153.0)",
+          "oklch(37.9% 0.077 153.0)",
+          "oklch(49.3% 0.101 153.0)",
+          "oklch(60.7% 0.101 153.0)",
+          "oklch(72.1% 0.077 153.0)",
+          "oklch(83.6% 0.054 153.0)",
+          "oklch(95.0% 0.031 153.0)"
         ]
       },
       "ok-texto": {
-        "role": "status",
+        "role": "secondary",
         "displayName": "Verde Conferido (texto)",
-        "canonical": "#2e7d5b",
-        "oklch": "oklch(53.1% 0.095 161.9)",
+        "cssVar": "--cor-ok-texto",
+        "canonical": "#1f7442",
         "tonalRamp": [
-          "oklch(15.0% 0.043 161.9)",
-          "oklch(26.4% 0.058 161.9)",
-          "oklch(37.9% 0.072 161.9)",
-          "oklch(49.3% 0.087 161.9)",
-          "oklch(60.7% 0.087 161.9)",
-          "oklch(72.1% 0.072 161.9)",
-          "oklch(83.6% 0.058 161.9)",
-          "oklch(95.0% 0.043 161.9)"
+          "oklch(15.0% 0.031 153.0)",
+          "oklch(26.4% 0.054 153.0)",
+          "oklch(37.9% 0.077 153.0)",
+          "oklch(49.3% 0.101 153.0)",
+          "oklch(60.7% 0.101 153.0)",
+          "oklch(72.1% 0.077 153.0)",
+          "oklch(83.6% 0.054 153.0)",
+          "oklch(95.0% 0.031 153.0)"
         ]
       },
       "ok-fundo": {
-        "role": "status",
-        "displayName": "Verde Conferido Claro",
-        "canonical": "#e8f4ee",
-        "oklch": "oklch(95.7% 0.015 164.7)",
+        "role": "secondary",
+        "displayName": "Verde Conferido (fundo)",
+        "cssVar": "--cor-ok-fundo",
+        "canonical": "#e9f5ee",
         "tonalRamp": [
-          "oklch(15.0% 0.007 164.7)",
-          "oklch(26.4% 0.009 164.7)",
-          "oklch(37.9% 0.011 164.7)",
-          "oklch(49.3% 0.014 164.7)",
-          "oklch(60.7% 0.014 164.7)",
-          "oklch(72.1% 0.011 164.7)",
-          "oklch(83.6% 0.009 164.7)",
-          "oklch(95.0% 0.007 164.7)"
+          "oklch(15.0% 0.004 160.6)",
+          "oklch(26.4% 0.008 160.6)",
+          "oklch(37.9% 0.011 160.6)",
+          "oklch(49.3% 0.014 160.6)",
+          "oklch(60.7% 0.014 160.6)",
+          "oklch(72.1% 0.011 160.6)",
+          "oklch(83.6% 0.008 160.6)",
+          "oklch(95.0% 0.004 160.6)"
         ]
       },
       "atencao": {
-        "role": "status",
-        "displayName": "Âmbar Validade",
-        "canonical": "#b26b00",
-        "oklch": "oklch(59.3% 0.132 65.8)",
+        "role": "secondary",
+        "displayName": "Âmbar de Validade (sinal)",
+        "cssVar": "--cor-atencao",
+        "canonical": "#c27a00",
         "tonalRamp": [
-          "oklch(15.0% 0.060 65.8)",
-          "oklch(26.4% 0.081 65.8)",
-          "oklch(37.9% 0.101 65.8)",
-          "oklch(49.3% 0.122 65.8)",
-          "oklch(60.7% 0.122 65.8)",
-          "oklch(72.1% 0.101 65.8)",
-          "oklch(83.6% 0.081 65.8)",
-          "oklch(95.0% 0.060 65.8)"
+          "oklch(15.0% 0.038 69.1)",
+          "oklch(26.4% 0.067 69.1)",
+          "oklch(37.9% 0.096 69.1)",
+          "oklch(49.3% 0.125 69.1)",
+          "oklch(60.7% 0.125 69.1)",
+          "oklch(72.1% 0.096 69.1)",
+          "oklch(83.6% 0.067 69.1)",
+          "oklch(95.0% 0.038 69.1)"
         ]
       },
       "atencao-texto": {
-        "role": "status",
-        "displayName": "Âmbar Validade (texto)",
+        "role": "secondary",
+        "displayName": "Âmbar de Validade (texto)",
+        "cssVar": "--cor-atencao-texto",
         "canonical": "#8a5300",
-        "oklch": "oklch(49.4% 0.109 66.9)",
         "tonalRamp": [
-          "oklch(15.0% 0.050 66.9)",
-          "oklch(26.4% 0.067 66.9)",
-          "oklch(37.9% 0.084 66.9)",
-          "oklch(49.3% 0.101 66.9)",
-          "oklch(60.7% 0.101 66.9)",
-          "oklch(72.1% 0.084 66.9)",
-          "oklch(83.6% 0.067 66.9)",
-          "oklch(95.0% 0.050 66.9)"
+          "oklch(15.0% 0.030 66.9)",
+          "oklch(26.4% 0.052 66.9)",
+          "oklch(37.9% 0.075 66.9)",
+          "oklch(49.3% 0.098 66.9)",
+          "oklch(60.7% 0.098 66.9)",
+          "oklch(72.1% 0.075 66.9)",
+          "oklch(83.6% 0.052 66.9)",
+          "oklch(95.0% 0.030 66.9)"
         ]
       },
       "atencao-fundo": {
-        "role": "status",
-        "displayName": "Âmbar Validade Claro",
-        "canonical": "#fdf3e3",
-        "oklch": "oklch(96.8% 0.024 79.7)",
+        "role": "secondary",
+        "displayName": "Âmbar de Validade (fundo)",
+        "cssVar": "--cor-atencao-fundo",
+        "canonical": "#fff4dc",
         "tonalRamp": [
-          "oklch(15.0% 0.011 79.7)",
-          "oklch(26.4% 0.014 79.7)",
-          "oklch(37.9% 0.018 79.7)",
-          "oklch(49.3% 0.022 79.7)",
-          "oklch(60.7% 0.022 79.7)",
-          "oklch(72.1% 0.018 79.7)",
-          "oklch(83.6% 0.014 79.7)",
-          "oklch(95.0% 0.011 79.7)"
+          "oklch(15.0% 0.009 86.3)",
+          "oklch(26.4% 0.016 86.3)",
+          "oklch(37.9% 0.023 86.3)",
+          "oklch(49.3% 0.030 86.3)",
+          "oklch(60.7% 0.030 86.3)",
+          "oklch(72.1% 0.023 86.3)",
+          "oklch(83.6% 0.016 86.3)",
+          "oklch(95.0% 0.009 86.3)"
         ]
       },
       "critico": {
-        "role": "status",
-        "displayName": "Vermelho Vencido",
-        "canonical": "#b42318",
-        "oklch": "oklch(50.0% 0.182 29.5)",
+        "role": "secondary",
+        "displayName": "Vermelho da Folhinha",
+        "cssVar": "--cor-critico",
+        "canonical": "#c40f2b",
         "tonalRamp": [
-          "oklch(15.0% 0.083 29.5)",
-          "oklch(26.4% 0.111 29.5)",
-          "oklch(37.9% 0.139 29.5)",
-          "oklch(49.3% 0.168 29.5)",
-          "oklch(60.7% 0.168 29.5)",
-          "oklch(72.1% 0.139 29.5)",
-          "oklch(83.6% 0.111 29.5)",
-          "oklch(95.0% 0.083 29.5)"
+          "oklch(15.0% 0.056 22.8)",
+          "oklch(26.4% 0.098 22.8)",
+          "oklch(37.9% 0.141 22.8)",
+          "oklch(49.3% 0.183 22.8)",
+          "oklch(60.7% 0.183 22.8)",
+          "oklch(72.1% 0.141 22.8)",
+          "oklch(83.6% 0.098 22.8)",
+          "oklch(95.0% 0.056 22.8)"
         ]
       },
       "critico-texto": {
-        "role": "status",
-        "displayName": "Vermelho Vencido (texto)",
-        "canonical": "#b42318",
-        "oklch": "oklch(50.0% 0.182 29.5)",
+        "role": "secondary",
+        "displayName": "Vermelho da Folhinha (texto)",
+        "cssVar": "--cor-critico-texto",
+        "canonical": "#c40f2b",
         "tonalRamp": [
-          "oklch(15.0% 0.083 29.5)",
-          "oklch(26.4% 0.111 29.5)",
-          "oklch(37.9% 0.139 29.5)",
-          "oklch(49.3% 0.168 29.5)",
-          "oklch(60.7% 0.168 29.5)",
-          "oklch(72.1% 0.139 29.5)",
-          "oklch(83.6% 0.111 29.5)",
-          "oklch(95.0% 0.083 29.5)"
+          "oklch(15.0% 0.056 22.8)",
+          "oklch(26.4% 0.098 22.8)",
+          "oklch(37.9% 0.141 22.8)",
+          "oklch(49.3% 0.183 22.8)",
+          "oklch(60.7% 0.183 22.8)",
+          "oklch(72.1% 0.141 22.8)",
+          "oklch(83.6% 0.098 22.8)",
+          "oklch(95.0% 0.056 22.8)"
         ]
       },
       "critico-fundo": {
-        "role": "status",
-        "displayName": "Vermelho Vencido Claro",
-        "canonical": "#fcecea",
-        "oklch": "oklch(95.5% 0.018 26.1)",
+        "role": "secondary",
+        "displayName": "Vermelho da Folhinha (fundo)",
+        "cssVar": "--cor-critico-fundo",
+        "canonical": "#fdebee",
         "tonalRamp": [
-          "oklch(15.0% 0.008 26.1)",
-          "oklch(26.4% 0.011 26.1)",
-          "oklch(37.9% 0.014 26.1)",
-          "oklch(49.3% 0.016 26.1)",
-          "oklch(60.7% 0.016 26.1)",
-          "oklch(72.1% 0.014 26.1)",
-          "oklch(83.6% 0.011 26.1)",
-          "oklch(95.0% 0.008 26.1)"
+          "oklch(15.0% 0.005 6.0)",
+          "oklch(26.4% 0.010 6.0)",
+          "oklch(37.9% 0.014 6.0)",
+          "oklch(49.3% 0.018 6.0)",
+          "oklch(60.7% 0.018 6.0)",
+          "oklch(72.1% 0.014 6.0)",
+          "oklch(83.6% 0.010 6.0)",
+          "oklch(95.0% 0.005 6.0)"
         ]
       },
       "critico-escura": {
-        "role": "status",
-        "displayName": "Vermelho Vencido Escuro",
-        "canonical": "#921c13",
-        "oklch": "oklch(43.0% 0.155 29.4)",
+        "role": "secondary",
+        "displayName": "Vermelho Escuro",
+        "cssVar": "--cor-critico-escura",
+        "canonical": "#9e0c23",
         "tonalRamp": [
-          "oklch(15.0% 0.070 29.4)",
-          "oklch(26.4% 0.094 29.4)",
-          "oklch(37.9% 0.119 29.4)",
-          "oklch(49.3% 0.143 29.4)",
-          "oklch(60.7% 0.143 29.4)",
-          "oklch(72.1% 0.119 29.4)",
-          "oklch(83.6% 0.094 29.4)",
-          "oklch(95.0% 0.070 29.4)"
+          "oklch(15.0% 0.047 22.2)",
+          "oklch(26.4% 0.083 22.2)",
+          "oklch(37.9% 0.119 22.2)",
+          "oklch(49.3% 0.155 22.2)",
+          "oklch(60.7% 0.155 22.2)",
+          "oklch(72.1% 0.119 22.2)",
+          "oklch(83.6% 0.083 22.2)",
+          "oklch(95.0% 0.047 22.2)"
         ]
       },
       "critico-pressionada": {
-        "role": "status",
-        "displayName": "Vermelho Vencido Pressionado",
-        "canonical": "#76170f",
-        "oklch": "oklch(37.1% 0.131 29.6)",
+        "role": "secondary",
+        "displayName": "Vermelho Pressionado",
+        "cssVar": "--cor-critico-pressionada",
+        "canonical": "#7a0a1b",
         "tonalRamp": [
-          "oklch(15.0% 0.059 29.6)",
-          "oklch(26.4% 0.080 29.6)",
-          "oklch(37.9% 0.100 29.6)",
-          "oklch(49.3% 0.120 29.6)",
-          "oklch(60.7% 0.120 29.6)",
-          "oklch(72.1% 0.100 29.6)",
-          "oklch(83.6% 0.080 29.6)",
-          "oklch(95.0% 0.059 29.6)"
+          "oklch(15.0% 0.039 21.6)",
+          "oklch(26.4% 0.068 21.6)",
+          "oklch(37.9% 0.098 21.6)",
+          "oklch(49.3% 0.127 21.6)",
+          "oklch(60.7% 0.127 21.6)",
+          "oklch(72.1% 0.098 21.6)",
+          "oklch(83.6% 0.068 21.6)",
+          "oklch(95.0% 0.039 21.6)"
         ]
       },
       "sobreposicao": {
         "role": "neutral",
         "displayName": "Sobreposição",
-        "canonical": "rgba(27, 42, 58, 0.45)",
-        "tonalRamp": []
+        "cssVar": "--cor-sobreposicao",
+        "canonical": "rgba(18, 18, 18, 0.45)"
       }
     },
     "typographyMeta": {
-      "numero-situacao": {
-        "displayName": "Número de situação",
-        "purpose": "Os quatro números do painel; só aparece ali."
+      "numeral-folha": {
+        "displayName": "Numeral da folha",
+        "purpose": "O dia na folha do dia do login (classe numeral, --fs-folha)."
+      },
+      "numeral-painel": {
+        "displayName": "Numeral do painel",
+        "purpose": "Os três números de situação do Painel (--fs-7; 2rem até 900px). A mesma classe numeral vale para a folha da marca e as quantidades das movimentações."
       },
       "headline": {
-        "displayName": "Título da página",
-        "purpose": "h1, um por tela."
+        "displayName": "Headline",
+        "purpose": "Título da página (h1), um por tela, largura 87,5% (--largura-titulo)."
       },
       "title": {
-        "displayName": "Título de seção",
-        "purpose": "h2, cabeçalho de painel e título de diálogo."
+        "displayName": "Title",
+        "purpose": "Título de seção (h2), cabeçalho de painel e título de diálogo, largura 87,5%."
       },
       "body": {
-        "displayName": "Corpo",
-        "purpose": "Texto corrido, valores de campo e nomes em listas (em 500)."
+        "displayName": "Body",
+        "purpose": "Texto corrido, valores dos campos, nomes em listas (em 500); até 68ch."
       },
       "body-small": {
-        "displayName": "Corpo pequeno",
-        "purpose": "Apoio, dicas, erros de campo, menu, avisos, paginação."
+        "displayName": "Body small",
+        "purpose": "Apoio, dicas, erros de campo, itens do menu, avisos, paginação."
       },
       "label": {
-        "displayName": "Rótulo",
-        "purpose": "Rótulos de campo, texto de botão, cabeçalhos de tabela."
+        "displayName": "Label",
+        "purpose": "Rótulos de campo, texto de botão, segmentos, cabeçalhos de tabela."
       },
       "meta": {
-        "displayName": "Metadado",
-        "purpose": "Etiquetas de metadado e descrições curtas abaixo de números."
+        "displayName": "Meta",
+        "purpose": "Etiquetas de metadado, perfil no cabeçalho, mês da folha da marca."
       }
     },
-    "shadows": [
+    "fontAxes": [
       {
-        "name": "sombra-flutuante",
-        "value": "0 8px 24px rgba(27, 42, 58, 0.14)",
-        "purpose": "Só para o que flutua: diálogo, gaveta, menu suspenso e lista de opções."
+        "name": "largura-numeral",
+        "value": "62%",
+        "purpose": "Numerais condensados (classe numeral, peso 800)."
+      },
+      {
+        "name": "largura-titulo",
+        "value": "87.5%",
+        "purpose": "Títulos h1 a h3, pelo reset em @layer base; utilitário font-stretch-titulo."
+      }
+    ],
+    "strokes": [
+      {
+        "name": "borda",
+        "value": "1px solid var(--cor-borda)",
+        "purpose": "Painéis, divisórias entre linhas, etiquetas de metadado."
+      },
+      {
+        "name": "fio-tinta",
+        "value": "2px solid var(--cor-texto)",
+        "purpose": "Abre tabelas, listas de dados e a linha de situações; também o contorno do circulado."
+      },
+      {
+        "name": "picote",
+        "value": "2px dotted var(--cor-borda-forte)",
+        "purpose": "Divisor de partes de uma mesma folha: grupos de formulário, folha da marca, rodapé da folha do dia, parte crítica do Estoque baixo."
       }
     ],
     "focus": [
       {
         "name": "foco-anel",
-        "value": "outline: 2px solid #2f5d8a; outline-offset: 2px",
-        "purpose": "Foco pelo teclado em todos os controles."
+        "value": "2px solid var(--cor-foco), offset 2px",
+        "purpose": "Foco padrão pelo teclado; branco sobre a faixa preta."
       },
       {
         "name": "foco-anel-forte",
-        "value": "outline: 3px solid #1b2a3a",
-        "purpose": "Foco dentro de itens com fundo âmbar ou vermelho, para não sumir na cor."
+        "value": "3px solid var(--cor-texto)",
+        "purpose": "Itens que podem estar circulados (menu, segmentos, lote), com fundo hover-neutro; e dentro de avisos de atenção ou crítico."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "flutuante",
+        "value": "0 8px 24px rgba(18, 18, 18, 0.14)",
+        "purpose": "Diálogo, gaveta, menu suspenso, lista de opções e a folha do dia pendurada na parede do login."
       }
     ],
     "motion": [
       {
         "name": "mov-rapido",
-        "value": "120ms",
-        "purpose": "Hover, pressão e troca de cor."
+        "value": "140ms",
+        "purpose": "Hover, pressão, troca de cor, menu suspenso."
       },
       {
         "name": "mov-medio",
         "value": "200ms",
-        "purpose": "Entrada de diálogo, véu e gaveta."
+        "purpose": "Diálogo, véu e gaveta."
       },
       {
         "name": "mov-curva",
@@ -512,261 +641,234 @@
       {
         "name": "mov-giro",
         "value": "800ms",
-        "purpose": "Giro do indicador de carregando; para com reduced-motion."
+        "purpose": "Giro do indicador de carregando; para com prefers-reduced-motion."
       }
     ],
     "breakpoints": [
       {
-        "name": "gaveta",
+        "name": "ate-900",
         "value": "900px",
-        "purpose": "Menu lateral vira gaveta; alvos de toque sobem para 44px."
+        "purpose": "Gaveta, alvos de 44px, login só com o formulário."
       },
       {
-        "name": "compacto",
+        "name": "ate-640",
         "value": "640px",
-        "purpose": "Painéis e formulários reduzem o recuo para 16px; a lista de rótulo e valor vira uma coluna. Nas classes, a variante ate-640: (max-width: 640px, inclusive 640)."
+        "purpose": "Recuo de 16px; Estoque baixo em linha inteira no Painel; variante ate-640:."
       },
       {
-        "name": "celular",
+        "name": "ate-480",
         "value": "480px",
-        "purpose": "Ações descem para baixo do título."
+        "purpose": "Ações abaixo do título; perfil some."
       },
       {
-        "name": "estreito",
+        "name": "ate-400",
         "value": "400px",
-        "purpose": "Nome do usuário vira ícone; botões do diálogo empilham."
+        "purpose": "Nome do usuário vira ícone; diálogo empilha."
       },
       {
-        "name": "tabela-empilhada",
-        "value": "48rem (container query)",
-        "purpose": "Tabela vira lista empilhada pela largura do próprio painel."
+        "name": "tabela-empilhavel",
+        "value": "@container (max-width: 48rem)",
+        "purpose": "Tabela vira lista empilhada."
       }
     ],
-    "dimensions": [
-      {
-        "name": "alvo-min",
-        "value": "40px (44px até 900px)"
-      },
-      {
-        "name": "altura-cabecalho",
-        "value": "56px"
-      },
-      {
-        "name": "largura-menu",
-        "value": "240px"
-      },
-      {
-        "name": "largura-conteudo",
-        "value": "1120px"
-      },
-      {
-        "name": "largura-formulario",
-        "value": "560px"
-      },
-      {
-        "name": "colunas-rotulo-valor",
-        "value": "var(--largura-coluna-numero) minmax(0, 1fr) (128px + resto)"
-      },
-      {
-        "name": "largura-login",
-        "value": "400px"
-      },
-      {
-        "name": "largura-dialogo",
-        "value": "440px"
-      },
-      {
-        "name": "largura-gaveta",
-        "value": "288px"
-      },
-      {
-        "name": "borda-largura",
-        "value": "1px"
-      },
-      {
-        "name": "etiqueta-largura",
-        "value": "4px"
-      },
-      {
-        "name": "icone-p",
-        "value": "18px"
-      },
-      {
-        "name": "icone-m",
-        "value": "20px"
-      },
-      {
-        "name": "medida-texto",
-        "value": "68ch"
-      }
+    "reviewWidths": [
+      320,
+      360,
+      375,
+      390,
+      414,
+      768,
+      1024,
+      1280,
+      1440,
+      "zoom 200%"
     ]
   },
   "components": [
     {
-      "name": "Botão primário",
+      "name": "Botão primário (placa preta)",
       "kind": "button",
       "refersTo": "botao-primaria",
-      "description": "A única ação principal da tela, sempre com verbo.",
-      "html": "<button class=\"ds-botao-primaria\" type=\"button\"><svg aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 21l-8 -4.5v-9l8 -4.5l8 4.5v4.5\"/><path d=\"M12 12l8 -4.5\"/><path d=\"M12 12v9\"/><path d=\"M12 12l-8 -4.5\"/><path d=\"M22 18h-7\"/><path d=\"M18 15l-3 3l3 3\"/></svg>Registrar entrada</button>",
-      "css": ".ds-botao-primaria { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: var(--cor-primaria, #2f5d8a); color: #fff; } .ds-botao-primaria svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-primaria:hover { background: var(--cor-primaria-escura, #1f4266); } .ds-botao-primaria:active { background: var(--cor-primaria-pressionada, #183552); } .ds-botao-primaria:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+      "description": "A única placa preta da tela: a ação principal, com verbo.",
+      "html": "<button class=\"ds-botao ds-botao--primaria\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3\"/><path d=\"M12 12l8-4.5\"/><path d=\"M12 12v9\"/><path d=\"M12 12L4 7.5\"/></svg><span>Registrar entrada</span></button>",
+      "css": ".ds-botao { display: inline-flex; align-items: center; justify-content: center; gap: var(--esp-2); min-height: var(--alvo-min); padding: 0 var(--esp-4); border: var(--borda-largura) solid transparent; border-radius: var(--raio-p); font-family: var(--fonte); font-size: var(--fs-2); font-weight: var(--peso-medio); line-height: var(--lh-titulo); white-space: nowrap; cursor: pointer; transition: background-color var(--mov-rapido) var(--mov-curva), border-color var(--mov-rapido) var(--mov-curva), color var(--mov-rapido) var(--mov-curva); } .ds-botao svg { width: var(--icone-p); height: var(--icone-p); flex-shrink: 0; } .ds-botao:focus-visible { outline: var(--foco-anel); outline-offset: var(--foco-distancia); } .ds-botao--primaria { background: var(--cor-primaria); color: var(--cor-texto-inverso); } .ds-botao--primaria:hover { background: var(--cor-primaria-escura); } .ds-botao--primaria:active { background: var(--cor-primaria-pressionada); }"
     },
     {
       "name": "Botão secundário",
       "kind": "button",
       "refersTo": "botao-secundaria",
-      "description": "Ações de apoio com peso visual próprio (ex.: Cancelar num formulário).",
-      "html": "<button class=\"ds-botao-secundaria\" type=\"button\">Cancelar</button>",
-      "css": ".ds-botao-secundaria { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: var(--cor-superficie, #ffffff); border-color: var(--cor-borda, #dce3eb); color: var(--cor-texto, #1b2a3a); } .ds-botao-secundaria svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-secundaria:hover { background: var(--cor-hover-neutro, #eef2f6); border-color: var(--cor-borda-forte, #a9b6c4); } .ds-botao-secundaria:active { background: var(--cor-pressionado-neutro, #e2e8ef); } .ds-botao-secundaria:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+      "description": "Papel com fio de 1px; ações que não são a principal.",
+      "html": "<button class=\"ds-botao2\">Cancelar</button>",
+      "css": ".ds-botao2 { display: inline-flex; align-items: center; min-height: var(--alvo-min); padding: 0 var(--esp-4); border: var(--borda-largura) solid var(--cor-borda); border-radius: var(--raio-p); background: var(--cor-superficie); color: var(--cor-texto); font-family: var(--fonte); font-size: var(--fs-2); font-weight: var(--peso-medio); cursor: pointer; transition: background-color var(--mov-rapido) var(--mov-curva), border-color var(--mov-rapido) var(--mov-curva); } .ds-botao2:hover { background: var(--cor-hover-neutro); border-color: var(--cor-borda-forte); } .ds-botao2:active { background: var(--cor-pressionado-neutro); } .ds-botao2:focus-visible { outline: var(--foco-anel); outline-offset: var(--foco-distancia); }"
     },
     {
       "name": "Botão fantasma",
       "kind": "button",
       "refersTo": "botao-fantasma",
-      "description": "Ação de apoio no cabeçalho da página ou dentro de painéis (ex.: Atualizar).",
-      "html": "<button class=\"ds-botao-fantasma\" type=\"button\">Atualizar</button>",
-      "css": ".ds-botao-fantasma { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: transparent; color: var(--cor-primaria, #2f5d8a); } .ds-botao-fantasma svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-fantasma:hover { background: var(--cor-primaria-clara, #eaf1f8); color: var(--cor-primaria-escura, #1f4266); } .ds-botao-fantasma:active { background: var(--cor-primaria-clara-pressionada, #dbe7f3); } .ds-botao-fantasma:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
-    },
-    {
-      "name": "Botão de perigo",
-      "kind": "button",
-      "refersTo": "botao-perigo",
-      "description": "Só na confirmação de ação irreversível (ajuste, desativar usuário).",
-      "html": "<button class=\"ds-botao-perigo\" type=\"button\">Desativar usuário</button>",
-      "css": ".ds-botao-perigo { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 1px solid transparent; border-radius: var(--raio-p, 6px); font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.875rem; font-weight: 500; line-height: 1.25; cursor: pointer; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), border-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); background: var(--cor-critico, #b42318); color: #fff; } .ds-botao-perigo svg { width: 18px; height: 18px; flex-shrink: 0; } .ds-botao-perigo:hover { background: var(--cor-critico-escura, #921c13); } .ds-botao-perigo:active { background: var(--cor-critico-pressionada, #76170f); } .ds-botao-perigo:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; }"
+      "description": "Ações de apoio no cabeçalho da página (Atualizar).",
+      "html": "<button class=\"ds-fantasma\">Atualizar</button>",
+      "css": ".ds-fantasma { display: inline-flex; align-items: center; min-height: var(--alvo-min); padding: 0 var(--esp-4); border: var(--borda-largura) solid transparent; border-radius: var(--raio-p); background: transparent; color: var(--cor-primaria); font-family: var(--fonte); font-size: var(--fs-2); font-weight: var(--peso-medio); cursor: pointer; transition: background-color var(--mov-rapido) var(--mov-curva); } .ds-fantasma:hover { background: var(--cor-primaria-clara); color: var(--cor-primaria-escura); } .ds-fantasma:active { background: var(--cor-primaria-clara-pressionada); } .ds-fantasma:focus-visible { outline: var(--foco-anel); outline-offset: var(--foco-distancia); }"
     },
     {
       "name": "Campo",
       "kind": "input",
       "refersTo": "campo",
-      "description": "Rótulo acima, caixa com borda firme; erro em vermelho em todos os estados.",
-      "html": "<div class=\"ds-campo\"><label class=\"ds-campo__rotulo\" for=\"ds-qtd\">Quantidade</label><div class=\"ds-campo__caixa\"><input class=\"ds-campo__entrada\" id=\"ds-qtd\" inputmode=\"numeric\"></div><p class=\"ds-campo__dica\">Em unidades do produto.</p></div>",
-      "css": ".ds-campo { display: flex; flex-direction: column; gap: 4px; max-width: 320px; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); color: var(--cor-texto, #1b2a3a); } .ds-campo__rotulo { font-size: 0.875rem; font-weight: 500; } .ds-campo__caixa { display: flex; background: var(--cor-superficie, #ffffff); border: 1px solid var(--cor-borda-forte, #a9b6c4); border-radius: var(--raio-p, 6px); transition: border-color 120ms cubic-bezier(0.2, 0, 0, 1); } .ds-campo__caixa:hover { border-color: var(--cor-texto-suave, #5b6b7d); } .ds-campo__caixa:focus-within { border-color: var(--cor-primaria, #2f5d8a); outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 0; } .ds-campo__entrada { flex: 1; min-width: 0; min-height: 40px; padding: 0 12px; border: 0; background: transparent; font: inherit; font-size: 1rem; color: inherit; font-variant-numeric: tabular-nums; } .ds-campo__entrada:focus { outline: none; } .ds-campo__dica { margin: 0; font-size: 0.875rem; line-height: 1.55; color: var(--cor-texto-suave, #5b6b7d); }"
+      "description": "Rótulo acima, caixa de papel com contorno em Grafite; foco com borda e anel de tinta.",
+      "html": "<label class=\"ds-campo\"><span class=\"ds-campo__rotulo\">Quantidade</span><span class=\"ds-campo__caixa\"><input class=\"ds-campo__entrada\" value=\"500 g\"></span></label>",
+      "css": ".ds-campo { display: flex; flex-direction: column; gap: var(--esp-1); font-family: var(--fonte); } .ds-campo__rotulo { font-size: var(--fs-2); font-weight: var(--peso-medio); color: var(--cor-texto); } .ds-campo__caixa { display: flex; background: var(--cor-superficie); border: var(--borda-largura) solid var(--cor-borda-forte); border-radius: var(--raio-p); transition: border-color var(--mov-rapido) var(--mov-curva); } .ds-campo__caixa:hover { border-color: var(--cor-texto-suave); } .ds-campo__caixa:focus-within { border-color: var(--cor-primaria); outline: var(--foco-anel); outline-offset: 0; } .ds-campo__entrada { flex: 1; min-width: 0; min-height: var(--alvo-min); padding: 0 var(--esp-3); border: 0; background: transparent; font: inherit; font-size: var(--fs-3); color: var(--cor-texto); } .ds-campo__entrada:focus { outline: none; }"
     },
     {
-      "name": "Menu lateral",
+      "name": "Cabeçalho (faixa preta) com a folha da marca",
       "kind": "nav",
-      "refersTo": "menu-link",
-      "description": "Navegação principal: página atual em Névoa Ardósia, contagem de alertas em âmbar.",
-      "html": "<nav class=\"ds-menu\" aria-label=\"Principal\"><a class=\"ds-menu__link\" href=\"#\" aria-current=\"page\"><svg class=\"ds-menu__icone\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 4h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1\"/><path d=\"M5 16h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1\"/><path d=\"M15 12h4a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-6a1 1 0 0 1 1 -1\"/><path d=\"M15 4h4a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1v-2a1 1 0 0 1 1 -1\"/></svg><span class=\"ds-menu__rotulo\">Painel</span></a><a class=\"ds-menu__link\" href=\"#\"><svg class=\"ds-menu__icone\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5\"/><path d=\"M12 12l8 -4.5\"/><path d=\"M12 12l0 9\"/><path d=\"M12 12l-8 -4.5\"/></svg><span class=\"ds-menu__rotulo\">Produtos</span></a><a class=\"ds-menu__link\" href=\"#\" aria-label=\"Alertas, 8 ativos\"><svg class=\"ds-menu__icone\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6\"/><path d=\"M9 17v1a3 3 0 0 0 6 0v-1\"/></svg><span class=\"ds-menu__rotulo\">Alertas</span><span class=\"ds-menu__contagem\">8</span></a></nav>",
-      "css": ".ds-menu { display: flex; flex-direction: column; gap: 4px; width: 216px; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); } .ds-menu__link { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 0 12px; border-radius: var(--raio-p, 6px); color: var(--cor-texto-suave, #5b6b7d); font-size: 0.875rem; text-decoration: none; transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); } .ds-menu__icone { width: 20px; height: 20px; flex-shrink: 0; } .ds-menu__rotulo { flex: 1; } .ds-menu__link:hover { background: var(--cor-hover-neutro, #eef2f6); color: var(--cor-texto, #1b2a3a); } .ds-menu__link:active { background: var(--cor-pressionado-neutro, #e2e8ef); } .ds-menu__link:focus-visible { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: 2px; } .ds-menu__link[aria-current='page'] { background: var(--cor-primaria-clara, #eaf1f8); color: var(--cor-primaria-escura, #1f4266); font-weight: 500; } .ds-menu__contagem { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; padding: 0 8px; border-radius: var(--raio-p, 6px); background: var(--cor-atencao-fundo, #fdf3e3); color: var(--cor-atencao-texto, #8a5300); font-size: 0.8125rem; font-weight: 500; line-height: 1.55; }"
+      "refersTo": "cabecalho",
+      "description": "Faixa de tinta de 56px: a folha com o dia de hoje e o nome do sistema; foco branco sobre a faixa.",
+      "html": "<header class=\"ds-faixa\"><a class=\"ds-marca\" href=\"#\"><span class=\"ds-folha\"><span class=\"ds-folha__dia\">11</span><span class=\"ds-folha__mes\">nov</span></span>Estoque Inteligente</a><button class=\"ds-conta\"><span class=\"ds-conta__nome\">Ana Souza</span><span class=\"ds-conta__perfil\">Operador</span></button></header>",
+      "css": ".ds-faixa { display: flex; align-items: center; justify-content: space-between; gap: var(--esp-3); height: var(--altura-cabecalho); padding: 0 var(--esp-5); background: var(--cor-faixa); color: var(--cor-texto-inverso); font-family: var(--fonte); } .ds-faixa :focus-visible { outline: var(--foco-anel); outline-color: var(--cor-texto-inverso); outline-offset: var(--foco-distancia); } .ds-marca { display: inline-flex; align-items: center; gap: var(--esp-3); min-height: var(--alvo-min); padding: 0 var(--esp-2); border-radius: var(--raio-p); color: var(--cor-texto-inverso); font-size: var(--fs-4); font-weight: var(--peso-medio); text-decoration: none; transition: background-color var(--mov-rapido) var(--mov-curva); } .ds-marca:hover { background: var(--cor-faixa-hover); } .ds-folha { display: inline-grid; place-items: center; width: var(--tamanho-folha-marca); padding-bottom: var(--esp-1); border-top: var(--picote); border-radius: var(--raio-p); background: var(--cor-superficie); color: var(--cor-texto); line-height: var(--lh-numero); } .ds-folha__dia { font-size: var(--fs-4); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; } .ds-folha__mes { font-size: var(--fs-1); font-weight: var(--peso-medio); } .ds-conta { display: inline-flex; flex-direction: column; align-items: flex-end; min-height: var(--alvo-min); padding: 0 var(--esp-3); border: 0; border-radius: var(--raio-p); background: transparent; color: var(--cor-texto-inverso); font: inherit; line-height: var(--lh-titulo); cursor: pointer; } .ds-conta:hover { background: var(--cor-faixa-hover); } .ds-conta:active { background: var(--cor-faixa-pressionada); } .ds-conta__nome { font-size: var(--fs-2); font-weight: var(--peso-medio); } .ds-conta__perfil { font-size: var(--fs-1); color: var(--cor-faixa-suave); }"
     },
     {
-      "name": "Etiquetas de metadado",
+      "name": "Menu lateral com a página circulada",
+      "kind": "nav",
+      "refersTo": "menu-link-atual",
+      "description": "Página atual circulada a tinta (2px), sem fundo; foco pelo teclado com fundo neutro e anel de 3px afastado.",
+      "html": "<nav class=\"ds-menu\"><a class=\"ds-menu__link\" aria-current=\"page\" href=\"#\">Painel</a><a class=\"ds-menu__link\" href=\"#\">Estoque</a><a class=\"ds-menu__link\" href=\"#\"><span class=\"ds-menu__rotulo\">Alertas</span><span class=\"ds-menu__contagem\">3</span></a></nav>",
+      "css": ".ds-menu { display: flex; flex-direction: column; gap: var(--esp-1); width: var(--largura-menu); padding: var(--esp-4) var(--esp-3); background: var(--cor-superficie); font-family: var(--fonte); } .ds-menu__link { display: flex; align-items: center; gap: var(--esp-3); min-height: var(--alvo-min); padding: 0 var(--esp-3); border: var(--fio-tinta); border-color: transparent; border-radius: var(--raio-p); color: var(--cor-texto-suave); font-size: var(--fs-2); text-decoration: none; transition: background-color var(--mov-rapido) var(--mov-curva), color var(--mov-rapido) var(--mov-curva); } .ds-menu__link:hover { background: var(--cor-hover-neutro); color: var(--cor-texto); } .ds-menu__link:active { background: var(--cor-pressionado-neutro); } .ds-menu__link[aria-current='page'] { border-color: var(--cor-texto); color: var(--cor-texto); font-weight: var(--peso-medio); } .ds-menu__link:focus-visible { background: var(--cor-hover-neutro); color: var(--cor-texto); outline: var(--foco-anel-forte); outline-offset: var(--foco-distancia); } .ds-menu__rotulo { flex: 1; } .ds-menu__contagem { padding: 0 var(--esp-2); border-radius: var(--raio-p); background: var(--cor-atencao-fundo); color: var(--cor-atencao-texto); font-size: var(--fs-1); font-weight: var(--peso-medio); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Sinal da situação",
       "kind": "chip",
-      "refersTo": "metadado",
-      "description": "Metadados abaixo do nome do item, que passam para a linha de baixo quando não cabem.",
-      "html": "<dl class=\"ds-metadados\"><div class=\"ds-metadado\"><dt class=\"ds-oculto\">Tipo</dt><dd>Saída</dd></div><div class=\"ds-metadado\"><dt class=\"ds-oculto\">Lote</dt><dd>Lote 3, validade 01/11/2026</dd></div><div class=\"ds-metadado\"><dt class=\"ds-oculto\">Data</dt><dd>29/10/2026, 19:32</dd></div></dl>",
-      "css": ".ds-metadados { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 0; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size: 0.8125rem; line-height: 1.55; color: var(--cor-texto-suave, #5b6b7d); } .ds-metadado { padding: 0 8px; border: 1px solid var(--cor-borda, #dce3eb); border-radius: var(--raio-p, 6px); background: var(--cor-superficie, #ffffff); white-space: nowrap; } .ds-metadado dd { margin: 0; font-variant-numeric: tabular-nums; } .ds-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }"
+      "refersTo": null,
+      "description": "Ícone de forma própria por situação, na cor dela, mais o texto que a nomeia; atenção e crítico pintam o texto.",
+      "html": "<span class=\"ds-sinal ds-sinal--ok\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0\"/><path d=\"M9 12l2 2l4 -4\"/></svg><span>Em dia</span></span> <span class=\"ds-sinal ds-sinal--atencao\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 9v4\"/><path d=\"M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z\"/><path d=\"M12 16h.01\"/></svg><span>Estoque baixo</span></span> <span class=\"ds-sinal ds-sinal--critico\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0\"/><path d=\"M10 10l4 4m0 -4l-4 4\"/></svg><span>Sem estoque</span></span>",
+      "css": ".ds-sinal { display: inline-flex; align-items: baseline; gap: var(--esp-1); font-family: var(--fonte); font-size: var(--fs-2); } .ds-sinal svg { flex-shrink: 0; align-self: center; width: var(--icone-p); height: var(--icone-p); } .ds-sinal--ok { color: var(--cor-texto-suave); } .ds-sinal--ok svg { color: var(--cor-ok); } .ds-sinal--atencao { color: var(--cor-atencao-texto); font-weight: var(--peso-medio); } .ds-sinal--atencao svg { color: var(--cor-atencao); } .ds-sinal--critico { color: var(--cor-critico-texto); font-weight: var(--peso-medio); } .ds-sinal--critico svg { color: var(--cor-critico); }"
     },
     {
-      "name": "Alerta com etiqueta de prateleira",
+      "name": "Linha de situações do Painel",
       "kind": "custom",
-      "refersTo": "aviso-atencao",
-      "description": "Assinatura do sistema: faixa de 4px na cor da situação, lado esquerdo reto, fundo claro só quando há problema.",
-      "html": "<ul class=\"ds-alertas\"><li class=\"ds-alerta ds-alerta--critico\"><a class=\"ds-alerta__link\" href=\"#\"><span class=\"ds-alerta__produto\">Iogurte natural 170 g</span><span class=\"ds-alerta__tipo\">Lote vencido</span></a></li><li class=\"ds-alerta ds-alerta--atencao\"><a class=\"ds-alerta__link\" href=\"#\"><span class=\"ds-alerta__produto\">Café torrado e moído 500 g</span><span class=\"ds-alerta__tipo\">Estoque baixo</span></a></li><li class=\"ds-alerta ds-alerta--resolvido\"><a class=\"ds-alerta__link\" href=\"#\"><span class=\"ds-alerta__produto\">Detergente neutro 500 ml</span><span class=\"ds-alerta__tipo\">Resolvido</span></a></li></ul>",
-      "css": ".ds-alertas { max-width: 520px; margin: 0; padding: 0; list-style: none; background: var(--cor-superficie, #ffffff); border: 1px solid var(--cor-borda, #dce3eb); border-left: 0; border-radius: 0 var(--raio-m, 10px) var(--raio-m, 10px) 0; overflow: hidden; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); } .ds-alerta { border-left: 4px solid var(--ds-faixa); background: var(--ds-fundo, transparent); } .ds-alerta + .ds-alerta { border-top: 1px solid var(--cor-borda, #dce3eb); } .ds-alerta--critico { --ds-faixa: var(--cor-critico, #b42318); --ds-fundo: var(--cor-critico-fundo, #fcecea); --ds-texto: var(--cor-critico-texto, #b42318); } .ds-alerta--atencao { --ds-faixa: var(--cor-atencao, #b26b00); --ds-fundo: var(--cor-atencao-fundo, #fdf3e3); --ds-texto: var(--cor-atencao-texto, #8a5300); } .ds-alerta--resolvido { --ds-faixa: var(--cor-borda, #dce3eb); --ds-texto: var(--cor-texto-suave, #5b6b7d); } .ds-alerta__link { display: flex; flex-direction: column; gap: 8px; min-height: 40px; padding: 12px 24px; color: var(--cor-texto, #1b2a3a); text-decoration: none; } .ds-alerta__link:focus-visible { outline: 3px solid var(--cor-texto, #1b2a3a); outline-offset: -2px; } .ds-alerta__produto { font-weight: 500; color: var(--cor-primaria, #2f5d8a); text-decoration: underline; text-underline-offset: 3px; } .ds-alerta__link:hover .ds-alerta__produto { color: var(--cor-primaria-escura, #1f4266); } .ds-alerta__tipo { font-size: 0.875rem; font-weight: 500; color: var(--ds-texto); }"
+      "refersTo": null,
+      "description": "Três células numa linha de folhinha aberta pelo fio de tinta; numerais condensados; a parte crítica do Estoque baixo separada pelo picote.",
+      "html": "<ul class=\"ds-situacoes\"><li class=\"ds-situacao ds-situacao--ativo\"><span class=\"ds-situacao__titulo\">Estoque baixo</span><span class=\"ds-situacao__valor ds-situacao__valor--atencao\">4</span><span class=\"ds-situacao__descricao\">4 produtos abaixo do mínimo</span><span class=\"ds-situacao__parte\">1 sem estoque</span></li><li class=\"ds-situacao\"><span class=\"ds-situacao__titulo\">A vencer</span><span class=\"ds-situacao__valor\">0</span><span class=\"ds-situacao__descricao\">Nada pendente</span></li><li class=\"ds-situacao\"><span class=\"ds-situacao__titulo\">Vencidos</span><span class=\"ds-situacao__valor ds-situacao__valor--critico\">2</span><span class=\"ds-situacao__descricao\">2 lotes vencidos</span></li></ul>",
+      "css": ".ds-situacoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border-top: var(--fio-tinta); border-bottom: var(--borda); font-family: var(--fonte); color: var(--cor-texto); } .ds-situacao { display: flex; flex-direction: column; gap: var(--esp-2); padding: var(--esp-4) var(--esp-5) var(--esp-5); } .ds-situacao:first-child { padding-left: 0; } .ds-situacao + .ds-situacao { border-left: var(--borda); } .ds-situacao__titulo { font-size: var(--fs-3); font-weight: var(--peso-medio); } .ds-situacao__valor { font-size: var(--fs-7); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; line-height: var(--lh-numero); color: var(--cor-texto-suave); } .ds-situacao__valor--atencao { color: var(--cor-atencao-texto); } .ds-situacao__valor--critico { color: var(--cor-critico-texto); } .ds-situacao__descricao { font-size: var(--fs-1); color: var(--cor-texto-suave); } .ds-situacao__parte { padding-top: var(--esp-2); border-top: var(--picote); font-size: var(--fs-2); font-weight: var(--peso-medio); color: var(--cor-critico-texto); }"
     },
     {
-      "name": "Painel de situações",
-      "kind": "custom",
-      "refersTo": "painel",
-      "description": "Assinatura do painel: um único painel dividido pelas etiquetas; a célula só ganha cor quando o número passa de zero.",
-      "html": "<section class=\"ds-situacoes\"><div class=\"ds-situacao ds-situacao--atencao\" data-ativo><span class=\"ds-situacao__titulo\">Estoque baixo</span><span class=\"ds-situacao__valor\">4</span><span class=\"ds-situacao__descricao\">produtos no mínimo ou abaixo</span></div><div class=\"ds-situacao ds-situacao--critico\" data-ativo><span class=\"ds-situacao__titulo\">Sem estoque</span><span class=\"ds-situacao__valor\">1</span><span class=\"ds-situacao__descricao\">produto com saldo zero</span></div><div class=\"ds-situacao ds-situacao--ok\"><span class=\"ds-situacao__titulo\">Vencidos</span><span class=\"ds-situacao__valor\">0</span><span class=\"ds-situacao__descricao\">Nada pendente</span></div></section>",
-      "css": ".ds-situacoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--cor-superficie, #ffffff); border: 1px solid var(--cor-borda, #dce3eb); border-left: 0; border-radius: 0 var(--raio-m, 10px) var(--raio-m, 10px) 0; overflow: hidden; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); color: var(--cor-texto, #1b2a3a); } .ds-situacao { display: flex; flex-direction: column; gap: 4px; padding: 16px 24px; border-left: 4px solid var(--ds-faixa); } .ds-situacao--ok { --ds-faixa: var(--cor-ok, #2e7d5b); } .ds-situacao--atencao { --ds-faixa: var(--cor-atencao, #b26b00); --ds-fundo: var(--cor-atencao-fundo, #fdf3e3); --ds-texto: var(--cor-atencao-texto, #8a5300); } .ds-situacao--critico { --ds-faixa: var(--cor-critico, #b42318); --ds-fundo: var(--cor-critico-fundo, #fcecea); --ds-texto: var(--cor-critico-texto, #b42318); } .ds-situacao[data-ativo] { background: var(--ds-fundo); } .ds-situacao__titulo { font-size: 0.875rem; font-weight: 500; } .ds-situacao__valor { font-size: 2rem; font-weight: 500; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--cor-texto-suave, #5b6b7d); } .ds-situacao[data-ativo] .ds-situacao__valor { color: var(--ds-texto); } .ds-situacao__descricao { font-size: 0.8125rem; color: var(--cor-texto-suave, #5b6b7d); }"
-    },
-    {
-      "name": "Segmentos",
-      "kind": "custom",
+      "name": "Segmentos com a escolhida circulada",
+      "kind": "chip",
       "refersTo": "segmento-escolhido",
-      "description": "Escolha única entre poucas opções, com rádios nativos cobrindo a opção inteira.",
-      "html": "<fieldset class=\"ds-segmentos\"><legend class=\"ds-oculto\">Situação</legend><label class=\"ds-segmento\"><input type=\"radio\" name=\"ds-seg\" checked><span>Ativos</span></label><label class=\"ds-segmento\"><input type=\"radio\" name=\"ds-seg\"><span>Resolvidos</span></label><label class=\"ds-segmento\"><input type=\"radio\" name=\"ds-seg\"><span>Todos</span></label></fieldset>",
-      "css": ".ds-segmentos { display: inline-flex; margin: 0; padding: 0; border: 1px solid var(--cor-borda, #dce3eb); border-radius: var(--raio-p, 6px); background: var(--cor-superficie, #ffffff); overflow: hidden; font-family: var(--fonte, 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif); } .ds-segmento { position: relative; display: inline-flex; } .ds-segmento + .ds-segmento { border-left: 1px solid var(--cor-borda, #dce3eb); } .ds-segmento input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; } .ds-segmento span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; font-size: 0.875rem; font-weight: 500; color: var(--cor-texto-suave, #5b6b7d); transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), color 120ms cubic-bezier(0.2, 0, 0, 1); } .ds-segmento:hover input:not(:checked) + span { background: var(--cor-hover-neutro, #eef2f6); color: var(--cor-texto, #1b2a3a); } .ds-segmento input:checked + span { background: var(--cor-primaria, #2f5d8a); color: #fff; } .ds-segmento input:focus-visible + span { outline: 2px solid var(--cor-primaria, #2f5d8a); outline-offset: -2px; } .ds-segmento input:checked:focus-visible + span { outline: 3px solid #fff; outline-offset: -5px; } .ds-oculto { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }"
+      "description": "Escolha única entre poucas opções; a escolhida fica circulada a tinta, o foco usa fundo neutro e anel de 3px por dentro.",
+      "html": "<div class=\"ds-segmentos\"><label class=\"ds-seg\"><input type=\"radio\" name=\"ds-f\" checked><span>Ativos</span></label><label class=\"ds-seg\"><input type=\"radio\" name=\"ds-f\"><span>Resolvidos</span></label><label class=\"ds-seg\"><input type=\"radio\" name=\"ds-f\"><span>Todos</span></label></div>",
+      "css": ".ds-segmentos { display: inline-flex; border: var(--borda); border-radius: var(--raio-p); background: var(--cor-superficie); overflow: hidden; font-family: var(--fonte); } .ds-seg { position: relative; display: inline-flex; } .ds-seg + .ds-seg { border-left: var(--borda); } .ds-seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; } .ds-seg span { display: inline-flex; align-items: center; min-height: var(--alvo-min); padding: 0 var(--esp-4); border: var(--fio-tinta); border-color: transparent; border-radius: var(--raio-p); font-size: var(--fs-2); font-weight: var(--peso-medio); color: var(--cor-texto-suave); transition: background-color var(--mov-rapido) var(--mov-curva), border-color var(--mov-rapido) var(--mov-curva); } .ds-seg:hover input:not(:checked) + span { background: var(--cor-hover-neutro); color: var(--cor-texto); } .ds-seg input:checked + span { border-color: var(--cor-texto); color: var(--cor-texto); } .ds-seg input:focus-visible + span { background: var(--cor-hover-neutro); color: var(--cor-texto); outline: var(--foco-anel-forte); outline-offset: calc(-1 * var(--foco-distancia)); }"
+    },
+    {
+      "name": "Painel de dados com metadados",
+      "kind": "card",
+      "refersTo": "painel",
+      "description": "Painel aberto pelo fio de tinta; nome na própria linha, quantidade em numeral à direita, metadados como etiquetas embaixo.",
+      "html": "<section class=\"ds-painel\"><div class=\"ds-painel__cabecalho\"><h2>Últimas movimentações</h2></div><div class=\"ds-mov\"><span class=\"ds-mov__nome\">Leite integral 1 L</span><span class=\"ds-mov__qtd\">+24</span><dl class=\"ds-metadados\"><div class=\"ds-metadado\"><dd>Entrada</dd></div><div class=\"ds-metadado\"><dt>Lote</dt><dd>12, validade 30/11/2026</dd></div><div class=\"ds-metadado\"><dd>Ana Souza</dd></div></dl></div></section>",
+      "css": ".ds-painel { background: var(--cor-superficie); border: var(--borda); border-top: var(--fio-tinta); border-radius: var(--raio-m); font-family: var(--fonte); color: var(--cor-texto); } .ds-painel__cabecalho { padding: var(--esp-4) var(--esp-5); border-bottom: var(--borda); } .ds-painel__cabecalho h2 { margin: 0; font-size: var(--fs-4); font-weight: var(--peso-medio); font-stretch: var(--largura-titulo); line-height: var(--lh-titulo); } .ds-mov { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--esp-2) var(--esp-4); padding: var(--esp-3) var(--esp-5); } .ds-mov__nome { font-weight: var(--peso-medio); } .ds-mov__qtd { font-size: var(--fs-4); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; line-height: var(--lh-numero); } .ds-metadados { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--esp-1) var(--esp-2); margin: 0; font-size: var(--fs-1); color: var(--cor-texto-suave); } .ds-metadado { display: flex; gap: var(--esp-1); padding: 0 var(--esp-2); border: var(--borda); border-radius: var(--raio-p); background: var(--cor-superficie); white-space: nowrap; } .ds-metadado dd { margin: 0; font-variant-numeric: tabular-nums; }"
     }
   ],
   "narrative": {
-    "northStar": "A Prateleira Etiquetada",
-    "overview": "Numa gôndola bem organizada, as prateleiras são neutras e quem fala é a etiqueta: preço, validade, aviso de \"últimas unidades\". O Estoque Inteligente segue a mesma lógica. A superfície é calma, branca sobre um cinza azulado muito leve, com bordas finas e texto em azul-noite. A cor de situação (verde conferido, âmbar de validade, vermelho de vencido) só aparece numa faixa de 4px na esquerda do item, a **etiqueta de prateleira**, e no fundo claro do item com problema. Quando nada precisa de atenção, a tela fica quieta; quando algo precisa, o olho vai direto para lá.\n\nO clima é **calmo, preciso e honesto**. Calmo, porque é uma ferramenta de trabalho usada no meio do expediente, muitas vezes no celular e com uma mão. Preciso, porque números se alinham por coluna, datas e quantidades nunca se separam da unidade e cada metadado tem seu lugar fixo. Honesto, porque nada é decorativo: nenhum número de enfeite, nenhum gradiente, nenhuma sombra fingindo profundidade, nenhum estado que a regra de negócio não confirma. A densidade é média: linhas de lista com ar suficiente para o toque (alvos de 40px no computador, 44px no celular), sem virar painel de cartões espaçados.\n\nO sistema é só claro, sem tema escuro. Um único azul, o Azul Ardósia, carrega toda a identidade: marca, ação primária, link, página atual e foco. Até os neutros são puxados para o mesmo matiz (cerca de 250° em OKLCH), por isso o cinza nunca parece morto.",
+    "northStar": "A Folhinha do Caixa",
+    "overview": "**Creative North Star: \"A Folhinha do Caixa\"**\n\nTodo comércio tem, pendurada perto do caixa, uma folhinha: papel branco, tinta preta, um cabeçalho escuro e o dia em numeral grande. O Estoque Inteligente se veste assim, porque o que ele controla é exatamente isso: validade lida em dias. A data é a figura principal. A marca é uma folha com o dia de hoje (em Brasília); o subtítulo do Painel diz o dia antes de qualquer número (\"Quarta, 11 de novembro · situação às 14:52\"); os indicadores são numerais condensados e pesados, como os de calendário; e a página atual, como o dia marcado à caneta, fica **circulada** a tinta.\n\nO clima é **impresso, direto e honesto**. Impresso, porque a tela é papel e tinta: fundo branco, texto quase preto, fios de 1px, um **fio de tinta** de 2px abrindo tabelas e indicadores, e o **picote** pontilhado separando grupos, como a linha onde se destaca a folha. Direto, porque o vermelho da folhinha é reservado ao que está crítico, e o âmbar e o verde só aparecem como sinal de situação. Honesto, porque nada é enfeite: nenhum cartão com sombra, nenhum ícone em quadradinho colorido, nenhum azul de SaaS, nenhum estado que a regra de negócio não confirma. A densidade é média: alvos de 40px no computador e 44px no celular, listas com ar suficiente para o toque.\n\nO sistema é só claro, sem tema escuro. A única superfície escura é a **faixa preta** do cabeçalho, o topo impresso da folhinha. A **placa preta** (fundo de tinta com texto branco) é do botão principal; o atual e o escolhido nunca ganham placa nem fundo colorido, só o circulado.",
     "keyCharacteristics": [
-      "Superfícies planas com borda de 1px; sombra só no que flutua sobre a página.",
-      "Um único destaque (Azul Ardósia) e três cores de situação que só aparecem na etiqueta.",
-      "IBM Plex Sans em dois pesos (400 e 500); hierarquia por tamanho e cor, nunca por negrito pesado.",
-      "Escala de espaçamento de 4px, sem exceções.",
-      "Etiqueta de prateleira: faixa de 4px à esquerda, com o canto daquele lado sempre reto.",
-      "Movimento curto (120 a 200ms) e só em resposta a uma ação."
+      "Papel branco e tinta #121212; vermelho só para o crítico, âmbar e verde só para situação.",
+      "Archivo com eixo de largura: interface em largura normal, títulos a 87,5%, numerais a 62% e peso 800.",
+      "Fio de tinta de 2px abrindo listas de dados; picote pontilhado de 2px como divisor de grupos.",
+      "Atual e escolhido circulados com contorno de tinta de 2px; placa preta só no botão principal.",
+      "Cantos de papel cortado (2px); plano, com sombra só no que flutua e na folha do dia pendurada.",
+      "Escala de espaçamento de 4px, sem exceções; movimento curto (140 a 200ms) e só em resposta a uma ação."
     ],
     "rules": [
       {
-        "name": "A Regra da Etiqueta",
-        "body": "A cor de situação aparece só na faixa da etiqueta de prateleira, no fundo claro do item com problema e no texto que nomeia a situação. Nunca em título de página, botão comum, ícone decorativo ou borda de painel.",
+        "name": "A Regra do Vermelho da Folhinha",
+        "body": "O vermelho só marca o que está crítico (sem estoque, vencido, erro, ação destrutiva). Nunca em título, ícone decorativo, borda de painel ou botão comum.",
         "section": "colors"
       },
       {
-        "name": "A Regra da Voz Única",
-        "body": "O Azul Ardósia é o único destaque. Cada tela tem um só botão primário; as outras ações são secundárias ou fantasmas.",
+        "name": "A Regra da Placa Única",
+        "body": "A placa preta (fundo de tinta, texto branco) é do botão principal, e há um só por tela. Página atual e opção escolhida ficam circuladas, nunca em placa nem com fundo colorido.",
         "section": "colors"
       },
       {
         "name": "A Regra da Cor que Não Fala Sozinha",
-        "body": "Toda situação vem acompanhada de texto (\"Estoque baixo\", \"Vencido\", \"Sem estoque\") e, no item, de um rótulo de tipo. A cor reforça, nunca é a única informação.",
+        "body": "Toda situação tem texto (\"Estoque baixo\", \"Vencido\", \"Sem estoque\") e um ícone com forma própria (círculo com check, triângulo, círculo com X). A cor reforça, nunca é a única informação.",
         "section": "colors"
       },
       {
-        "name": "A Regra dos Dois Pesos",
-        "body": "Só existem 400 e 500. A hierarquia vem do tamanho e da cor (`texto` contra `texto-suave`), nunca de 600 ou 700.",
+        "name": "A Regra dos Três Pesos",
+        "body": "O texto usa 400 e 500; o 800 é só do numeral condensado. Nada de 600 ou 700.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra da Folha Impressa",
+        "body": "Títulos `h1` a `h3` saem a 87,5% de largura pelo reset (`--largura-titulo`), como o cabeçalho impresso da folhinha; números grandes saem a 62% e 800 pela classe `numeral`. Nenhuma outra largura.",
         "section": "typography"
       },
       {
         "name": "A Regra da Coluna Alinhada",
-        "body": "Quantidade, saldo, data e contagem usam algarismos tabulares (classe `numero`). Número e unidade nunca se separam: \"500 g\" leva espaço inseparável.",
+        "body": "Quantidade, saldo, data, contagem e código de barras usam algarismos tabulares. Número e unidade nunca se separam: \"500 g\" leva espaço inseparável.",
         "section": "typography"
       },
       {
-        "name": "A Regra da Caixa Normal",
-        "body": "Nenhum texto em CAIXA ALTA, nem em rótulo pequeno.",
+        "name": "A Regra da Caixa de Frase",
+        "body": "Texto em caixa de frase, sem CAIXA ALTA; o mês da folha do dia só ganha a primeira letra maiúscula.",
         "section": "typography"
       },
       {
         "name": "A Regra da Escala de 4px",
-        "body": "Nenhum espaçamento fora de `esp-1` a `esp-7`. Um valor que não está na escala é um erro, não um ajuste fino.",
+        "body": "Nenhum espaçamento fora de `esp-0` a `esp-7`. Um valor que não está na escala é um erro, não um ajuste fino.",
         "section": "layout"
       },
       {
         "name": "A Regra do Nome na Própria Linha",
-        "body": "Em listas, o nome do item fica sozinho na sua linha (no máximo 2 linhas, com reticências); só uma quantidade pode ficar à direita dele. O resto vai embaixo, como etiquetas.",
+        "body": "Em listas, o nome do item fica sozinho na sua linha (no máximo 2 linhas, com reticências, quebrando só entre palavras); só uma quantidade pode ficar à direita dele. O resto vai embaixo, como etiquetas.",
         "section": "layout"
       },
       {
         "name": "A Regra do Que Flutua",
-        "body": "Nada que está na página tem sombra, nem no hover. A sombra flutuante é só para camadas que se sobrepõem ao conteúdo (diálogo, gaveta, menu suspenso, lista de opções). O hover de um elemento da página muda o fundo, nunca a elevação.",
+        "body": "Nada que está na página tem sombra, nem no hover. A sombra flutuante é das camadas que se sobrepõem ao conteúdo e da folha do dia, a única folha solta do sistema. O hover muda o fundo ou o contorno, nunca a elevação.",
         "section": "elevation"
       },
       {
-        "name": "A Regra do Canto Reto",
-        "body": "O lado que leva a etiqueta de prateleira nunca é arredondado. Painéis cujos itens têm etiqueta (situações do painel, lista de alertas) dispensam a borda esquerda e arredondam só o lado direito (`0 10px 10px 0`), porque é ali que as faixas ficam.",
+        "name": "A Regra do Fio de Tinta",
+        "body": "Tabelas, listas de dados (movimentações, alertas, histórico) e a linha de situações do Painel abrem com o fio de tinta de 2px no topo. Painéis comuns, de formulário ou de vazio, ficam só com a borda de 1px.",
+        "section": "elevation"
+      },
+      {
+        "name": "A Regra do Circulado",
+        "body": "O atual e o escolhido (página do menu, opção dos segmentos, lote escolhido) levam um contorno de tinta de 2px colado, sempre presente e transparente quando não escolhido, para o tamanho não mudar. Nada mais no sistema usa esse contorno.",
+        "section": "shapes"
+      },
+      {
+        "name": "A Regra do Picote",
+        "body": "O pontilhado de 2px separa partes de uma mesma folha: grupos de um formulário, o topo da folha da marca, o rodapé da folha do dia e, no Painel, a parte crítica (\"1 sem estoque\") dentro do grupo \"Estoque baixo\". Entre blocos independentes, o divisor é o fio de 1px.",
         "section": "shapes"
       }
     ],
     "dos": [
-      "**Do** usar só os tokens do tema para cor, fonte, tamanho, raio, sombra, duração e dimensão, sem valores literais no CSS das páginas e sem `style={{}}`.",
-      "**Do** manter um único botão primário por tela, com verbo; o resto é secundário ou fantasma.",
-      "**Do** marcar itens de estoque, lotes e alertas com a etiqueta de prateleira (`etiqueta--ok`, `--atencao`, `--critico`), com o lado esquerdo reto, e deixar o resto da tela calmo.",
-      "**Do** escrever o nome da situação junto da cor (\"Vencido\", \"Estoque baixo\").",
-      "**Do** usar algarismos tabulares em toda quantidade, saldo, data e contagem.",
-      "**Do** garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.",
-      "**Do** usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.",
-      "**Do** levar o texto de atenção para `atencao-texto` (#8a5300); a cor da faixa (#b26b00) não serve para texto.",
-      "**Do** escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`), para a tela mudar exatamente na mesma largura."
+      "Do usar só os tokens do tema para cor, fonte, tamanho, largura de fonte, raio, sombra, duração e dimensão, sem valores literais no CSS das páginas e sem `style={{}}`; a única cópia permitida é a do favicon, comentada token a token.",
+      "Do manter uma única placa preta por tela (o botão principal, com verbo); o resto é secundário ou fantasma.",
+      "Do circular a tinta (2px) a página atual e a opção escolhida, e dar ao foco pelo teclado outra forma: fundo `hover-neutro` com anel de 3px.",
+      "Do escrever a situação com `<SinalSituacao>`: ícone de forma própria mais o texto que a nomeia.",
+      "Do abrir tabelas e listas de dados com o fio de tinta de 2px e separar grupos de uma mesma folha com o picote.",
+      "Do usar a classe `numeral` (62%, 800, tabular) em números grandes e algarismos tabulares em toda quantidade, saldo, data, contagem e código de barras.",
+      "Do mostrar o código de barras sempre com `<CodigoDeBarras>`.",
+      "Do começar a linha de apoio do Painel pelo dia em Brasília, que aparece já no carregando e no erro.",
+      "Do garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.",
+      "Do usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.",
+      "Do levar o texto de atenção para `atencao-texto`; a cor do sinal (`atencao`) não serve para texto.",
+      "Do escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`), para a tela mudar exatamente na mesma largura."
     ],
     "donts": [
-      "**Don't** usar gradiente, vidro (desfoque de fundo), grade de cartões idênticos com sombra, CAIXA ALTA, setas \"→\" em botões ou emojis.",
-      "**Don't** pôr sombra em nada que esteja na página, nem no hover; sombra é só para diálogo, gaveta, menu suspenso e lista de opções.",
-      "**Don't** usar peso 600 ou 700; a hierarquia vem do tamanho e da cor.",
-      "**Don't** usar âmbar ou vermelho fora da etiqueta, dos avisos, dos erros e da ação de perigo, nem como enfeite.",
-      "**Don't** arredondar o lado esquerdo de um contêiner que leva etiqueta.",
-      "**Don't** usar espaçamento fora da escala de 4px (`esp-1` a `esp-7`).",
-      "**Don't** quebrar nomes no meio da palavra (`word-break: break-all`, `overflow-wrap: anywhere`), nem pôr outro texto na linha do nome numa lista.",
-      "**Don't** animar nada que não seja resposta a uma ação do usuário.",
-      "**Don't** pôr utilitário numa propriedade que o reset do `global.css` já define (margem de `h1` a `h3`, `p`, `ul`, `ol`, `dl` e `dd`; recuo de `ul` e `ol`; peso e entrelinha de `h1` a `h3`; tamanho de `h1` e `h2`): o reset vence e a classe fica sem efeito."
+      "Don't usar cartões com sombra, ícone em quadradinho colorido, azul de SaaS, gradiente, vidro (desfoque de fundo), CAIXA ALTA, setas \"→\" em botões ou emojis.",
+      "Don't pôr faixa colorida na borda de item, cartão ou aviso (`border-left` de situação), nem tingir o fundo de uma lista pela situação; só o aviso tem fundo de situação.",
+      "Don't usar vermelho fora do crítico, nem âmbar e verde fora da situação.",
+      "Don't dar placa preta ou fundo colorido à página atual ou à opção escolhida.",
+      "Don't pôr sombra em nada que esteja na página, nem no hover; a sombra é do que flutua e da folha do dia.",
+      "Don't usar peso 600 ou 700, nem o 800 fora do numeral, nem larguras de fonte além de 62% e 87,5%.",
+      "Don't usar espaçamento fora da escala de 4px (`esp-0` a `esp-7`).",
+      "Don't quebrar nomes no meio da palavra (`word-break: break-all`, `overflow-wrap: anywhere`), nem pôr outro texto na linha do nome numa lista.",
+      "Don't animar nada que não seja resposta a uma ação do usuário.",
+      "Don't misturar, num mesmo elemento, uma classe do CSS do projeto e um utilitário na mesma propriedade: o CSS sem camada sempre vence, e o utilitário fica sem efeito."
     ]
   }
 }

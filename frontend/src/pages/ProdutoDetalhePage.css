@@ -123,10 +123,10 @@
   font-size: var(--fs-2);
 }
 
+/* Saldo do lote no mesmo numeral das quantidades do histórico logo abaixo */
 .lote__quantidade {
   min-width: var(--esp-7);
   font-size: var(--fs-4);
-  font-weight: var(--peso-medio);
   text-align: right;
 }
 
@@ -160,9 +160,11 @@
   border-top: var(--borda);
 }
 
+/* Tipo e quantidade centrados na mesma linha: o ícone do tipo deixaria a linha de base torta */
 .historico__tipo {
   display: inline-flex;
   grid-area: tipo;
+  align-self: center;
   align-items: center;
   gap: var(--esp-2);
   font-size: var(--fs-2);
@@ -178,8 +180,9 @@
 
 .historico__quantidade {
   grid-area: quantidade;
+  align-self: center;
   margin: var(--esp-0);
-  font-weight: var(--peso-medio);
+  font-size: var(--fs-4);
   text-align: right;
   white-space: nowrap;
 }

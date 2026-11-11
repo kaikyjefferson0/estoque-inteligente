@@ -6,6 +6,12 @@
   gap: var(--esp-3) var(--esp-5);
 }
 
+/* Ao lado dos filtros, a caixa de marcar fala no mesmo tamanho deles */
+.alertas__filtros .marcar__rotulo {
+  font-size: var(--fs-2);
+  font-weight: var(--peso-medio);
+}
+
 .alertas__contagem {
   display: flex;
   align-items: center;

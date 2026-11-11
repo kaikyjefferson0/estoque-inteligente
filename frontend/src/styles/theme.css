@@ -72,6 +72,8 @@
   /* Numerais da folhinha (datas, contagens): condensados e pesados */
   --peso-numeral: 800;
   --largura-numeral: 62%;
+  /* Títulos (h1 a h3): levemente estreitos, como o cabeçalho impresso da folhinha */
+  --largura-titulo: 87.5%;
   --fs-1: 0.8125rem; /* 13px: metadados */
   --fs-2: 0.875rem; /* 14px: rótulos e texto secundário */
   --fs-3: 1rem; /* 16px: corpo */

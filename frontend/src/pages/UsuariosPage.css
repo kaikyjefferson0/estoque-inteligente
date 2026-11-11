@@ -23,12 +23,14 @@
   font-weight: var(--peso-medio);
 }
 
+/* Mesma etiqueta das outras (papel com contorno), em tinta por marcar a própria conta */
 .usuarios__voce {
   flex-shrink: 0;
   padding: var(--esp-0) var(--esp-2);
+  border: var(--borda);
   border-radius: var(--raio-p);
-  background: var(--cor-primaria-clara);
-  color: var(--cor-primaria-escura);
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
   font-size: var(--fs-1);
   font-weight: var(--peso-medio);
   white-space: nowrap;
