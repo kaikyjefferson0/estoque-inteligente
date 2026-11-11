@@ -20,3 +20,5 @@ capturas/
 
 # Configuração local do Impeccable (por máquina)
 .impeccable/config.local.json
+# Estado local dos sorteios de direção do Impeccable (concept-seed)
+.impeccable/questions/
