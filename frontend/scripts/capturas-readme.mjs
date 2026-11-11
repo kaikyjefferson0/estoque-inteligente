@@ -54,7 +54,14 @@ async function entrar(largura) {
 
 async function capturar(page, nome) {
   const arquivo = join(saida, `${nome}.webp`)
-  const png = await page.screenshot({ fullPage: true })
+  // A captura de página inteira deixa o que é fixo (a barra inferior do celular) no meio da imagem,
+  // na altura da primeira tela. Com a janela da altura da página, a barra fica no fim, como para
+  // quem rolou até embaixo
+  const janela = page.viewportSize()
+  const altura = await page.evaluate(() => document.documentElement.scrollHeight)
+  await page.setViewportSize({ width: janela.width, height: Math.max(altura, janela.height) })
+  const png = await page.screenshot()
+  await page.setViewportSize(janela)
   await salvarWebp(png, arquivo)
   console.log('capturada:', arquivo)
 }

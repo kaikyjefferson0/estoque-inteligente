@@ -11,6 +11,24 @@ export function FolhaMarca() {
   )
 }
 
+/**
+ * Mini-folha com o dia de uma movimentação (o `criado_em` dela, em Brasília), à esquerda da linha
+ * nas últimas movimentações e no histórico. É só visual: a data e a hora completas continuam
+ * escritas na etiqueta "Em", que o leitor de tela lê e a cópia leva.
+ */
+export function FolhaDaData({ iso, className }: { iso: string; className?: string }) {
+  const { dia, mesCurto } = partesDoDia(new Date(iso))
+  return (
+    <span
+      aria-hidden
+      className={`flex w-folha-data shrink-0 flex-col items-center rounded-p border-x border-b border-x-borda border-b-borda border-t-picote bg-superficie py-esp-1 leading-numero text-texto ${className ?? ''}`}
+    >
+      <span className="numeral text-fs-4">{dia}</span>
+      <span className="text-fs-1 font-medio text-texto-suave">{mesCurto}</span>
+    </span>
+  )
+}
+
 /** Folha do dia no login: o calendário do balcão, com a regra de quem vence hoje. */
 export function FolhaDoDia() {
   const { dia, mes, ano, diaDaSemana } = partesDoDia()

@@ -14,8 +14,8 @@ export function formatarData(data: string): string {
 }
 
 /** "Hoje" em Brasília, como AAAA-MM-DD (o mesmo "hoje" do backend, RN-36). */
-export function hojeIso(): string {
-  return DIA_ISO.format(new Date())
+export function hojeIso(agora = new Date()): string {
+  return DIA_ISO.format(agora)
 }
 
 const PARTES_DO_DIA = new Intl.DateTimeFormat('pt-BR', {

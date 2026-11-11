@@ -15,6 +15,7 @@ import { Aviso } from '../components/Aviso'
 import { BotaoLink } from '../components/Botao'
 import { CodigoDeBarras } from '../components/CodigoDeBarras'
 import { Carregando, ErroEstado, Vazio } from '../components/Estados'
+import { FolhaDaData } from '../components/Folha'
 import { Metadados } from '../components/Metadados'
 import { Paginacao } from '../components/Paginacao'
 import { SinalSituacao } from '../components/SinalSituacao'
@@ -191,6 +192,7 @@ function Historico({ produtoId }: { produtoId: number }) {
               const quantidade = m.tipo === 'saida' ? -m.quantidade : m.quantidade
               return (
                 <li key={m.id} className="historico__item">
+                  <FolhaDaData iso={m.criado_em} className="historico__folha" />
                   <span className="historico__tipo">
                     <Icone aria-hidden />
                     {rotulo}

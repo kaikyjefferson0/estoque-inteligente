@@ -81,6 +81,23 @@
 
   /* Grades (grid-cols-) */
   --grid-template-columns-rotulo-valor: var(--colunas-rotulo-valor);
+  --grid-template-columns-regua: var(--colunas-regua);
+  --grid-template-columns-semana: var(--colunas-semana);
+
+  /* Dimensões de componentes (size-, w-, min-h-) */
+  --size-icone-p: var(--icone-p);
+  --size-icone-m: var(--icone-m);
+  --width-folha-data: var(--tamanho-folha-data);
+  --min-height-dia-regua: var(--altura-dia-regua);
+  --max-width-dia-regua: var(--largura-dia-regua);
+  --min-height-item-barra: var(--altura-item-barra);
+
+  /* Movimento: transition-colors e afins usam a duração e a curva do tema */
+  --default-transition-duration: var(--mov-rapido);
+  --default-transition-timing-function: var(--mov-curva);
+
+  /* Camadas (z-) */
+  --z-index-cabecalho: var(--camada-cabecalho);
 
   /* Borda: a classe border usa a largura do tema, não o 1px embutido do Tailwind */
   --default-border-width: var(--borda-largura);
@@ -120,9 +137,52 @@
   border-top: var(--picote);
 }
 
+/* Fio de tinta de 2px abrindo uma lista de dados ou a barra inferior */
+@utility border-t-tinta {
+  border-top: var(--fio-tinta);
+}
+
+/* Contorno do circulado, sempre presente (a cor vem de border-texto ou border-transparent),
+   para o tamanho não mudar ao circular */
+@utility border-circulado {
+  border-width: var(--largura-circulado);
+  border-style: solid;
+}
+
+/* Foco pelo teclado nos itens que podem estar circulados: anel de 3px afastado, outra forma */
+@utility foco-forte {
+  outline: var(--foco-anel-forte);
+  outline-offset: var(--foco-distancia);
+}
+
+/* O mesmo anel por dentro, onde não há espaço em volta (itens da barra inferior, como nos segmentos) */
+@utility foco-forte-dentro {
+  outline: var(--foco-anel-forte);
+  outline-offset: calc(-1 * var(--foco-distancia));
+}
+
+/* Hoje com vencimento na régua: o circulado em branco dentro da placa preta */
+@utility circulado-na-placa {
+  outline: var(--largura-circulado) solid var(--cor-texto-inverso);
+  outline-offset: calc(-3 * var(--largura-circulado));
+}
+
+/* Área segura do aparelho embaixo (iPhone sem botão); zero nos demais */
+@utility pb-area-segura {
+  padding-bottom: var(--area-segura-baixo);
+}
+
 /*
  * Cortes do layout, com o mesmo valor do CSS antigo (@media (max-width: ...), ou seja, largura ≤ corte).
  * Media query não lê var(), por isso o número fica aqui. Não use max-sm, max-md…: eles geram
  * width < corte e erram exatamente na largura do corte (640px é o teste de zoom de 200%).
  */
 @custom-variant ate-640 (@media (max-width: 640px));
+@custom-variant ate-900 (@media (max-width: 900px));
+
+/*
+ * Régua de vencimentos: com menos de 42rem de largura própria (container @container), os 21 dias
+ * viram a folha do mês, 3 semanas de 7 colunas. Em 42rem (672px), com os 20 vãos de 4px, cada dia
+ * tem 28px, o mínimo para o número de dois algarismos dentro do circulado.
+ */
+@custom-variant regua-estreita (@container (max-width: 42rem));

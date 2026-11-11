@@ -143,17 +143,23 @@
   list-style: none;
 }
 
-/* Tipo e quantidade em cima; lote, quem e quando como etiquetas embaixo; o ajuste no fim */
+/* Mini-folha com o dia à esquerda; tipo e quantidade em cima; lote, quem e quando como etiquetas
+   embaixo; o ajuste no fim */
 .historico__item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    'tipo quantidade'
-    'metadados metadados'
-    'ajuste ajuste';
+    'folha tipo quantidade'
+    'folha metadados metadados'
+    'folha ajuste ajuste';
   align-items: baseline;
   gap: var(--esp-2) var(--esp-4);
   padding: var(--esp-3) var(--esp-5);
+}
+
+.historico__folha {
+  grid-area: folha;
+  align-self: start;
 }
 
 .historico__item + .historico__item {

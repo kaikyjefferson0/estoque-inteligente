@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-11T18:16:18Z",
+  "generatedAt": "2026-11-11T19:41:44Z",
   "title": "Design System: Estoque Inteligente",
   "extensions": {
-    "tokenSource": "frontend/src/styles/theme.css é a única fonte de valores; frontend/src/styles/tailwind.css liga os tokens ao Tailwind CSS v4 por @theme inline, só com var(--...), com os padrões do Tailwind desligados e os utilitários próprios font-stretch-titulo e border-t-picote.",
+    "tokenSource": "frontend/src/styles/theme.css é a única fonte de valores; frontend/src/styles/tailwind.css liga os tokens ao Tailwind CSS v4 por @theme inline, só com var(--...), com os padrões do Tailwind desligados e os utilitários próprios font-stretch-titulo, border-t-picote, border-t-tinta, border-circulado, foco-forte e pb-area-segura; variantes ate-640, ate-900 e regua-estreita (container).",
     "colorMeta": {
       "primaria": {
         "role": "primary",
@@ -648,7 +648,7 @@
       {
         "name": "ate-900",
         "value": "900px",
-        "purpose": "Gaveta, alvos de 44px, login só com o formulário."
+        "purpose": "Barra inferior fixa (o menu inteiro na gaveta aberta pelo Mais), alvos de 44px, login só com o formulário."
       },
       {
         "name": "ate-640",
@@ -669,6 +669,11 @@
         "name": "tabela-empilhavel",
         "value": "@container (max-width: 48rem)",
         "purpose": "Tabela vira lista empilhada."
+      },
+      {
+        "name": "regua-estreita",
+        "value": "@container (max-width: 42rem)",
+        "purpose": "A régua de 21 dias vira a folha do mês (3 semanas de 7 colunas)."
       }
     ],
     "reviewWidths": [
@@ -764,11 +769,35 @@
       "description": "Painel aberto pelo fio de tinta; nome na própria linha, quantidade em numeral à direita, metadados como etiquetas embaixo.",
       "html": "<section class=\"ds-painel\"><div class=\"ds-painel__cabecalho\"><h2>Últimas movimentações</h2></div><div class=\"ds-mov\"><span class=\"ds-mov__nome\">Leite integral 1 L</span><span class=\"ds-mov__qtd\">+24</span><dl class=\"ds-metadados\"><div class=\"ds-metadado\"><dd>Entrada</dd></div><div class=\"ds-metadado\"><dt>Lote</dt><dd>12, validade 30/11/2026</dd></div><div class=\"ds-metadado\"><dd>Ana Souza</dd></div></dl></div></section>",
       "css": ".ds-painel { background: var(--cor-superficie); border: var(--borda); border-top: var(--fio-tinta); border-radius: var(--raio-m); font-family: var(--fonte); color: var(--cor-texto); } .ds-painel__cabecalho { padding: var(--esp-4) var(--esp-5); border-bottom: var(--borda); } .ds-painel__cabecalho h2 { margin: 0; font-size: var(--fs-4); font-weight: var(--peso-medio); font-stretch: var(--largura-titulo); line-height: var(--lh-titulo); } .ds-mov { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: var(--esp-2) var(--esp-4); padding: var(--esp-3) var(--esp-5); } .ds-mov__nome { font-weight: var(--peso-medio); } .ds-mov__qtd { font-size: var(--fs-4); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; line-height: var(--lh-numero); } .ds-metadados { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--esp-1) var(--esp-2); margin: 0; font-size: var(--fs-1); color: var(--cor-texto-suave); } .ds-metadado { display: flex; gap: var(--esp-1); padding: 0 var(--esp-2); border: var(--borda); border-radius: var(--raio-p); background: var(--cor-superficie); white-space: nowrap; } .ds-metadado dd { margin: 0; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Régua de vencimentos",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Os 21 dias a partir de hoje: hoje em placa preta, dia com vencimento circulado a tinta e a quantidade de lotes embaixo, em numeral na cor de atenção; abre com o fio de tinta.",
+      "html": "<ol class=\"ds-regua\"><li class=\"ds-dia\"><span class=\"ds-dia__sem\">hoje</span><span class=\"ds-dia__num ds-dia__num--hoje\">11</span><span class=\"ds-dia__qtd\">2</span></li><li class=\"ds-dia\"><span class=\"ds-dia__sem\">qui</span><span class=\"ds-dia__num\">12</span><span class=\"ds-dia__qtd\">&nbsp;</span></li><li class=\"ds-dia\"><span class=\"ds-dia__sem\">sex</span><span class=\"ds-dia__num ds-dia__num--vence\">13</span><span class=\"ds-dia__qtd\">1</span></li><li class=\"ds-dia\"><span class=\"ds-dia__sem\">sáb</span><span class=\"ds-dia__num\">14</span><span class=\"ds-dia__qtd\">&nbsp;</span></li><li class=\"ds-dia\"><span class=\"ds-dia__sem\">dom</span><span class=\"ds-dia__num ds-dia__num--vence\">15</span><span class=\"ds-dia__qtd\">3</span></li><li class=\"ds-dia\"><span class=\"ds-dia__sem\">seg</span><span class=\"ds-dia__num\">16</span><span class=\"ds-dia__qtd\">&nbsp;</span></li><li class=\"ds-dia\"><span class=\"ds-dia__sem\">ter</span><span class=\"ds-dia__num\">17</span><span class=\"ds-dia__qtd\">&nbsp;</span></li></ol>",
+      "css": ".ds-regua { display: grid; grid-template-columns: var(--colunas-semana); gap: 0 var(--esp-1); margin: 0; padding: 0; list-style: none; border-top: var(--fio-tinta); border-bottom: var(--borda); font-family: var(--fonte); } .ds-dia { display: flex; flex-direction: column; align-items: center; gap: var(--esp-1); padding: var(--esp-2) 0; } .ds-dia__sem { font-size: var(--fs-1); line-height: var(--lh-numero); color: var(--cor-texto-suave); } .ds-dia__num { display: flex; align-items: center; justify-content: center; width: 100%; min-height: var(--altura-dia-regua); border: var(--largura-circulado) solid transparent; border-radius: var(--raio-p); font-size: var(--fs-4); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; line-height: var(--lh-numero); color: var(--cor-texto-suave); } .ds-dia__num--vence { border-color: var(--cor-texto); color: var(--cor-texto); } .ds-dia__num--hoje { border-color: var(--cor-texto); background: var(--cor-texto); color: var(--cor-texto-inverso); } .ds-dia__qtd { font-size: var(--fs-3); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; line-height: var(--lh-numero); color: var(--cor-atencao-texto); }"
+    },
+    {
+      "name": "Barra inferior do celular",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Até 900px: Painel, Entrada, Saída, Alertas (contagem) e Mais (abre a gaveta), fixa embaixo e aberta pelo fio de tinta; a página atual circulada.",
+      "html": "<nav class=\"ds-barra\" aria-label=\"Atalhos\"><a class=\"ds-barra__item\" aria-current=\"page\" href=\"#\">Painel</a><a class=\"ds-barra__item\" href=\"#\">Entrada</a><a class=\"ds-barra__item\" href=\"#\">Saída</a><a class=\"ds-barra__item\" href=\"#\">Alertas <span class=\"ds-barra__contagem\">8</span></a><button class=\"ds-barra__item\">Mais</button></nav>",
+      "css": ".ds-barra { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--esp-1); padding: var(--esp-1) var(--esp-1) calc(var(--esp-1) + var(--area-segura-baixo)); border-top: var(--fio-tinta); background: var(--cor-superficie); font-family: var(--fonte); } .ds-barra__item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--esp-1); min-width: 0; min-height: var(--altura-item-barra); padding: 0 var(--esp-1); border: var(--largura-circulado) solid transparent; border-radius: var(--raio-p); background: transparent; color: var(--cor-texto-suave); font: inherit; font-size: var(--fs-1); text-decoration: none; cursor: pointer; transition: background-color var(--mov-rapido) var(--mov-curva), color var(--mov-rapido) var(--mov-curva); } .ds-barra__item:hover { background: var(--cor-hover-neutro); color: var(--cor-texto); } .ds-barra__item:active { background: var(--cor-pressionado-neutro); } .ds-barra__item[aria-current='page'] { border-color: var(--cor-texto); color: var(--cor-texto); font-weight: var(--peso-medio); } .ds-barra__item:focus-visible { background: var(--cor-hover-neutro); color: var(--cor-texto); outline: var(--foco-anel-forte); outline-offset: calc(-1 * var(--foco-distancia)); } .ds-barra__contagem { padding: 0 var(--esp-1); border-radius: var(--raio-p); background: var(--cor-atencao-fundo); color: var(--cor-atencao-texto); font-weight: var(--peso-medio); font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Mini-folha de data",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "A data de uma movimentação como uma folhinha de 40px: picote no topo, o dia em numeral e o mês abreviado; só visual, a data completa fica na etiqueta.",
+      "html": "<span class=\"ds-folha-data\" aria-hidden=\"true\"><span class=\"ds-folha-data__dia\">11</span><span class=\"ds-folha-data__mes\">nov</span></span>",
+      "css": ".ds-folha-data { display: inline-flex; flex-direction: column; align-items: center; width: var(--tamanho-folha-data); padding: var(--esp-1) 0; border: var(--borda); border-top: var(--picote); border-radius: var(--raio-p); background: var(--cor-superficie); color: var(--cor-texto); font-family: var(--fonte); line-height: var(--lh-numero); } .ds-folha-data__dia { font-size: var(--fs-4); font-weight: var(--peso-numeral); font-stretch: var(--largura-numeral); font-variant-numeric: tabular-nums; } .ds-folha-data__mes { font-size: var(--fs-1); font-weight: var(--peso-medio); color: var(--cor-texto-suave); }"
     }
   ],
   "narrative": {
     "northStar": "A Folhinha do Caixa",
-    "overview": "**Creative North Star: \"A Folhinha do Caixa\"**\n\nTodo comércio tem, pendurada perto do caixa, uma folhinha: papel branco, tinta preta, um cabeçalho escuro e o dia em numeral grande. O Estoque Inteligente se veste assim, porque o que ele controla é exatamente isso: validade lida em dias. A data é a figura principal. A marca é uma folha com o dia de hoje (em Brasília); o subtítulo do Painel diz o dia antes de qualquer número (\"Quarta, 11 de novembro · situação às 14:52\"); os indicadores são numerais condensados e pesados, como os de calendário; e a página atual, como o dia marcado à caneta, fica **circulada** a tinta.\n\nO clima é **impresso, direto e honesto**. Impresso, porque a tela é papel e tinta: fundo branco, texto quase preto, fios de 1px, um **fio de tinta** de 2px abrindo tabelas e indicadores, e o **picote** pontilhado separando grupos, como a linha onde se destaca a folha. Direto, porque o vermelho da folhinha é reservado ao que está crítico, e o âmbar e o verde só aparecem como sinal de situação. Honesto, porque nada é enfeite: nenhum cartão com sombra, nenhum ícone em quadradinho colorido, nenhum azul de SaaS, nenhum estado que a regra de negócio não confirma. A densidade é média: alvos de 40px no computador e 44px no celular, listas com ar suficiente para o toque.\n\nO sistema é só claro, sem tema escuro. A única superfície escura é a **faixa preta** do cabeçalho, o topo impresso da folhinha. A **placa preta** (fundo de tinta com texto branco) é do botão principal; o atual e o escolhido nunca ganham placa nem fundo colorido, só o circulado.",
+    "overview": "**Creative North Star: \"A Folhinha do Caixa\"**\n\nTodo comércio tem, pendurada perto do caixa, uma folhinha: papel branco, tinta preta, um cabeçalho escuro e o dia em numeral grande. O Estoque Inteligente se veste assim, porque o que ele controla é exatamente isso: validade lida em dias. A data é a figura principal. A marca é uma folha com o dia de hoje (em Brasília); o subtítulo do Painel diz o dia antes de qualquer número (\"Quarta, 11 de novembro · situação às 14:52\"); os indicadores são numerais condensados e pesados, como os de calendário; e a página atual, como o dia marcado à caneta, fica **circulada** a tinta.\n\nO clima é **impresso, direto e honesto**. Impresso, porque a tela é papel e tinta: fundo branco, texto quase preto, fios de 1px, um **fio de tinta** de 2px abrindo tabelas e indicadores, e o **picote** pontilhado separando grupos, como a linha onde se destaca a folha. Direto, porque o vermelho da folhinha é reservado ao que está crítico, e o âmbar e o verde só aparecem como sinal de situação. Honesto, porque nada é enfeite: nenhum cartão com sombra, nenhum ícone em quadradinho colorido, nenhum azul de SaaS, nenhum estado que a regra de negócio não confirma. A densidade é média: alvos de 40px no computador e 44px no celular, listas com ar suficiente para o toque.\n\nO sistema é só claro, sem tema escuro. A única superfície escura é a **faixa preta** do cabeçalho, o topo impresso da folhinha. A **placa preta** (fundo de tinta com texto branco) é do botão principal e do dia de hoje na régua de vencimentos; o atual e o escolhido nunca ganham placa nem fundo colorido, só o circulado.",
     "keyCharacteristics": [
       "Papel branco e tinta #121212; vermelho só para o crítico, âmbar e verde só para situação.",
       "Archivo com eixo de largura: interface em largura normal, títulos a 87,5%, numerais a 62% e peso 800.",
@@ -785,7 +814,7 @@
       },
       {
         "name": "A Regra da Placa Única",
-        "body": "A placa preta (fundo de tinta, texto branco) é do botão principal, e há um só por tela. Página atual e opção escolhida ficam circuladas, nunca em placa nem com fundo colorido.",
+        "body": "A placa preta (fundo de tinta, texto branco) é do botão principal, e há um só por tela; a única outra placa é o dia de hoje na régua de vencimentos, como o dia marcado na folhinha. Página atual e opção escolhida ficam circuladas, nunca em placa nem com fundo colorido.",
         "section": "colors"
       },
       {
@@ -830,12 +859,12 @@
       },
       {
         "name": "A Regra do Fio de Tinta",
-        "body": "Tabelas, listas de dados (movimentações, alertas, histórico) e a linha de situações do Painel abrem com o fio de tinta de 2px no topo. Painéis comuns, de formulário ou de vazio, ficam só com a borda de 1px.",
+        "body": "Tabelas, listas de dados (movimentações, alertas, histórico), a linha de situações e a régua de vencimentos do Painel abrem com o fio de tinta de 2px no topo, e a barra inferior do celular também. Painéis comuns, de formulário ou de vazio, ficam só com a borda de 1px.",
         "section": "elevation"
       },
       {
         "name": "A Regra do Circulado",
-        "body": "O atual e o escolhido (página do menu, opção dos segmentos, lote escolhido) levam um contorno de tinta de 2px colado, sempre presente e transparente quando não escolhido, para o tamanho não mudar. Nada mais no sistema usa esse contorno.",
+        "body": "O atual e o escolhido (página do menu e da barra inferior, opção dos segmentos, lote escolhido) e o dia com vencimento na régua levam um contorno de tinta de 2px colado, sempre presente e transparente quando não marcado, para o tamanho não mudar. Nada mais no sistema usa esse contorno.",
         "section": "shapes"
       },
       {
@@ -856,7 +885,8 @@
       "Do garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.",
       "Do usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.",
       "Do levar o texto de atenção para `atencao-texto`; a cor do sinal (`atencao`) não serve para texto.",
-      "Do escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`), para a tela mudar exatamente na mesma largura."
+      "Do escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`, `ate-900:`), para a tela mudar exatamente na mesma largura.",
+      "Do dar folga embaixo da página e no `scroll-padding-bottom` a tudo o que fica fixo embaixo, para não cobrir conteúdo nem o foco."
     ],
     "donts": [
       "Don't usar cartões com sombra, ícone em quadradinho colorido, azul de SaaS, gradiente, vidro (desfoque de fundo), CAIXA ALTA, setas \"→\" em botões ou emojis.",

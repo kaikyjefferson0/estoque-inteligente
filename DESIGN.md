@@ -222,7 +222,7 @@ components:
 
 # Design System: Estoque Inteligente
 
-> **Fonte dos tokens:** todos os valores moram em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios, sombras e durações; cada chave do frontmatter acima corresponde a uma variável dele (`primaria` → `--cor-primaria`, `p` → `--raio-p`, `esp-4` → `--esp-4`). Com o Tailwind CSS v4, o fluxo é: tokens no `theme.css` → `@theme inline` em `frontend\src\styles\tailwind.css`, só com referências `var(--...)`, nenhum valor repetido → classes com o mesmo nome do token (`bg-primaria`, `p-esp-4`, `rounded-p`, `shadow-flutuante`, `text-fs-2`, `max-w-largura-conteudo`, `max-w-largura-formulario`, `grid-cols-rotulo-valor`). A classe `border` usa a largura do tema (`--borda-largura`), não o 1px embutido do Tailwind. Os padrões do Tailwind (cores, espaçamento, raios, sombras, fontes, pesos, tamanhos, entrelinhas e espaçamento entre letras) estão desligados com `initial` e o lint recusa valores arbitrários (`p-[13px]`), por isso as regras abaixo valem igual para as classes; `min-w-esp-0` faz o papel do `min-w-0`. Dois tokens não têm namespace de tema no Tailwind v4 e viram utilitários próprios, também só com `var(--...)`: `@utility font-stretch-titulo` (`font-stretch: var(--largura-titulo)`; o `font-stretch-*` nativo só aceita porcentagem crua) e `@utility border-t-picote` (`border-top: var(--picote)`; borda pontilhada não é valor de tema). Os cortes do layout viram variantes com o mesmo valor do CSS antigo (`ate-640:` é `@media (max-width: 640px)`), nunca `max-sm:`, que erra exatamente em 640px. O Preflight está desligado: o reset do `global.css` (margem de `h1` a `h3`, `p`, `ul`, `ol`, `dl` e `dd`; recuo e marcador de `ul` e `ol`; peso, largura e entrelinha de `h1` a `h3`; tamanho de `h1` e `h2`; fonte e cor herdadas nos controles; cor dos links; anel de foco; `scroll-padding-top`) fica em `@layer base`, na ordem de camadas declarada no `tailwind.css` (`theme, base, components, utilities`), que por isso é importado antes do `global.css` no `main.tsx`: os utilitários vencem o reset, e o CSS sem camada (`componentes.css`, `layout.css` e o CSS das telas não migradas) vence os dois. O espaço entre um título e o texto de apoio vem do `gap` do bloco que os contém. As telas migram uma a uma; até lá, as não migradas seguem no CSS delas.
+> **Fonte dos tokens:** todos os valores moram em `frontend\src\styles\theme.css`, a única fonte de cores, espaçamentos, fontes, raios, sombras e durações; cada chave do frontmatter acima corresponde a uma variável dele (`primaria` → `--cor-primaria`, `p` → `--raio-p`, `esp-4` → `--esp-4`). Com o Tailwind CSS v4, o fluxo é: tokens no `theme.css` → `@theme inline` em `frontend\src\styles\tailwind.css`, só com referências `var(--...)`, nenhum valor repetido → classes com o mesmo nome do token (`bg-primaria`, `p-esp-4`, `rounded-p`, `shadow-flutuante`, `text-fs-2`, `max-w-largura-conteudo`, `max-w-largura-formulario`, `grid-cols-rotulo-valor`). A classe `border` usa a largura do tema (`--borda-largura`), não o 1px embutido do Tailwind. Os padrões do Tailwind (cores, espaçamento, raios, sombras, fontes, pesos, tamanhos, entrelinhas e espaçamento entre letras) estão desligados com `initial` e o lint recusa valores arbitrários (`p-[13px]`), por isso as regras abaixo valem igual para as classes; `min-w-esp-0` faz o papel do `min-w-0`. Dois tokens não têm namespace de tema no Tailwind v4 e viram utilitários próprios, também só com `var(--...)`: `@utility font-stretch-titulo` (`font-stretch: var(--largura-titulo)`; o `font-stretch-*` nativo só aceita porcentagem crua) e `@utility border-t-picote` (`border-top: var(--picote)`; borda pontilhada não é valor de tema); do mesmo jeito, `border-t-tinta` (o fio de tinta no topo), `border-circulado` (largura e estilo do circulado, com a cor em `border-texto` ou `border-transparent`), `foco-forte` (anel de 3px afastado) e `pb-area-segura` (a área segura do aparelho embaixo). Dimensões de componente também passam pelo `@theme` (`size-icone-m`, `w-folha-data`, `min-h-dia-regua`, `min-h-item-barra`, `z-cabecalho`), e a duração e a curva padrão das transições do Tailwind apontam para `--mov-rapido` e `--mov-curva`. Os cortes do layout viram variantes com o mesmo valor do CSS antigo (`ate-640:` é `@media (max-width: 640px)`, `ate-900:` é `@media (max-width: 900px)`), nunca `max-sm:`, que erra exatamente em 640px; a régua de vencimentos usa uma variante de container, `regua-estreita:` (`@container (max-width: 42rem)`). O Preflight está desligado: o reset do `global.css` (margem de `h1` a `h3`, `p`, `ul`, `ol`, `dl` e `dd`; recuo e marcador de `ul` e `ol`; peso, largura e entrelinha de `h1` a `h3`; tamanho de `h1` e `h2`; fonte e cor herdadas nos controles; cor dos links; anel de foco; `scroll-padding-top`) fica em `@layer base`, na ordem de camadas declarada no `tailwind.css` (`theme, base, components, utilities`), que por isso é importado antes do `global.css` no `main.tsx`: os utilitários vencem o reset, e o CSS sem camada (`componentes.css`, `layout.css` e o CSS das telas não migradas) vence os dois. O espaço entre um título e o texto de apoio vem do `gap` do bloco que os contém. As telas migram uma a uma; até lá, as não migradas seguem no CSS delas.
 
 ## Overview
 
@@ -232,7 +232,7 @@ Todo comércio tem, pendurada perto do caixa, uma folhinha: papel branco, tinta 
 
 O clima é **impresso, direto e honesto**. Impresso, porque a tela é papel e tinta: fundo branco, texto quase preto, fios de 1px, um **fio de tinta** de 2px abrindo tabelas e indicadores, e o **picote** pontilhado separando grupos, como a linha onde se destaca a folha. Direto, porque o vermelho da folhinha é reservado ao que está crítico, e o âmbar e o verde só aparecem como sinal de situação. Honesto, porque nada é enfeite: nenhum cartão com sombra, nenhum ícone em quadradinho colorido, nenhum azul de SaaS, nenhum estado que a regra de negócio não confirma. A densidade é média: alvos de 40px no computador e 44px no celular, listas com ar suficiente para o toque.
 
-O sistema é só claro, sem tema escuro. A única superfície escura é a **faixa preta** do cabeçalho, o topo impresso da folhinha. A **placa preta** (fundo de tinta com texto branco) é do botão principal; o atual e o escolhido nunca ganham placa nem fundo colorido, só o circulado.
+O sistema é só claro, sem tema escuro. A única superfície escura é a **faixa preta** do cabeçalho, o topo impresso da folhinha. A **placa preta** (fundo de tinta com texto branco) é do botão principal e do dia de hoje na régua de vencimentos; o atual e o escolhido nunca ganham placa nem fundo colorido, só o circulado.
 
 **Key Characteristics:**
 - Papel branco e tinta #121212; vermelho só para o crítico, âmbar e verde só para situação.
@@ -272,7 +272,7 @@ Papel e tinta, com três cores de situação que só falam quando há algo a diz
 ### Named Rules
 **A Regra do Vermelho da Folhinha.** O vermelho só marca o que está crítico (sem estoque, vencido, erro, ação destrutiva). Nunca em título, ícone decorativo, borda de painel ou botão comum.
 
-**A Regra da Placa Única.** A placa preta (fundo de tinta, texto branco) é do botão principal, e há um só por tela. Página atual e opção escolhida ficam circuladas, nunca em placa nem com fundo colorido.
+**A Regra da Placa Única.** A placa preta (fundo de tinta, texto branco) é do botão principal, e há um só por tela; a única outra placa é o dia de hoje na régua de vencimentos, como o dia marcado na folhinha. Página atual e opção escolhida ficam circuladas, nunca em placa nem com fundo colorido.
 
 **A Regra da Cor que Não Fala Sozinha.** Toda situação tem texto ("Estoque baixo", "Vencido", "Sem estoque") e um ícone com forma própria (círculo com check, triângulo, círculo com X). A cor reforça, nunca é a única informação.
 
@@ -304,7 +304,7 @@ Papel e tinta, com três cores de situação que só falam quando há algo a diz
 
 ## Layout
 
-A área logada tem a **faixa preta** fixa de 56px no topo (marca à esquerda, conta à direita), um **menu lateral** branco de 232px, também fixo, e o **conteúdo** com recuo de 32px e largura máxima de 1120px. Tudo se alinha à esquerda. Como o cabeçalho é fixo, a rolagem até um controle focado deixa a altura dele mais 8px de folga (`scroll-padding-top`), para o anel de foco aparecer inteiro.
+A área logada tem a **faixa preta** fixa de 56px no topo (marca à esquerda, conta à direita), um **menu lateral** branco de 232px, também fixo, e o **conteúdo** com recuo de 32px e largura máxima de 1120px. Tudo se alinha à esquerda. Como o cabeçalho é fixo, a rolagem até um controle focado deixa a altura dele mais 8px de folga (`scroll-padding-top`), para o anel de foco aparecer inteiro; até 900px, a **barra inferior** fixa ganha a mesma folga embaixo (`scroll-padding-bottom`), e o conteúdo termina 24px acima dela.
 
 O **login** é a folhinha pendurada: no computador, duas colunas iguais; à esquerda, a parede com a folha do dia centrada e separada por um fio de tinta; à direita, o formulário no papel (até 400px), com a entrada de demonstração aberta por outro fio de tinta.
 
@@ -313,8 +313,9 @@ Cada página é uma coluna com 24px entre blocos. No topo, o **cabeçalho da pá
 **Ritmo:** margem, recuo e espaço entre itens só da escala de 4px (`esp-0` a `esp-7`, de 0 a 48px). Dentro do painel, as linhas de lista usam 12px na vertical e 24px na horizontal; os cabeçalhos de painel, 16px por 24px.
 
 **Responsivo:**
-- **≤ 900px:** o menu lateral vira uma gaveta (288px, até 85% da largura) aberta pelo botão do cabeçalho; os alvos de toque sobem de 40 para 44px; o conteúdo usa recuo de 24px por 16px; os numerais do Painel caem de 48 para 32px; o login fica só com o formulário, com a folha da marca invertida e um fio de tinta embaixo dela.
+- **≤ 900px:** o menu lateral sai e entra a **barra inferior** fixa (Painel, Entrada, Saída, Alertas e Mais); o menu inteiro vira uma gaveta (288px, até 85% da largura) aberta pelo "Mais", e o cabeçalho não tem mais botão de menu; os alvos de toque sobem de 40 para 44px; o conteúdo usa recuo de 24px por 16px; os numerais do Painel caem de 48 para 32px; o login fica só com o formulário, com a folha da marca invertida e um fio de tinta embaixo dela.
 - **≤ 640px:** painéis e formulários reduzem o recuo interno para 16px (nas classes, `ate-640:p-esp-4`); a lista de rótulo e valor põe o valor embaixo do rótulo; no Painel, "Estoque baixo" ocupa a linha inteira e "A vencer" e "Vencidos" dividem a de baixo; os segmentos de Alertas viram grade 2×2.
+- **Régua com menos de 42rem de largura própria** (container query, não a tela: vale também para o zoom de 200%): os 21 dias viram a folha do mês, 3 semanas de 7 colunas, com a linha dos dias da semana em cima.
 - **≤ 480px:** as ações da página descem para baixo do título (o botão fantasma que abre a linha desconta o próprio recuo para alinhar com o título); o perfil some do cabeçalho.
 - **≤ 400px:** o nome do usuário vira um ícone e a marca encolhe; os botões do diálogo empilham com largura total, com a ação principal em cima.
 - **Tabelas** viram listas empilhadas por container query, quando o próprio painel tem menos de 48rem: nome numa linha própria, as outras células como etiquetas de metadado embaixo e a ação no fim.
@@ -336,14 +337,14 @@ O sistema é **plano**, como papel impresso. Tudo o que está na página fica no
 ### Named Rules
 **A Regra do Que Flutua.** Nada que está na página tem sombra, nem no hover. A sombra flutuante é das camadas que se sobrepõem ao conteúdo e da folha do dia, a única folha solta do sistema. O hover muda o fundo ou o contorno, nunca a elevação.
 
-**A Regra do Fio de Tinta.** Tabelas, listas de dados (movimentações, alertas, histórico) e a linha de situações do Painel abrem com o fio de tinta de 2px no topo. Painéis comuns, de formulário ou de vazio, ficam só com a borda de 1px.
+**A Regra do Fio de Tinta.** Tabelas, listas de dados (movimentações, alertas, histórico), a linha de situações e a régua de vencimentos do Painel abrem com o fio de tinta de 2px no topo, e a barra inferior do celular também. Painéis comuns, de formulário ou de vazio, ficam só com a borda de 1px.
 
 ## Shapes
 
 Cantos de papel cortado, quase retos: **2px** para tudo (`p` nos controles, `m` em painéis, diálogos e menus suspensos; os dois existem para os papéis continuarem separados se um dia mudarem). Não há pílulas; o único círculo é o indicador de carregando. As bordas são de 1px; as de 2px são só três: o fio de tinta (sólido, em `texto`), o picote (pontilhado, em `borda-forte`) e o circulado do atual e do escolhido (sólido, em `texto`). Uma faixa colorida na borda de um item não existe neste sistema.
 
 ### Named Rules
-**A Regra do Circulado.** O atual e o escolhido (página do menu, opção dos segmentos, lote escolhido) levam um contorno de tinta de 2px colado, sempre presente e transparente quando não escolhido, para o tamanho não mudar. Nada mais no sistema usa esse contorno.
+**A Regra do Circulado.** O atual e o escolhido (página do menu e da barra inferior, opção dos segmentos, lote escolhido) e o dia com vencimento na régua levam um contorno de tinta de 2px colado, sempre presente e transparente quando não marcado, para o tamanho não mudar. Nada mais no sistema usa esse contorno.
 
 **A Regra do Picote.** O pontilhado de 2px separa partes de uma mesma folha: grupos de um formulário, o topo da folha da marca, o rodapé da folha do dia e, no Painel, a parte crítica ("1 sem estoque") dentro do grupo "Estoque baixo". Entre blocos independentes, o divisor é o fio de 1px.
 
@@ -398,7 +399,8 @@ Dados de um registro mostrados por inteiro (Minha conta: nome, e-mail, perfil), 
 - **Menu lateral:** links em `body-small` e `texto-suave` com ícone de 20px e 12px de espaço, altura do alvo de toque, cantos de 2px. Hover em Toque Neutro com texto em tinta; `:active` em Pressão Neutra.
 - **Página atual:** circulada (contorno de tinta de 2px), texto em tinta e 500, sem fundo.
 - **Foco pelo teclado no menu e nos segmentos:** fundo Toque Neutro e anel de 3px (`foco-anel-forte`): afastado 2px no menu, por dentro nos segmentos. É outra forma, para não parecer um segundo circulado.
-- **Celular (≤ 900px):** o menu vira gaveta pela esquerda (desliza em 200ms), com sombra flutuante e véu de sobreposição.
+- **Barra inferior (≤ 900px):** fixa embaixo, em papel aberto pelo fio de tinta, com cinco itens de mesma largura (ícone de 20px e rótulo em `meta`, 56px de altura, 4px entre eles e de respiro, mais a área segura do aparelho): Painel, Entrada, Saída, Alertas (com a mesma contagem do menu ao lado do sino, na mesma linha, "99+" acima de 99, e o nome "Alertas, 8 ativos") e **Mais**, que abre a gaveta. A página atual fica circulada; fora das quatro páginas da barra, o "Mais" fica circulado e o nome dele diz onde a pessoa está ("Mais, você está em Estoque"). Foco pelo teclado com fundo Toque Neutro e anel de 3px por dentro do item (`foco-forte-dentro`), porque entre os itens só há 4px. Em 320px os cinco itens têm 59px de largura, sem rolagem lateral, e o sino com "99+" ainda cabe dentro do circulado.
+- **Gaveta (≤ 900px):** o menu inteiro, aberto pelo "Mais", desliza pela esquerda em 200ms, com sombra flutuante e véu de sobreposição; fecha ao navegar e, com Esc, devolve o foco ao "Mais".
 
 ### Segmentos
 Escolha única entre poucas opções (rádios nativos que cobrem a opção inteira): uma faixa de papel com borda de 1px e cantos de 2px, opções separadas por fios de 1px, texto `label` em `texto-suave`. A opção escolhida fica circulada a tinta, com o texto em tinta; o hover das outras usa Toque Neutro.
@@ -411,6 +413,12 @@ Um padrão só em todas as telas: ícone de código de barras em `texto-suave`, 
 
 ### Linha de situações do Painel (assinatura)
 Três células numa única linha de folhinha, aberta pelo fio de tinta e fechada por um fio de 1px, divididas por fios verticais e sem cartões: **Estoque baixo** (com os "Sem estoque" dentro), **A vencer** e **Vencidos**. Cada célula tem o sinal com o título, o numeral do painel e uma descrição em `meta`. Com zero, o sinal é ok, o numeral fica em `texto-suave` e a descrição diz "Nada pendente"; acima de zero, o numeral ganha a cor de texto da situação. A parte crítica do grupo ("1 sem estoque") vem embaixo, separada pelo picote, com o sinal crítico. A primeira célula não tem recuo à esquerda, para o numeral alinhar com o título da página.
+
+### Régua de vencimentos (assinatura, Painel)
+Os 21 dias a partir de hoje (em Brasília), lidos dos alertas ativos de validade (RN-14 e RN-15), entre a linha de situações e as últimas movimentações. Título "Vencimentos" com a linha de apoio "Próximos 21 dias, até 01/12". Os **vencidos** vêm antes da régua, com o sinal crítico e o texto ("3 lotes vencidos") e o link "Ver vencidos". A régua abre com o fio de tinta e fecha com um fio de 1px; cada dia tem o mês (só no primeiro dia e na virada), o dia da semana ("hoje" no primeiro), o número em numeral de 18px numa caixa de 36px de altura e no máximo 40px de largura (o circulado fica quase quadrado e dias vizinhos não se colam) e, embaixo, a **quantidade de lotes** que vencem nele, em numeral na cor de texto de atenção. Hoje fica em placa preta e, se também tem vencimento, leva o circulado em branco dentro da placa; o dia com vencimento, circulado a tinta; os outros, em `texto-suave`. Na folha do mês, a linha de dias da semana fica em cima (sempre o dia da semana; hoje é a placa), e as linhas do mês e das quantidades só ocupam espaço nas semanas que as usam. Embaixo, a legenda com um dia circulado de exemplo dentro da frase ("Dia circulado: vencem lotes nesse dia, e o número embaixo diz quantos. 4 lotes em 4 dias.", com a explicação do desenho fora do leitor de tela), ou "Nenhum vencimento nos próximos 21 dias." no vazio, e a linha "Mais 2 lotes vencem depois de 01/12." com o link "Ver a vencer" (nome diferente do "Ver alertas" do Painel, que leva a outro lugar). A grade é só visual (`aria-hidden`): uma lista oculta diz ao leitor de tela só os dias com vencimento ("sábado, 14 de novembro: 2 lotes vencem"). Conta lotes, não alertas; um alerta de vencimento próximo com a validade já passada conta como vencido. Carregando e erro usam os estados do sistema, e o "Atualizar" do Painel recarrega a régua junto.
+
+### Mini-folha de data
+A data de cada movimentação (o `criado_em` dela, em Brasília) como uma folhinha de 40px à esquerda da linha, nas últimas movimentações do Painel e no Histórico do detalhe: papel com o picote no topo e fio de 1px nos lados e embaixo, o dia em numeral de 18px e o mês abreviado em `meta`. É só visual: a data e a hora completas continuam na etiqueta "Em", que o leitor de tela lê e a cópia leva (decisão do dono, 11/11/2026; a mini-folha não tem o ano).
 
 ### Folha do dia (assinatura, login)
 A folhinha de parede: papel de até 400px com sombra flutuante, aberto por uma argola preta de 24px, o mês e o ano, o dia em numeral da folha, o dia da semana, uma nota curta separada por um fio ("Um lote que vence hoje ainda pode sair. Amanhã, não.") e um rodapé aberto pelo picote com o nome do produto. Até 900px ela sai, e a folha da marca aparece invertida (tinta com o dia em branco) acima do formulário.
@@ -440,7 +448,8 @@ Só em resposta a uma ação: 140ms (`mov-rapido`) para hover, pressão, troca d
 - **Do** garantir alvos de toque de 40px no computador e 44px no celular, e foco visível pelo teclado em tudo.
 - **Do** usar ícones só do Tabler, com 18px (`icone-p`) ou 20px (`icone-m`) e `aria-hidden` quando há texto ao lado.
 - **Do** levar o texto de atenção para `atencao-texto`; a cor do sinal (`atencao`) não serve para texto.
-- **Do** escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`), para a tela mudar exatamente na mesma largura.
+- **Do** escrever os cortes do layout com as variantes de mesmo valor do CSS antigo (`ate-640:`, `ate-900:`), para a tela mudar exatamente na mesma largura.
+- **Do** dar folga embaixo da página e no `scroll-padding-bottom` a tudo o que fica fixo embaixo, para não cobrir conteúdo nem o foco.
 
 ### Don't:
 - **Don't** usar cartões com sombra, ícone em quadradinho colorido, azul de SaaS, gradiente, vidro (desfoque de fundo), CAIXA ALTA, setas "→" em botões ou emojis.
@@ -479,4 +488,47 @@ Revisão de 11/11/2026, branch `feat/acabamento-visual`, sobre as 16 telas em 32
 
 **Medições:** 48 combinações de tela e largura sem rolagem horizontal, sem alvo de toque pequeno, sem contraste abaixo de 4,5:1 e sem controle sem nome. Lint, build, 56 testes do Vitest e 19 do Playwright passaram.
 
-Ficam para o próximo PR, por decisão do dono, e são dívida do contrato de direção: a régua de vencimentos de 21 dias no Painel (que no celular vira a folha do mês), a barra inferior fixa até 900px (Painel, Entrada, Saída, Alertas e Mais, sem o botão de menu do topo) e a mini-folha de data nas últimas movimentações.
+Ficaram para o PR seguinte, por decisão do dono, como dívida do contrato de direção: a régua de vencimentos de 21 dias no Painel (que no celular vira a folha do mês), a barra inferior fixa até 900px (Painel, Entrada, Saída, Alertas e Mais, sem o botão de menu do topo) e a mini-folha de data nas últimas movimentações. **Quitada no PR dos componentes (veredito abaixo).**
+
+## Veredito da revisão (PR dos componentes)
+
+Revisão de 11/11/2026, branch `feat/painel-folhinha` (a partir de 3142ae9), sobre a régua de vencimentos, a barra inferior, a mini-folha de data e as capturas do README.
+
+**Revisão final da Impeccable (contra o direction contract): disposição `ship`.** A dívida do contrato está quitada, e é a primeira vez que a superfície fecha com `ship`.
+- Primeira rodada (`fix`): 3 correções materiais.
+  - O cabeçalho da folha do mês dizia "hoje" na coluna que também tem as quartas seguintes. Agora mostra sempre o dia da semana, e hoje é a placa preta.
+  - A data aparecia na mini-folha e de novo na etiqueta "Em". **Ficou como adaptação aceita**, por decisão do dono: a etiqueta é o único lugar acessível e copiável com a data e a hora completas, e deixar só a hora exigiria texto oculto colado ao visível.
+  - As capturas de evidência em `.impeccable\review` eram do build anterior e foram refeitas.
+- Segunda rodada (`fix`): as 3 resolvidas. Ela apontou uma regressão: a contagem de alertas no canto do item cobria o sino em 320px. Agora fica ao lado dele, na mesma linha.
+- Terceira rodada: `ship`. O escopo foram o Painel, a régua e seus estados, a barra inferior, a gaveta e o Histórico do detalhe. O login e as outras telas seguem o veredito anterior e as medições abaixo.
+
+**ui-reviewer do projeto (9 larguras e zoom de 200%, com textos de 60 caracteres e saldo de 99.999):** nenhum item crítico. Dos 9 importantes, 8 foram corrigidos:
+- cabeçalho "hoje" na folha do mês;
+- peso da folha do mês no celular (as linhas do mês e das quantidades só nas semanas que as usam);
+- circulado com largura máxima;
+- contagem da barra dentro do item, com "99+";
+- anel de foco por dentro na barra;
+- link "Ver a vencer";
+- legenda com a amostra dentro da frase e a explicação fora do leitor de tela;
+- hoje com vencimento também circulado.
+
+Dos menores, foram corrigidos o comentário do corte da régua, o "Atualizar" que agora espera a régua e o comentário da área segura.
+
+**Decisões do dono sobre o que sobrou (11/11/2026):**
+- **Barra e cabeçalho fixos em telas baixas.** No zoom de 200% (640×400) e no celular deitado, os dois ocupam cerca de um terço da altura. Fica para depois do deploy, registrado em `docs\pendencias.md`. A solução proposta é soltar a barra no fim da página com `@media (max-height: 480px)`.
+- **Aprovados como estão:**
+  - a folha do mês começa em hoje, e não no domingo;
+  - nenhum item fica circulado na barra em Minha conta (a página vem do menu da conta);
+  - a data na mini-folha e na etiqueta "Em".
+- **Menores que continuam como estão:**
+  - a mini-folha se repete quando várias movimentações são do mesmo dia;
+  - 4px a menos para o nome em 320px;
+  - erro e carregando da régua sem a moldura do painel;
+  - `viewport-fit=cover` desligado, então a área segura vale zero (sem ele, a página não passa sob o entalhe em paisagem).
+
+**Proveniência:** as 8 capturas de `docs\imagens` foram geradas por `npm run capturas:readme` na branch `feat/painel-folhinha`, a partir de 3142ae9, em 11/11/2026, com os dados de demonstração. Cada uma tem o registro no arquivo ao lado (`<imagem>.webp.json`, gravado pelo `impeccable embed-prompt`), e o `embed-prompt --scan docs/imagens` dá 0 pendentes.
+
+**Medições:**
+- 48 combinações de tela e largura (16 telas em 320, 768 e 1280px) sem rolagem horizontal, sem alvo de toque pequeno, sem contraste abaixo de 4,5:1 e sem controle sem nome.
+- Contraste das cores da régua e da barra, que a medição pula por serem `aria-hidden`, calculado à parte: o menor valor é 5,79:1.
+- Lint, build, 70 testes do Vitest e 25 do Playwright passaram (estoque 9, barra inferior 6, responsividade 10).

@@ -87,13 +87,14 @@
   list-style: none;
 }
 
-/* Nome numa linha própria, com a quantidade à direita; etiquetas embaixo, em qualquer largura */
+/* Mini-folha com o dia à esquerda; nome numa linha própria, com a quantidade à direita;
+   etiquetas embaixo, em qualquer largura */
 .movimento {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    'nome quantidade'
-    'metadados metadados';
+    'folha nome quantidade'
+    'folha metadados metadados';
   align-items: baseline;
   gap: var(--esp-2) var(--esp-4);
   padding: var(--esp-3) var(--esp-5);
@@ -101,6 +102,11 @@
 
 .movimento + .movimento {
   border-top: var(--borda);
+}
+
+.movimento__folha {
+  grid-area: folha;
+  align-self: start;
 }
 
 .movimento__nome {
