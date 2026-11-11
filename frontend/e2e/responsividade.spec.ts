@@ -145,7 +145,7 @@ const TELAS: Tela[] = [
     nome: 'menu-da-conta',
     abrir: async (p) => {
       await irPara(p, '/')
-      await p.getByRole('button', { name: /abrir menu da conta/ }).click()
+      await p.getByRole('button', { name: /menu da conta/ }).click()
       await expect(p.getByRole('menu')).toBeVisible()
     },
   },

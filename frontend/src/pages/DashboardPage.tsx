@@ -15,7 +15,15 @@ import { SinalSituacao } from '../components/SinalSituacao'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Dashboard, MovimentacaoRecente, TipoMovimentacao } from '../types/dashboard'
 import type { Situacao } from '../types/situacao'
-import { formatarComSinal, formatarData, formatarDataHora, formatarHora, formatarNumero, plural } from '../utils/formato'
+import {
+  formatarComSinal,
+  formatarData,
+  formatarDataHora,
+  formatarDiaDaSemana,
+  formatarHora,
+  formatarNumero,
+  plural,
+} from '../utils/formato'
 import './DashboardPage.css'
 
 interface Indicador {
@@ -24,6 +32,8 @@ interface Indicador {
   // Situação quando o valor é maior que zero; com zero a etiqueta fica "ok"
   situacao: Exclude<Situacao, 'ok'>
   descricao: (valor: number) => string
+  // Parte do grupo que tem situação própria (ex.: os sem estoque dentro do estoque baixo)
+  parte?: { valor: number; situacao: Exclude<Situacao, 'ok'>; rotulo: string }
 }
 
 function indicadores(d: Dashboard): Indicador[] {
@@ -33,13 +43,8 @@ function indicadores(d: Dashboard): Indicador[] {
       valor: d.produtos_estoque_baixo,
       situacao: 'atencao',
       descricao: (n) => `${plural(n, 'produto', 'produtos')} no mínimo ou abaixo`,
-    },
-    {
-      titulo: 'Sem estoque',
-      valor: d.produtos_sem_estoque,
-      situacao: 'critico',
-      // RN-13: saldo zero também é saldo no mínimo ou abaixo, então já conta no estoque baixo
-      descricao: (n) => `${plural(n, 'produto', 'produtos')} com saldo zero, já no estoque baixo`,
+      // RN-13: saldo zero também é saldo no mínimo ou abaixo, então "Sem estoque" é parte deste grupo
+      parte: { valor: d.produtos_sem_estoque, situacao: 'critico', rotulo: 'sem estoque' },
     },
     {
       titulo: 'A vencer',
@@ -74,7 +79,7 @@ function Situacoes({ dashboard }: { dashboard: Dashboard }) {
         Situação do estoque
       </h2>
       <ul className="situacoes">
-        {indicadores(dashboard).map(({ titulo, valor, situacao, descricao }) => {
+        {indicadores(dashboard).map(({ titulo, valor, situacao, descricao, parte }) => {
           const atual: Situacao = valor > 0 ? situacao : 'ok'
           return (
             <li key={titulo} className={`situacao etiqueta--${atual}`} data-ativo={valor > 0 || undefined}>
@@ -83,6 +88,11 @@ function Situacoes({ dashboard }: { dashboard: Dashboard }) {
               </SinalSituacao>
               <span className="situacao__valor numeral">{formatarNumero(valor)}</span>
               <span className="situacao__descricao">{valor > 0 ? descricao(valor) : 'Nada pendente'}</span>
+              {parte && parte.valor > 0 && (
+                <SinalSituacao situacao={parte.situacao} className="situacao__parte">
+                  <span className="numero">{formatarNumero(parte.valor)}</span> {parte.rotulo}
+                </SinalSituacao>
+              )}
             </li>
           )
         })}
@@ -110,7 +120,7 @@ function Movimentacoes({ itens }: { itens: MovimentacaoRecente[] }) {
             {/* Rótulo e valor em blocos próprios: um rótulo oculto na mesma linha gruda ao copiar */}
             <dl className="movimento__quantidade">
               <dt className="visualmente-oculto">Quantidade</dt>
-              <dd className="numero">{formatarComSinal(quantidade)}</dd>
+              <dd className="numeral">{formatarComSinal(quantidade)}</dd>
             </dl>
             <Metadados
               className="movimento__metadados"
@@ -153,7 +163,10 @@ export function DashboardPage() {
         <div>
           <h1>Painel</h1>
           <p className="pagina__apoio">
-            {atualizadoEm ? `Situação do estoque às ${formatarHora(atualizadoEm)}` : 'Situação do estoque agora'}
+            {/* O dia não depende da API: aparece já no carregando e no erro; a hora, só com a resposta */}
+            {atualizadoEm
+              ? `${formatarDiaDaSemana(atualizadoEm)} · situação às ${formatarHora(atualizadoEm)}`
+              : `${formatarDiaDaSemana(new Date())} · situação do estoque`}
           </p>
         </div>
         <div className="pagina__acoes">

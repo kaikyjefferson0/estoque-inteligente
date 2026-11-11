@@ -82,6 +82,15 @@ export function formatarHora(data: Date): string {
   return HORA.format(data)
 }
 
+const DIA_E_MES = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', timeZone: FUSO })
+const DIA_DA_SEMANA = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: FUSO })
+
+/** Dia em Brasília para o subtítulo das páginas: "Quarta, 11 de novembro" (sem o "-feira"). */
+export function formatarDiaDaSemana(data: Date): string {
+  const semana = DIA_DA_SEMANA.format(data).replace('-feira', '')
+  return `${semana.charAt(0).toUpperCase()}${semana.slice(1)}, ${DIA_E_MES.format(data)}`
+}
+
 export function formatarNumero(valor: number): string {
   return NUMERO.format(valor)
 }

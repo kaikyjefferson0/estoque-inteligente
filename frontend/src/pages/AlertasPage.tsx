@@ -15,7 +15,8 @@ import { SinalSituacao } from '../components/SinalSituacao'
 import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Alerta, GeracaoDeAlertas, TipoAlerta } from '../types/alerta'
-import type { Pagina } from '../types/pagina'
+import type { ItemEstoque } from '../types/estoque'
+import { LIMITE_MAXIMO, type Pagina } from '../types/pagina'
 import type { Situacao } from '../types/situacao'
 import { formatarDataHora, formatarNumero, formatarTempoDecorrido, plural } from '../utils/formato'
 import { descreverLote } from '../utils/situacao'
@@ -49,9 +50,13 @@ function descreverGeracao({ criados, resolvidos }: GeracaoDeAlertas): string {
   return `${partes.join(' e ')}.`
 }
 
-function ItemAlerta({ alerta }: { alerta: Alerta }) {
-  const { rotulo, etiqueta } = TIPO[alerta.tipo]
+// Produto com saldo zero continua no grupo "Estoque baixo" (RN-13), mas com o nome e a cor
+// que o Estoque e o Painel dão a ele
+const SEM_ESTOQUE: { rotulo: string; etiqueta: Situacao } = { rotulo: 'Sem estoque', etiqueta: 'critico' }
+
+function ItemAlerta({ alerta, semEstoque }: { alerta: Alerta; semEstoque: boolean }) {
   const resolvido = alerta.resolvido_em !== null
+  const { rotulo, etiqueta } = alerta.tipo === 'estoque_baixo' && semEstoque && !resolvido ? SEM_ESTOQUE : TIPO[alerta.tipo]
   return (
     <li className={`alerta etiqueta--${etiqueta}`} data-resolvido={resolvido || undefined}>
       {/* O item inteiro leva ao produto: nome numa linha própria, etiquetas embaixo */}
@@ -104,6 +109,14 @@ export function AlertasPage() {
     deslocamento: deslocamento || null,
   })
   const { dados, erro, carregando, recarregar } = useRecurso<Pagina<Alerta>>(caminho)
+  // O alerta não traz o saldo: quem está com saldo zero vem do mesmo filtro do Estoque. Se esta
+  // consulta falhar, o alerta continua como "Estoque baixo", que também é verdade (RN-13)
+  const semEstoque = useRecurso<Pagina<ItemEstoque>>(
+    montarCaminho('/stock', { situacao: 'sem_estoque', limite: LIMITE_MAXIMO }),
+  )
+  const idsSemEstoque = new Set(semEstoque.dados?.itens.map((item) => item.produto_id))
+  // Na primeira carga, espera as duas respostas: o rótulo não pode trocar com a lista já na tela
+  const esperandoSemEstoque = !semEstoque.dados && !semEstoque.erro
 
   const [verificando, setVerificando] = useState(false)
   const [resultado, setResultado] = useState<{ situacao: Situacao; texto: string } | null>(null)
@@ -131,6 +144,7 @@ export function AlertasPage() {
       const geracao = await api<GeracaoDeAlertas>('/alerts/generate', { method: 'POST' })
       setResultado({ situacao: 'ok', texto: descreverGeracao(geracao) })
       recarregar()
+      semEstoque.recarregar()
       atualizarAlertas()
     } catch (e) {
       setResultado({ situacao: 'critico', texto: mensagemDeErro(e) })
@@ -206,10 +220,10 @@ export function AlertasPage() {
         )}
       </div>
 
-      {!dados && carregando && <Carregando texto="Carregando os alertas…" />}
+      {((!dados && carregando) || (dados && !erro && esperandoSemEstoque)) && <Carregando texto="Carregando os alertas…" />}
       {erro && <ErroEstado mensagem={erro} aoTentarDeNovo={recarregar} />}
 
-      {dados && !trocando && total === 0 && (
+      {dados && !trocando && !esperandoSemEstoque && total === 0 && (
         <div className="painel">
           {filtro === 'todos' ? (
             <Vazio
@@ -235,17 +249,17 @@ export function AlertasPage() {
         </div>
       )}
 
-      {alertas.length > 0 && (
+      {alertas.length > 0 && !esperandoSemEstoque && (
         <div className="alertas__painel" aria-busy={trocando}>
           <ul className="alertas" aria-label={resolvidos ? 'Alertas ativos e resolvidos' : 'Alertas ativos'}>
             {alertas.map((alerta) => (
-              <ItemAlerta key={alerta.id} alerta={alerta} />
+              <ItemAlerta key={alerta.id} alerta={alerta} semEstoque={idsSemEstoque.has(alerta.produto_id)} />
             ))}
           </ul>
         </div>
       )}
 
-      {total > 0 && (
+      {total > 0 && !esperandoSemEstoque && (
         <Paginacao total={total} limite={limite} deslocamento={deslocamento} aoMudar={irPara} nomeDaLista="alertas" />
       )}
     </div>

@@ -108,6 +108,19 @@
 }
 
 /*
+ * Utilitários de tokens sem namespace no @theme do Tailwind v4: o font-stretch só aceita porcentagem
+ * crua (font-stretch-75%) e a borda pontilhada não é um valor de tema. Como no @theme, só var(--...).
+ */
+@utility font-stretch-titulo {
+  font-stretch: var(--largura-titulo);
+}
+
+/* Picote da folha como divisor no topo de um grupo (o mesmo de .formulario__grupo) */
+@utility border-t-picote {
+  border-top: var(--picote);
+}
+
+/*
  * Cortes do layout, com o mesmo valor do CSS antigo (@media (max-width: ...), ou seja, largura ≤ corte).
  * Media query não lê var(), por isso o número fica aqui. Não use max-sm, max-md…: eles geram
  * width < corte e erram exatamente na largura do corte (640px é o teste de zoom de 200%).

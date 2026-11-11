@@ -9,3 +9,4 @@ export interface Pagina<T> {
 
 // Padrão da API; o máximo aceito é 200
 export const ITENS_POR_PAGINA = 50
+export const LIMITE_MAXIMO = 200

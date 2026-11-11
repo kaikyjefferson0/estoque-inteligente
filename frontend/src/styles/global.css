@@ -12,8 +12,11 @@
     box-sizing: border-box;
   }
 
+  /* Cabeçalho fixo no topo: o controle que recebe o foco pelo teclado não fica escondido atrás dele,
+     com folga para o anel de foco aparecer inteiro */
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--altura-cabecalho) + var(--esp-2));
   }
 
   body {
@@ -49,6 +52,7 @@
   h2,
   h3 {
     font-weight: var(--peso-medio);
+    font-stretch: var(--largura-titulo);
     line-height: var(--lh-titulo);
   }
 

@@ -492,20 +492,18 @@
   min-height: 100vh;
 }
 
-.estado--erro {
-  align-items: flex-start;
-  padding: var(--esp-0);
+/* Carregando e erro soltos na página ganham a moldura do painel, como o vazio (que as páginas
+   já põem num .painel): a troca de um estado para outro não faz aparecer uma caixa nova.
+   Dentro de um painel, o estado usa a moldura dele. No erro, o aviso crítico leva a mensagem */
+.pagina > .estado {
+  background: var(--cor-superficie);
+  border: var(--borda);
+  border-radius: var(--raio-m);
+}
+
+.estado--erro .aviso {
+  max-width: var(--medida-texto);
   text-align: left;
-}
-
-.painel .estado--erro {
-  padding: var(--esp-4) var(--esp-5);
-}
-
-@media (max-width: 640px) {
-  .painel .estado--erro {
-    padding: var(--esp-3) var(--esp-4);
-  }
 }
 
 .estado__titulo {
@@ -882,7 +880,8 @@
   flex-direction: column;
   gap: var(--esp-3);
   padding: var(--esp-4) var(--esp-0) var(--esp-0);
-  border-top: var(--borda);
+  /* Picote da folha: separa o grupo sem pesar como o fio sólido dos painéis */
+  border-top: var(--picote);
 }
 
 .formulario__acoes {

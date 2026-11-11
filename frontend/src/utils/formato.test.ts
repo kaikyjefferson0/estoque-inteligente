@@ -4,6 +4,7 @@ import {
   formatarCnpj,
   formatarData,
   formatarDataHora,
+  formatarDiaDaSemana,
   formatarHora,
   hojeIso,
   lerData,
@@ -65,6 +66,13 @@ describe('datas no fuso America/Sao_Paulo', () => {
 
   it('hora curta no horário de Brasília', () => {
     expect(formatarHora(new Date('2026-10-28T15:05:00Z'))).toBe('12:05')
+  })
+
+  it('dia do subtítulo em Brasília, sem o "-feira" e com maiúscula', () => {
+    // 20:00 UTC de 10/11 = 17:00 de terça, 10/11, em Brasília (e já quarta, 11/11, em Tóquio)
+    expect(formatarDiaDaSemana(new Date('2026-11-10T20:00:00Z'))).toBe('Terça, 10 de novembro')
+    // Sábado e domingo não têm "-feira"
+    expect(formatarDiaDaSemana(new Date('2026-11-14T15:00:00Z'))).toBe('Sábado, 14 de novembro')
   })
 
   it('"hoje" é o dia de Brasília, não o do computador nem o UTC', () => {

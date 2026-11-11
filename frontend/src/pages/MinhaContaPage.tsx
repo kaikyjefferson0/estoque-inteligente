@@ -152,7 +152,7 @@ export function MinhaContaPage() {
             onChange={(e) => alterar('atual', e.target.value, 'senha_atual')}
             erro={erros.senha_atual}
           />
-          <div className="flex flex-col gap-esp-3 border-t border-t-borda pt-esp-4">
+          <div className="flex flex-col gap-esp-3 border-t-picote pt-esp-4">
             <Campo
               rotulo="Nova senha"
               name="senha_nova"

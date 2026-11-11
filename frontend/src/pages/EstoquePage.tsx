@@ -14,7 +14,7 @@ import { PARAMETRO_PAGINA, usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { ItemEstoque, SituacaoEstoque } from '../types/estoque'
 import type { Pagina } from '../types/pagina'
-import { formatarHora, formatarNumero, plural } from '../utils/formato'
+import { formatarDiaDaSemana, formatarHora, formatarNumero, plural } from '../utils/formato'
 import { SITUACAO_DO_ESTOQUE } from '../utils/situacao'
 import { useAtraso } from '../utils/useAtraso'
 import './EstoquePage.css'
@@ -125,7 +125,10 @@ export function EstoquePage() {
         <div>
           <h1>Estoque</h1>
           <p className="pagina__apoio">
-            {atualizadoEm ? `Saldos às ${formatarHora(atualizadoEm)}` : 'Saldo disponível e situação de cada produto'}
+            {/* Como no Painel: o dia já no carregando e no erro; a hora, só com a resposta */}
+            {atualizadoEm
+              ? `${formatarDiaDaSemana(atualizadoEm)} · saldos às ${formatarHora(atualizadoEm)}`
+              : `${formatarDiaDaSemana(new Date())} · saldo de cada produto`}
           </p>
         </div>
         <div className="pagina__acoes">
