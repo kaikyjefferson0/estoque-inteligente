@@ -14,7 +14,7 @@
 - RN-52: a troca da própria senha aceita no máximo 5 tentativas por minuto por usuário (contadas pelo dono do token, não pelo IP); acima disso responde 429 "Muitas tentativas. Aguarde um minuto e tente de novo." Assim, quem tiver um token roubado não consegue testar a senha atual sem parar. Requisição sem token válido recebe 401 e não conta.
 
 ## Cadastros
-- RN-04: o código de barras do produto é único.
+- RN-04: o código de barras do produto é único e é guardado e buscado sem nenhum espaço em branco. A API remove os espaços (espaço, tabulação, quebra de linha e espaço inseparável, em qualquer posição) antes de validar, ao cadastrar, editar, buscar pelo código e registrar entrada ou saída: "3037 3543" e "30373543" são o mesmo código e contam como repetidos. Por isso o limite de 50 caracteres vale para o código já sem espaços, e um código só com espaços é vazio e recusado (422). Os códigos gravados antes desta regra são limpos por uma migration de dados, que antes confere se a limpeza deixaria dois produtos com o mesmo código; se deixar, ela para sem alterar nada e diz quais produtos colidem. O banco também garante a regra: depois da limpeza, a mesma migration cria uma CHECK que recusa código com espaço, mesmo num INSERT ou UPDATE feito fora da API. Casos de teste em [casos-de-teste.md](casos-de-teste.md): CT-05 (único), CT-52 (busca exata), CT-82 (sem espaços), CT-83 (limpeza dos códigos gravados) e CT-84 (busca das listas).
 - RN-05: o produto tem estoque mínimo, indica se controla validade e, se controlar, quantos dias de antecedência para o alerta.
 - RN-06: no fornecedor só o nome é obrigatório; CNPJ é opcional.
 - RN-19: Admin e operador podem cadastrar e editar produtos e fornecedores.
@@ -61,7 +61,7 @@
 - RN-46: admin e operador veem o dashboard e a lista de estoque.
 
 ## Listas
-- RN-51: as listas da API (produtos, fornecedores, estoque, alertas, usuários e histórico do produto) são paginadas: recebem `limite` (padrão 50, máximo 200; acima disso a API recusa com 422) e `deslocamento` (padrão 0), e devolvem `{ itens, total, limite, deslocamento }`. Os filtros e a busca valem antes da paginação, e o `total` conta todos os itens que passam neles. A ordem de cada lista é fixa (com o id desempatando), para as páginas não repetirem nem pularem itens. Produtos, estoque e fornecedores aceitam `busca` (nome ou código de barras; no fornecedor, nome ou CNPJ).
+- RN-51: as listas da API (produtos, fornecedores, estoque, alertas, usuários e histórico do produto) são paginadas: recebem `limite` (padrão 50, máximo 200; acima disso a API recusa com 422) e `deslocamento` (padrão 0), e devolvem `{ itens, total, limite, deslocamento }`. Os filtros e a busca valem antes da paginação, e o `total` conta todos os itens que passam neles. A ordem de cada lista é fixa (com o id desempatando), para as páginas não repetirem nem pularem itens. Produtos, estoque e fornecedores aceitam `busca` (nome ou código de barras; no fornecedor, nome ou CNPJ). Em produtos e estoque, o nome é comparado com o termo como veio ("Leite integral") e o código de barras com o termo sem espaços (RN-04: "3037 3543" acha "30373543"). Caso de teste: CT-84.
 
 ## Banco de dados
 - RN-50: a API usa um usuário de banco sem poder de alterar a estrutura; no histórico (stock_movements) ele só lê e insere. Só as migrations usam o usuário dono.

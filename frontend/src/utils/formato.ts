@@ -149,6 +149,14 @@ export function agruparCodigoDeBarras(codigo: string): string[] {
   })
 }
 
+/** RN-04: o código de barras não tem espaço em branco. Tira todos, em qualquer posição: espaço,
+ *  tabulação, quebra de linha (a cópia de um código pode trazer uma) e espaço inseparável:
+ *  "3037\r\n3543" -> "30373543". O backend faz o mesmo; aqui é para a busca, o link de cadastro e a
+ *  mensagem mostrarem o código como ele é salvo. */
+export function normalizarCodigoDeBarras(valor: string): string {
+  return valor.replace(/\s/g, '')
+}
+
 /** Junta o número à palavra seguinte com espaço inseparável ("800 g", "12 rolos", "5 L"):
  *  o nome quebra entre palavras, mas nunca entre a quantidade e a unidade. */
 export function semQuebraNaUnidade(texto: string): string {

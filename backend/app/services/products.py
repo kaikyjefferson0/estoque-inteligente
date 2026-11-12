@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.models.batch import Batch
 from app.models.product import Product
 from app.models.supplier import Supplier
+from app.schemas.products import normalizar_codigo_barras
 from app.services import alerts as alertas
 from app.services.paginacao import padrao_de_busca, paginar
 from app.services.teto_demo import TetoDoDemoError, conferir_teto  # noqa: F401  (a rota trata o erro)
@@ -91,7 +92,7 @@ def criar_produto(
     dias_alerta_validade: int | None = None,
     fornecedor_id: int | None = None,
 ) -> Product:
-    codigo_barras = codigo_barras.strip()
+    codigo_barras = normalizar_codigo_barras(codigo_barras)  # RN-04
     conferir_teto(db, Product, "produtos")  # RN-57
     _validar_validade(controla_validade, dias_alerta_validade)
     _validar_fornecedor(db, fornecedor_id)
@@ -111,12 +112,21 @@ def criar_produto(
 
 
 def obter_por_codigo(db: Session, codigo_barras: str) -> Product:
-    """Busca exata pelo código de barras (RN-04: é único), usada pela leitura na entrada e na saída."""
-    codigo = codigo_barras.strip()
+    """Busca exata pelo código de barras (RN-04: é único e sem espaços), usada pela leitura na entrada e na saída."""
+    codigo = normalizar_codigo_barras(codigo_barras)
     produto = db.scalar(select(Product).where(Product.codigo_barras == codigo)) if codigo else None
     if produto is None:
         raise ProdutoNaoEncontradoError(codigo)
     return produto
+
+
+def filtro_nome_ou_codigo(nome, codigo_barras, termo: str):
+    """RN-51 e RN-04: o nome é comparado com o termo como veio ("Leite integral"); o código de
+    barras, com o termo sem espaços, porque é guardado sem eles ("3037 3543" acha "30373543")."""
+    return or_(
+        nome.ilike(padrao_de_busca(termo), escape="\\"),
+        codigo_barras.ilike(padrao_de_busca(normalizar_codigo_barras(termo)), escape="\\"),
+    )
 
 
 def listar_produtos(db: Session, limite: int, deslocamento: int, busca: str | None = None) -> dict:
@@ -124,13 +134,7 @@ def listar_produtos(db: Session, limite: int, deslocamento: int, busca: str | No
     consulta = select(Product).order_by(Product.id)
     termo = (busca or "").strip()
     if termo:
-        padrao = padrao_de_busca(termo)
-        consulta = consulta.where(
-            or_(
-                Product.nome.ilike(padrao, escape="\\"),
-                Product.codigo_barras.ilike(padrao, escape="\\"),
-            )
-        )
+        consulta = consulta.where(filtro_nome_ou_codigo(Product.nome, Product.codigo_barras, termo))
     pagina = paginar(db, consulta, limite, deslocamento)
     return pagina.com_itens([linha[0] for linha in pagina.linhas])
 
@@ -150,7 +154,7 @@ def atualizar_produto(db: Session, produto_id: int, dados: dict) -> Product:
     produto = obter_produto(db, produto_id, travar=True)
     dados = {campo: valor for campo, valor in dados.items() if campo in CAMPOS_EDITAVEIS}
     if "codigo_barras" in dados:
-        dados["codigo_barras"] = dados["codigo_barras"].strip()
+        dados["codigo_barras"] = normalizar_codigo_barras(dados["codigo_barras"])  # RN-04
     if "nome" in dados:
         dados["nome"] = dados["nome"].strip()
 

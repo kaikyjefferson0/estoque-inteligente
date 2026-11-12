@@ -8,6 +8,7 @@ import {
   formatarHora,
   hojeIso,
   lerData,
+  normalizarCodigoDeBarras,
   partesDoDia,
   semQuebraNaUnidade,
   somenteDigitos,
@@ -45,6 +46,35 @@ describe('agruparCodigoDeBarras', () => {
   it('mantém num grupo só o código de outro tamanho ou com letras', () => {
     expect(agruparCodigoDeBarras('12345')).toEqual(['12345'])
     expect(agruparCodigoDeBarras('ABC-123')).toEqual(['ABC-123'])
+  })
+})
+
+// CT-82 / RN-04: o código de barras não tem espaço em branco
+describe('normalizarCodigoDeBarras', () => {
+  it('tira o espaço entre os grupos, como aparecem na tela', () => {
+    expect(normalizarCodigoDeBarras('3037 3543')).toBe('30373543')
+    expect(normalizarCodigoDeBarras('7 896000 000011')).toBe('7896000000011')
+  })
+
+  it('tira a quebra de linha que a cópia dos grupos leva (\\r\\n no Windows, \\n nos outros)', () => {
+    expect(normalizarCodigoDeBarras('3037\r\n3543')).toBe('30373543')
+    expect(normalizarCodigoDeBarras('3037\n3543')).toBe('30373543')
+  })
+
+  it('tira o espaço inseparável, o estreito e a tabulação', () => {
+    expect(normalizarCodigoDeBarras('3037 3543')).toBe('30373543')
+    expect(normalizarCodigoDeBarras('3037 3543')).toBe('30373543')
+    expect(normalizarCodigoDeBarras('3037\t3543')).toBe('30373543')
+  })
+
+  it('tira os espaços das pontas e deixa vazio o que só tem espaço', () => {
+    expect(normalizarCodigoDeBarras('  7896000000011\n')).toBe('7896000000011')
+    expect(normalizarCodigoDeBarras('  \r\n ')).toBe('')
+  })
+
+  it('não mexe em letras, hífens e outros caracteres do código', () => {
+    expect(normalizarCodigoDeBarras('ABC-123')).toBe('ABC-123')
+    expect(normalizarCodigoDeBarras('7896000000011')).toBe('7896000000011')
   })
 })
 

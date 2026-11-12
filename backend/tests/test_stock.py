@@ -702,3 +702,37 @@ def test_situacao_do_lote_bate_com_os_alertas(client, db, token_admin, refrigera
     situacoes = {lote["id"]: lote["situacao"] for lote in saldo(client, token_admin, refrigerante.id)["lotes"]}
     traducao = {"vencido": "vencido", "a_vencer": "vencimento_proximo"}
     assert {(lote_id, traducao[s]) for lote_id, s in situacoes.items() if s != "ok"} == tipos
+
+
+# --- Código de barras com espaços (CT-82) ---
+
+
+def test_ct82_entrada_e_saida_pelo_codigo_com_espacos(client, db, admin, token_operador, detergente):
+    """CT-82 / RN-04: a entrada e a saída acham o produto pelo código com espaços em qualquer posição."""
+    resposta = entrada(client, token_operador, "7891000 000002\r\n", 5)
+    assert resposta.status_code == 201
+    assert resposta.json()["produto_id"] == detergente.id
+
+    saida = client.post(
+        "/stock/exits", headers=auth(token_operador), json={"codigo_barras": "7 891000 000002", "quantidade": 2}
+    )
+    assert saida.status_code == 201
+    assert saida.json()["produto_id"] == detergente.id
+    assert saida.json()["saldo_total"] == 3
+
+    # O service também normaliza, para quem o chama sem passar pelo schema
+    assert service.registrar_entrada(db, admin, " 7891000 000002 ", 1).movimentacao.produto_id == detergente.id
+
+
+def test_ct84_busca_do_estoque_com_espacos(client, db, token_operador, refrigerante, detergente):
+    """CT-84 / RN-51, RN-04: na lista de estoque, o nome com espaço e o código sem os espaços."""
+    headers = auth(token_operador)
+
+    def nomes(busca):
+        resposta = client.get("/stock", headers=headers, params={"busca": busca})
+        assert resposta.status_code == 200
+        return {item["nome"] for item in resposta.json()["itens"]}
+
+    assert nomes("Refrigerante 2") == {"Refrigerante 2L"}
+    assert nomes("7 891000 000002") == {"Detergente"}
+    assert nomes("7891000\r\n00000") == {"Refrigerante 2L", "Detergente"}

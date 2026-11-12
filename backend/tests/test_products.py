@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import pytest
 
 from app.models.product import Product
@@ -199,5 +201,72 @@ def test_ct52_busca_pelo_codigo_de_barras_exato(client, token_admin, token_opera
 
 def test_service_busca_por_codigo_ignora_espacos_e_recusa_vazio(db, refrigerante):
     assert service.obter_por_codigo(db, f"  {refrigerante.codigo_barras} ").id == refrigerante.id
+    # RN-04: também no meio do código, como na cópia dos grupos da tela
+    assert service.obter_por_codigo(db, "7891000\r\n000001").id == refrigerante.id
     with pytest.raises(service.ProdutoNaoEncontradoError):
         service.obter_por_codigo(db, "   ")
+
+
+def test_ct82_cadastro_e_edicao_tiram_os_espacos_do_codigo(client, db, token_operador):
+    """CT-82 / RN-04: espaços no meio do código (como na cópia dos grupos da tela) não são salvos."""
+    headers = auth(token_operador)
+    resposta = client.post("/products", headers=headers, json=dados_refrigerante(codigo_barras=" 3037 3543\r\n"))
+    assert resposta.status_code == 201
+    produto = resposta.json()
+    assert produto["codigo_barras"] == "30373543"
+    assert db.query(Product).filter(Product.codigo_barras == "30373543").count() == 1
+
+    # O mesmo código com outros espaços (quebra de linha, espaço inseparável, tabulação) é repetido
+    for codigo in ("3037\n3543", "3037 3543", "3037\t3543"):
+        repetido = client.post("/products", headers=headers, json=dados_refrigerante(nome="Outro", codigo_barras=codigo))
+        assert repetido.status_code == 409, repr(codigo)
+    assert db.query(Product).count() == 1
+
+    # Na edição também
+    editado = client.patch(f"/products/{produto['id']}", headers=headers, json={"codigo_barras": "7 896000 000011"})
+    assert editado.status_code == 200
+    assert editado.json()["codigo_barras"] == "7896000000011"
+
+    # O tamanho máximo (50) vale para o código sem espaços; só espaços é código vazio
+    em_grupos = " ".join(["1234567890"] * 5)  # 50 dígitos em 54 caracteres
+    longo = client.post("/products", headers=headers, json=dados_refrigerante(nome="Longo", codigo_barras=em_grupos))
+    assert longo.status_code == 201
+    assert longo.json()["codigo_barras"] == "1234567890" * 5
+    vazio = client.post("/products", headers=headers, json=dados_refrigerante(nome="Vazio", codigo_barras="  \r\n "))
+    assert vazio.status_code == 422
+
+
+def test_ct82_busca_pelo_codigo_ignora_espacos(client, token_operador, refrigerante):
+    """CT-82 / RN-04: a busca exata acha o produto pelo código com espaços em qualquer posição."""
+    headers = auth(token_operador)
+    # Em grupos, com a quebra de linha da cópia no Windows, com espaço inseparável e nas pontas
+    for codigo in ("7 891000 000001", "789100\r\n0000001", "7891000 000001", " 7891000000001\n"):
+        resposta = client.get(f"/products/by-barcode/{quote(codigo, safe='')}", headers=headers)
+        assert resposta.status_code == 200, repr(codigo)
+        assert resposta.json()["id"] == refrigerante.id
+
+    # Sem os espaços, parte do código continua sendo só parecida: 404
+    assert client.get(f"/products/by-barcode/{quote('7891 00000000', safe='')}", headers=headers).status_code == 404
+    # Só espaços não é um código: recusado antes de buscar
+    assert client.get("/products/by-barcode/%20%0A%20", headers=headers).status_code == 422
+
+
+def test_ct84_busca_da_lista_de_produtos_com_espacos(client, db, token_operador, refrigerante, detergente):
+    """CT-84 / RN-51, RN-04: o nome é comparado com o termo como veio; o código, sem os espaços."""
+    service.criar_produto(db, nome="Leite integral 1 L", codigo_barras="30373543", estoque_minimo=0)
+    headers = auth(token_operador)
+
+    def nomes(busca):
+        resposta = client.get("/products", headers=headers, params={"busca": busca})
+        assert resposta.status_code == 200
+        return {p["nome"] for p in resposta.json()["itens"]}
+
+    # Nome com espaço continua funcionando (o espaço do nome não é tirado)
+    assert nomes("Leite integral") == {"Leite integral 1 L"}
+    assert nomes("Refrigerante 2") == {"Refrigerante 2L"}
+    assert nomes("Leiteintegral") == set()
+    # Código com espaço, quebra de linha ou espaço inseparável é encontrado, inteiro ou em parte
+    assert nomes("3037 3543") == {"Leite integral 1 L"}
+    assert nomes("3037\r\n3543") == {"Leite integral 1 L"}
+    assert nomes("7 891000 000002") == {"Detergente"}
+    assert nomes("789100 00000") == {"Refrigerante 2L", "Detergente"}

@@ -8,7 +8,8 @@ id, nome, email (único), senha_hash, perfil (admin ou operador), ativo, criado_
 id, nome, cnpj (opcional; único quando informado), criado_em
 
 ## products
-id, nome, codigo_barras (único), estoque_minimo, controla_validade, dias_alerta_validade (opcional), fornecedor_id (opcional, referência a suppliers), criado_em
+id, nome, codigo_barras (único, sem espaço em branco), estoque_minimo, controla_validade, dias_alerta_validade (opcional), fornecedor_id (opcional, referência a suppliers), criado_em
+- CHECK ck_products_codigo_barras_sem_espacos: o código de barras não tem nenhum espaço em branco (RN-04). A condição lista os mesmos caracteres que a API tira (espaço, tabulação, quebras de linha, espaço inseparável e os outros espaços do Unicode), sem usar o `\s` do PostgreSQL, que depende do locale do banco. Criada pela migration 9a0c1c19b39f, depois de limpar os códigos já gravados.
 
 ## batches
 id, produto_id, validade (opcional), quantidade, criado_em

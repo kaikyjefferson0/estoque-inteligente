@@ -99,6 +99,7 @@
 |---|---|---|---|
 | CT-52 | Buscar produto pelo código de barras exato (admin ou operador) | Devolve o produto com esse código; código inexistente ou só parecido devolve 404; sem login devolve 401 | Devolve outro produto com código parecido ou aceita sem login |
 | CT-53 | Consultar o saldo de produto com lote vencido, lote a vencer e lote em dia | Cada lote vem com a situação vencido, a_vencer ou ok, pelas mesmas condições dos alertas e com o "hoje" de Brasília; vencer hoje é a_vencer | Situação diferente da usada nos alertas ou calculada no fuso UTC |
+| CT-82 | Usar o código de barras com espaços no meio (espaço, quebra de linha ou espaço inseparável, como ao copiar "3037 3543" da tela) no cadastro, na edição, na busca exata, na entrada e na saída; e copiar o código mostrado na lista de Produtos e colar na busca da Entrada. Regra: [RN-04](regras-negocio.md) | Os espaços são ignorados: o produto é salvo só com os dígitos, a busca, a entrada e a saída encontram o produto, e o mesmo código com outros espaços conta como repetido (409); só espaços é código vazio (422). O código copiado da lista vai para a área de transferência só com os dígitos e, colado na Entrada, encontra o produto | Código salvo com espaço, busca com 404, entrada ou saída recusada, o mesmo código aceito duas vezes, ou cópia com espaço ou quebra de linha entre os grupos |
 
 ## Senhas e tentativas
 
@@ -126,6 +127,7 @@
 | CT-79 | Sincronizar com usuário inexistente, com o próprio dono, sem as migrations ou sem as variáveis | Recusada com mensagem clara, sem mudar nada | Permissões alteradas ou erro confuso |
 | CT-80 | Em `APP_ENV=production`, subir sem `APP_DB_ROLE`, sem `MIGRATIONS_DATABASE_URL`, com a `DATABASE_URL` em outro usuário ou com o dono como usuário da aplicação | Recusa com mensagem clara, sem mostrar a URL, antes de qualquer migration; fora de produção, um usuário só continua valendo | Sobe mesmo assim ou mostra a URL |
 | CT-81 | Subir a API em produção com o usuário da aplicação sem permissão, com UPDATE no histórico e depois da sincronização | Não sobe nos dois primeiros casos; sobe no terceiro | API no ar com permissões erradas |
+| CT-83 | Aplicar a migration do código de barras com produtos gravados com espaços no código, e depois com dois produtos que ficariam com o mesmo código sem os espaços ("3037 3543" e "30373543"); depois, gravar direto no banco (fora da API) um código com espaço. Regra: [RN-04](regras-negocio.md) | No primeiro caso, os espaços somem de todos os códigos, rodar de novo não muda nada e a CHECK é criada; no segundo, a migration para com uma mensagem que lista os produtos que colidem, sem alterar nenhum código; a gravação direta é recusada pela CHECK ck_products_codigo_barras_sem_espacos | Código com espaço sobrando, código repetido gravado, alteração parcial antes do erro, ou o banco aceitando código com espaço |
 
 ## Listas paginadas
 
@@ -133,6 +135,7 @@
 |---|---|---|---|
 | CT-65 | Listar com mais itens que o limite (ex.: 60 produtos, limite padrão 50) | Devolve só 50 itens, com total 60; a página seguinte (deslocamento 50) traz os 10 restantes, sem repetir nenhum | Devolve todos os itens, total errado ou itens repetidos entre as páginas |
 | CT-66 | Pedir uma lista com limite acima de 200 | Sistema recusa (422) | Lista devolvida com mais de 200 itens |
+| CT-84 | Buscar nas listas de Produtos e de Estoque por um nome com espaço ("Leite integral") e por um código com espaço, quebra de linha ou espaço inseparável ("3037 3543"). Regras: [RN-51 e RN-04](regras-negocio.md) | O nome é encontrado com o espaço; o código é encontrado como se não tivesse os espaços, inteiro ou em parte | Nome com espaço deixa de ser encontrado, ou código com espaço não acha o produto |
 
 ## Demonstração
 
