@@ -5,8 +5,9 @@ import { expect, test, type Browser, type Page } from '@playwright/test'
 // roda este arquivo depois do estoque.spec.ts, que precisa do banco vazio.
 //
 // Em cada largura, percorre as telas e falha se houver rolagem horizontal, algo além da tela,
-// texto grudado (ao copiar ou no leitor de tela), texto sobreposto, alvo de toque abaixo de 44px no celular ou
-// janela maior que a tela. Com E2E_CAPTURAS=<pasta>, guarda uma captura de cada tela (para o ui-reviewer).
+// texto grudado (ao copiar ou no leitor de tela), código de barras com espaço ou quebra na cópia, texto
+// sobreposto, alvo de toque abaixo de 44px no celular ou janela maior que a tela. Com E2E_CAPTURAS=<pasta>,
+// guarda uma captura de cada tela (para o ui-reviewer).
 
 const ADMIN = { email: 'admin.e2e@exemplo.com.br', senha: lerSenha('E2E_SENHA_ADMIN') }
 const API = 'http://127.0.0.1:8001'
@@ -210,6 +211,9 @@ async function medir(page: Page, celular: boolean): Promise<string[]> {
         const a = textos[i - 1]
         const b = textos[i]
         if (a.parentElement === b.parentElement && a.nextSibling === b) continue
+        // Os grupos do mesmo código de barras grudam de propósito (conferido logo abaixo)
+        const codigoA = a.parentElement?.closest('.codigo-barras__digitos')
+        if (codigoA && codigoA === b.parentElement?.closest('.codigo-barras__digitos')) continue
         const fimA = a.data.trimEnd().length - 1
         const inicioB = b.data.length - b.data.trimStart().length
         const intervalo = document.createRange()
@@ -221,6 +225,18 @@ async function medir(page: Page, celular: boolean): Promise<string[]> {
         if (/^[\p{L}\p{N}:;,.!?)%][\p{L}\p{N}(+−-]$/u.test(copiado)) {
           problemas.push(`texto grudado: "${a.data.trim().slice(-24)}" + "${b.data.trim().slice(0, 24)}"`)
         }
+      }
+
+      // No código de barras é o contrário (CT-82): a cópia leva só os dígitos, sem espaço nem quebra
+      // de linha entre os grupos, para colar na busca da Entrada e da Saída
+      for (const digitos of document.querySelectorAll('.codigo-barras__digitos')) {
+        if (!digitos.checkVisibility()) continue
+        const intervalo = document.createRange()
+        intervalo.selectNodeContents(digitos)
+        selecao.removeAllRanges()
+        selecao.addRange(intervalo)
+        const copiado = selecao.toString()
+        if (/\s/.test(copiado)) problemas.push(`código de barras com espaço na cópia: ${JSON.stringify(copiado)}`)
       }
       selecao.removeAllRanges()
     }

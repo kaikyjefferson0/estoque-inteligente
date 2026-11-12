@@ -17,6 +17,13 @@ class Product(Base):
             " OR (NOT controla_validade AND dias_alerta_validade IS NULL)",
             name="ck_products_dias_alerta_validade",
         ),
+        # RN-04: sem espaço em branco (os mesmos caracteres que a API tira). Criada pela migration
+        # 9a0c1c19b39f, que tem a cópia desta condição: as duas precisam ser iguais.
+        CheckConstraint(
+            r"codigo_barras !~ '[\u0009-\u000d\u001c- \u0085   - "
+            r"    　]'",
+            name="ck_products_codigo_barras_sem_espacos",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

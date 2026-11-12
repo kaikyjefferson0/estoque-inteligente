@@ -14,7 +14,7 @@ import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosD
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import type { Produto, SaldoProduto } from '../types/produto'
-import { formatarCnpj } from '../utils/formato'
+import { formatarCnpj, normalizarCodigoDeBarras } from '../utils/formato'
 
 // Ordem dos campos na tela: o foco vai para o primeiro inválido
 const CAMPOS = [
@@ -50,8 +50,9 @@ function validar(v: Valores): ErrosDeCampo<CampoProduto> {
   if (!v.nome.trim()) erros.nome = 'Informe o nome do produto.'
   else if (v.nome.trim().length > MAX_NOME) erros.nome = `Use até ${MAX_NOME} caracteres no nome.`
 
-  if (!v.codigoBarras.trim()) erros.codigo_barras = 'Informe o código de barras.'
-  else if (v.codigoBarras.trim().length > MAX_CODIGO) erros.codigo_barras = `Use até ${MAX_CODIGO} caracteres no código.`
+  const codigo = normalizarCodigoDeBarras(v.codigoBarras)
+  if (!codigo) erros.codigo_barras = 'Informe o código de barras.'
+  else if (codigo.length > MAX_CODIGO) erros.codigo_barras = `Use até ${MAX_CODIGO} caracteres no código.`
 
   const minimo = v.estoqueMinimo.trim()
   if (!minimo) erros.estoque_minimo = 'Informe o estoque mínimo. Use 0 se não quiser alerta de estoque baixo.'
@@ -72,7 +73,8 @@ function validar(v: Valores): ErrosDeCampo<CampoProduto> {
 function paraApi(v: Valores) {
   return {
     nome: v.nome.trim(),
-    codigo_barras: v.codigoBarras.trim(),
+    // RN-04: sem espaços em nenhuma posição (colado da tela, pode vir "3037 3543")
+    codigo_barras: normalizarCodigoDeBarras(v.codigoBarras),
     estoque_minimo: Number(v.estoqueMinimo.trim()),
     controla_validade: v.controlaValidade,
     // RN-26: sem controle de validade, os dias ficam vazios
@@ -295,7 +297,7 @@ function FormularioProduto({
 export function ProdutoNovoPage() {
   useTituloDaPagina('Cadastrar produto')
   const [parametros] = useSearchParams()
-  const codigo = (parametros.get('codigo') ?? '').trim().slice(0, MAX_CODIGO)
+  const codigo = normalizarCodigoDeBarras(parametros.get('codigo') ?? '').slice(0, MAX_CODIGO)
   return (
     <div className="pagina">
       <header className="pagina__cabecalho">

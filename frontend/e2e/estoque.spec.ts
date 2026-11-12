@@ -142,6 +142,25 @@ test('entrada pelo código de barras', async () => {
   await expect(admin.getByRole('row').filter({ hasText: SABAO.nome })).toContainText('Estoque baixo')
 })
 
+test('código copiado da lista de Produtos e colado na busca da Entrada', async () => {
+  // CT-82 / RN-04: a tela mostra o código em grupos ("7 890000 000011"), mas a cópia leva só os
+  // dígitos, e a busca da Entrada acha o produto com o que foi colado
+  await admin.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+  await admin.goto('/produtos')
+  const codigo = admin.getByRole('row').filter({ hasText: IOGURTE.nome }).locator('.codigo-barras__digitos')
+  await codigo.selectText()
+  await admin.keyboard.press('ControlOrMeta+C')
+  await expect.poll(() => admin.evaluate(() => navigator.clipboard.readText())).toBe(IOGURTE.codigo)
+
+  await admin.goto('/entrada')
+  const campo = admin.getByLabel('Código de barras')
+  await campo.focus()
+  await admin.keyboard.press('ControlOrMeta+V')
+  await expect(campo).toHaveValue(IOGURTE.codigo)
+  await campo.press('Enter')
+  await expect(admin.getByRole('heading', { name: IOGURTE.nome })).toBeVisible()
+})
+
 test('saída usando FEFO em dois lotes', async () => {
   // RN-14: o lote que vence em 5 dias está dentro dos 10 dias de alerta
   await admin.goto('/alertas')

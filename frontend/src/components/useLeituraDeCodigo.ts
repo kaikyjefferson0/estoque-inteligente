@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { ApiError, api, mensagemDeErro } from '../api/client'
 import type { Produto, SaldoProduto } from '../types/produto'
+import { normalizarCodigoDeBarras } from '../utils/formato'
 
 export interface ProdutoLido {
   produto: Produto
@@ -9,7 +10,8 @@ export interface ProdutoLido {
   vez: number
 }
 
-/** Estado da leitura por código de barras, com a busca exata GET /products/by-barcode/{codigo}. */
+/** Estado da leitura por código de barras, com a busca exata GET /products/by-barcode/{codigo}.
+ *  O código vai sem espaços (RN-04): colado da tela, ele pode trazer uma quebra de linha entre os grupos. */
 export function useLeituraDeCodigo() {
   const [codigo, setCodigo] = useState('')
   const [erro, setErro] = useState<string | null>(null)
@@ -23,7 +25,7 @@ export function useLeituraDeCodigo() {
 
   const buscar = useCallback(async (valor: string) => {
     const atual = ++leitura.current
-    const termo = valor.trim()
+    const termo = normalizarCodigoDeBarras(valor)
     setLido(null)
     setNaoEncontrado(null)
     if (!termo) {

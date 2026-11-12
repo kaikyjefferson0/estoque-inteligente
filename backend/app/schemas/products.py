@@ -1,12 +1,26 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, StringConstraints, model_validator
 
 MAX_INTEGER = 2_147_483_647  # limite da coluna INTEGER do PostgreSQL
 
+
+def normalizar_codigo_barras(codigo: str) -> str:
+    """RN-04: o código de barras não tem espaço em branco, em nenhuma posição. Tira espaço, tabulação,
+    quebra de linha (copiar o código mostrado em grupos pode trazer uma) e espaço inseparável."""
+    return "".join(codigo.split())
+
+
+def _codigo_sem_espacos(valor: object) -> object:
+    # Roda antes da validação de texto, para o tamanho (1 a 50) valer para o código já sem espaços.
+    # O que não é texto segue igual e é recusado pela validação, com a mensagem de sempre.
+    return normalizar_codigo_barras(valor) if isinstance(valor, str) else valor
+
+
 Nome = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
-CodigoBarras = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)]
+# Usado também na entrada e na saída (schemas.stock) e na busca exata (GET /products/by-barcode)
+CodigoBarras = Annotated[str, BeforeValidator(_codigo_sem_espacos), StringConstraints(min_length=1, max_length=50)]
 EstoqueMinimo = Annotated[int, Field(ge=0, le=MAX_INTEGER)]
 # O valor > 0 e a coerência com controla_validade (RN-26) são checados no service
 DiasAlerta = Annotated[int, Field(le=MAX_INTEGER)]

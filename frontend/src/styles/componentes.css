@@ -94,9 +94,11 @@
   color: var(--cor-texto-suave);
 }
 
-.codigo-barras__digitos {
-  display: inline-flex;
-  gap: var(--esp-1);
+/* Grupos em linha, não em flex: item de flex vira bloco, e o Chrome põe uma quebra de linha entre
+   blocos ao copiar ("3037\r\n3543"). Em linha, a cópia leva só os dígitos e o duplo clique pega o
+   código inteiro. O respiro entre os grupos é margem, do mesmo tamanho do gap de antes. */
+.codigo-barras__digitos > span + span {
+  margin-inline-start: var(--esp-1);
 }
 
 /* ---------- Folha da marca: a data de hoje no cabeçalho e no login ---------- */

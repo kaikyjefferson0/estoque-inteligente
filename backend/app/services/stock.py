@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -10,10 +10,11 @@ from app.models.batch import Batch
 from app.models.product import Product
 from app.models.stock_movement import StockMovement
 from app.models.user import User
+from app.schemas.products import normalizar_codigo_barras
 from app.services import alerts as alertas
 from app.services import condicoes
-from app.services.paginacao import padrao_de_busca, paginar
-from app.services.products import ProdutoNaoEncontradoError, obter_produto
+from app.services.paginacao import paginar
+from app.services.products import ProdutoNaoEncontradoError, filtro_nome_ou_codigo, obter_produto
 
 
 class QuantidadeInvalidaError(Exception):
@@ -122,7 +123,7 @@ def registrar_entrada(
     if quantidade <= 0:
         raise QuantidadeInvalidaError("Informe uma quantidade maior que zero.")
 
-    produto_id = db.scalar(select(Product.id).where(Product.codigo_barras == codigo_barras.strip()))
+    produto_id = db.scalar(select(Product.id).where(Product.codigo_barras == normalizar_codigo_barras(codigo_barras)))
     if produto_id is None:
         raise ProdutoNaoEncontradoError(codigo_barras)
 
@@ -191,7 +192,9 @@ def registrar_saida(db: Session, usuario: User, codigo_barras: str, quantidade: 
     if quantidade <= 0:
         raise QuantidadeInvalidaError("Informe uma quantidade maior que zero.")
 
-    produto = db.scalars(select(Product).where(Product.codigo_barras == codigo_barras.strip())).one_or_none()
+    produto = db.scalars(
+        select(Product).where(Product.codigo_barras == normalizar_codigo_barras(codigo_barras))
+    ).one_or_none()
     if produto is None:
         raise ProdutoNaoEncontradoError(codigo_barras)
 
@@ -346,10 +349,7 @@ def listar_estoque(
         consulta = consulta.where(situacao_col == situacao)
     termo = (busca or "").strip()
     if termo:
-        padrao = padrao_de_busca(termo)
-        consulta = consulta.where(
-            or_(saldos.c.nome.ilike(padrao, escape="\\"), saldos.c.codigo_barras.ilike(padrao, escape="\\"))
-        )
+        consulta = consulta.where(filtro_nome_ou_codigo(saldos.c.nome, saldos.c.codigo_barras, termo))
     pagina = paginar(db, consulta, limite, deslocamento)
     return pagina.com_itens([dict(linha._mapping) for linha in pagina.linhas])
 

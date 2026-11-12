@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.limiter import limitar_escrita_da_demo
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
-from app.schemas.products import ProductCreate, ProductOut, ProductUpdate
+from app.schemas.products import CodigoBarras, ProductCreate, ProductOut, ProductUpdate
 from app.services import products as service
 
 # RN-18: tudo exige login. RN-19: admin e operador cadastram e editam.
@@ -40,7 +40,7 @@ def criar(dados: ProductCreate, db: Annotated[Session, Depends(get_db)]):
 
 @router.get("/by-barcode/{codigo_barras}", response_model=ProductOut)
 def obter_por_codigo(
-    codigo_barras: Annotated[str, Path(max_length=50, description="Código de barras exato")],
+    codigo_barras: Annotated[CodigoBarras, Path(description="Código de barras exato; espaços em qualquer posição são ignorados (RN-04)")],
     db: Annotated[Session, Depends(get_db)],
 ):
     try:
