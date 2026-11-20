@@ -128,7 +128,7 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
           <Campo
             rotulo="E-mail"
             type="email"
-            name="email"
+            name="email" data-cy="login-email"
             autoComplete="username"
             inputMode="email"
             autoFocus
@@ -142,7 +142,7 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
           <Campo
             rotulo="Senha"
             type={mostrarSenha ? 'text' : 'password'}
-            name="senha"
+            name="senha" data-cy="login-senha"
             autoComplete="current-password"
             value={senha}
             onChange={(e) => {
@@ -163,7 +163,7 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
             }
           />
           <Botao
-            type="submit"
+            type="submit" data-cy="login-enviar"
             variante="primaria"
             larguraTotal
             carregando={enviando === 'formulario'}

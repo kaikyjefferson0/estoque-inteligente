@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint -c oxlint.config.ts",
     "test": "vitest run",
+    "test:cypress": "node e2e/rodar.mjs --cypress",
     "test:e2e": "node e2e/rodar.mjs",
     "preview": "vite preview",
     "capturas": "node scripts/capturas-ui.mjs",

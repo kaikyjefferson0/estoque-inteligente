@@ -1,0 +1,7 @@
+{
+  "name": "estoque-inteligente-cypress",
+  "private": true,
+  "devDependencies": {
+    "cypress": "15.0.0"
+  }
+}

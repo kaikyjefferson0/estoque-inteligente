@@ -258,7 +258,7 @@ export function ProdutoDetalhePage() {
         </div>
         {dados && (
           <div className="pagina__acoes">
-            <BotaoLink to={`/produtos/${dados.id}/editar`} variante="primaria" icone={IconPencil}>
+            <BotaoLink to={`/produtos/${dados.id}/editar`} variante="primaria" icone={IconPencil} data-cy="btn-editar">
               Editar
             </BotaoLink>
           </div>
@@ -267,7 +267,7 @@ export function ProdutoDetalhePage() {
 
       {mensagem && (
         <Aviso situacao="ok">
-          <p>{mensagem}</p>
+          <p data-cy="mensagem">{mensagem}</p>
         </Aviso>
       )}
 

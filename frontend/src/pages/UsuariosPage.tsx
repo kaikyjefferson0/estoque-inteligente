@@ -44,7 +44,7 @@ function Identificacao({ usuario, proprio }: { usuario: Usuario; proprio: boolea
 function Acoes({ usuario, proprio, aoDefinirSenha }: { usuario: Usuario; proprio: boolean; aoDefinirSenha: () => void }) {
   return (
     <div className="usuarios__acoes">
-      <BotaoLink to={`/usuarios/${usuario.id}/editar`} variante="fantasma" icone={IconPencil} aria-label={`Editar ${usuario.nome}`}>
+      <BotaoLink to={`/usuarios/${usuario.id}/editar`} variante="fantasma" icone={IconPencil} data-cy="usuario-editar" aria-label={`Editar ${usuario.nome}`}>
         Editar
       </BotaoLink>
       {/* RN-49: a própria senha só muda em Minha conta, com a senha atual */}
@@ -150,7 +150,7 @@ export function UsuariosPage() {
               {dados.map((u) => {
                 const proprio = u.id === logado?.id
                 return (
-                  <tr key={u.id} data-inativo={!u.ativo || undefined}>
+                  <tr key={u.id} data-cy="usuario-linha" data-email={u.email} data-inativo={!u.ativo || undefined}>
                     <td className="usuarios__celula-usuario">
                       <Identificacao usuario={u} proprio={proprio} />
                     </td>

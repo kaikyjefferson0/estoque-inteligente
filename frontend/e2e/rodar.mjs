@@ -32,6 +32,7 @@ const ESPERA_MAXIMA_MS = 60_000
 const RESULTADOS = path.join(FRONTEND, 'test-results', 'e2e')
 // Relatório HTML, gerado só no CI (e2e\playwright.config.ts)
 const RELATORIO = path.join(FRONTEND, 'playwright-report')
+const SO_CYPRESS = process.argv.includes('--cypress')
 const SO_RESPONSIVIDADE = process.argv.includes('--responsividade')
 const PASTA_CAPTURAS = process.argv.find((a) => a.startsWith('--capturas='))?.slice('--capturas='.length)
 
@@ -188,6 +189,18 @@ async function principal() {
       console.error(processo.saida.join('\n'))
       throw new Error(`${processo.nome} encerrou logo depois de subir.`)
     }
+  }
+
+  if (SO_CYPRESS) {
+    const pasta = path.join(FRONTEND, 'e2e', 'cypress')
+    const cli = path.join(pasta, 'node_modules', 'cypress', 'bin', 'cypress')
+    const testes = spawnSync(process.execPath, [cli, 'run'], {
+      cwd: pasta,
+      env: { ...ambienteBase, ...segredos, E2E_SITE: SITE, E2E_PYTHON: PYTHON },
+      stdio: 'inherit',
+    })
+    if (testes.error) throw testes.error
+    return testes.status ?? 1
   }
 
   let codigo = 0

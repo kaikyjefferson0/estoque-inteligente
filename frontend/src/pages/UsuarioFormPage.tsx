@@ -121,7 +121,7 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
       )}
       <Campo
         rotulo="Nome"
-        name="nome"
+        name="nome" data-cy="usuario-nome"
         autoComplete="off"
         autoFocus={!inicial}
         maxLength={MAX_NOME}
@@ -142,7 +142,7 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
       ) : (
         <Campo
           rotulo="E-mail"
-          name="email"
+          name="email" data-cy="usuario-email"
           type="email"
           autoComplete="off"
           spellCheck={false}
@@ -160,7 +160,7 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
         <div className="formulario__grupo">
           <Campo
             rotulo="Senha"
-            name="senha"
+            name="senha" data-cy="usuario-senha"
             type="password"
             autoComplete="new-password"
             maxLength={SENHA_MAXIMA}
@@ -175,7 +175,7 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
           />
           <Campo
             rotulo="Confirme a senha"
-            name="confirmacao"
+            name="confirmacao" data-cy="usuario-confirmacao"
             type="password"
             autoComplete="new-password"
             maxLength={SENHA_MAXIMA}
@@ -215,7 +215,7 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
         {inicial && (
           <CaixaDeMarcar
             rotulo="Usuário ativo"
-            name="ativo"
+            name="ativo" data-cy="usuario-ativo"
             checked={ativo}
             disabled={proprio}
             {...(proprio && { 'aria-describedby': ID_MOTIVO })}
@@ -229,7 +229,7 @@ function FormularioUsuario({ inicial }: { inicial?: Usuario }) {
         )}
       </div>
       <div className="formulario__acoes">
-        <Botao type="submit" variante="primaria" carregando={enviando} textoCarregando={inicial ? 'Salvando…' : 'Cadastrando…'}>
+        <Botao type="submit" data-cy="usuario-salvar" variante="primaria" carregando={enviando} textoCarregando={inicial ? 'Salvando…' : 'Cadastrando…'}>
           {inicial ? 'Salvar alterações' : 'Cadastrar usuário'}
         </Botao>
         <BotaoLink to="/usuarios" variante="fantasma">

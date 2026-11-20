@@ -199,16 +199,17 @@ function FormularioProduto({
   else dicaValidade = 'Marque para registrar a validade em cada entrada e receber alertas de vencimento.'
 
   return (
-    <form className="painel formulario" onSubmit={aoEnviar} noValidate>
+    <form className="painel formulario" onSubmit={aoEnviar} noValidate data-cy="form-produto">
       <AnuncioDeErros mensagem={anuncio} />
       {erroGeral && (
         <Aviso situacao="critico">
-          <p>{erroGeral}</p>
+          <p data-cy="mensagem">{erroGeral}</p>
         </Aviso>
       )}
       <Campo
         rotulo="Nome"
         name="nome"
+        data-cy="input-nome"
         autoComplete="off"
         autoFocus={!inicial}
         maxLength={MAX_NOME}
@@ -219,6 +220,7 @@ function FormularioProduto({
       <Campo
         rotulo="Código de barras"
         name="codigo_barras"
+        data-cy="input-codigo-barras"
         autoComplete="off"
         inputMode="numeric"
         className="numero"
@@ -230,6 +232,7 @@ function FormularioProduto({
       <Campo
         rotulo="Estoque mínimo"
         name="estoque_minimo"
+        data-cy="input-estoque-minimo"
         inputMode="numeric"
         autoComplete="off"
         className="numero"
@@ -255,6 +258,7 @@ function FormularioProduto({
         <CaixaDeMarcar
           rotulo="Controla validade"
           name="controla_validade"
+          data-cy="input-controla-validade"
           checked={valores.controlaValidade}
           disabled={validadeBloqueada || lotes === 'verificando'}
           dica={dicaValidade}
@@ -271,6 +275,7 @@ function FormularioProduto({
           <Campo
             rotulo="Dias de alerta"
             name="dias_alerta_validade"
+            data-cy="input-dias-alerta-validade"
             inputMode="numeric"
             autoComplete="off"
             className="numero"
@@ -283,7 +288,7 @@ function FormularioProduto({
       </div>
 
       <div className="formulario__acoes">
-        <Botao type="submit" variante="primaria" carregando={enviando} textoCarregando={inicial ? 'Salvando…' : 'Cadastrando…'}>
+        <Botao data-cy="btn-salvar" type="submit" variante="primaria" carregando={enviando} textoCarregando={inicial ? 'Salvando…' : 'Cadastrando…'}>
           {inicial ? 'Salvar alterações' : 'Cadastrar produto'}
         </Botao>
         <BotaoLink to={inicial ? `/produtos/${inicial.id}` : '/produtos'} variante="fantasma">

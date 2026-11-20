@@ -39,7 +39,7 @@ export function ConfirmarDialogo({
             <AlertDialog.Cancel asChild>
               <Botao variante="fantasma">Cancelar</Botao>
             </AlertDialog.Cancel>
-            <Botao variante={perigo ? 'perigo' : 'primaria'} carregando={carregando} onClick={aoConfirmar}>
+            <Botao variante={perigo ? 'perigo' : 'primaria'} carregando={carregando} onClick={aoConfirmar} data-cy="dialogo-confirmar">
               {textoConfirmar}
             </Botao>
           </div>

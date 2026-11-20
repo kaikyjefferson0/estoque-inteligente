@@ -150,3 +150,88 @@
 | CT-74 | Abrir o login com e sem `VITE_DEMO` ligada, e "Minha conta" com a conta de demonstração | O botão "Entrar como demonstração" só aparece com `VITE_DEMO` e entra com a conta de demonstração; "Minha conta" esconde a troca de senha e explica o motivo | Botão sem `VITE_DEMO` ou formulário de troca de senha visível para a conta de demonstração |
 | CT-75 | Conta de demonstração faz a 31ª alteração no mesmo minuto | Sistema responde 429 e nada é gravado; uma conta comum, no mesmo ritmo, não é limitada | Alteração gravada ou conta comum bloqueada |
 | CT-76 | Em modo de demonstração, cadastrar o 101º produto ou fornecedor | Sistema recusa (409) e o cadastro não é salvo; fora do modo de demonstração, o cadastro é aceito | Produto ou fornecedor salvo acima do teto |
+
+## Verificação SQL de fornecedores e produtos
+
+### Escopo
+
+- Um fornecedor pode ter vários produtos. O vínculo é opcional no produto (RN-24).
+- O banco garante o formato e a unicidade do CNPJ informado (RN-25), a unicidade e a ausência de espaços no código de barras (RN-04) e as regras de estoque mínimo e validade (RN-05 e RN-26).
+- O `DELETE` do seed recarrega dados fictícios no esquema da aula. A RN-23 continua valendo na aplicação e é coberta pelo CT-23 em [test_cadastros.py](../backend/tests/test_cadastros.py).
+- Produtos e fornecedores deste recorte não têm campo monetário.
+
+### Executar
+
+Na raiz do repositório, crie o banco descartável e aplique o esquema uma vez. Use uma conta PostgreSQL local com permissão para criar bancos e ajuste a conexão ao seu ambiente.
+
+~~~powershell
+createdb estoque_aula_test
+psql -X -v ON_ERROR_STOP=1 -d estoque_aula_test -1 -f db/postgresql/01-schema.sql
+psql -X -v ON_ERROR_STOP=1 -d estoque_aula_test -1 -f db/seed.sql
+psql -X -v ON_ERROR_STOP=1 -d estoque_aula_test -f db/postgresql/02-verificar.sql
+psql -X -v ON_ERROR_STOP=1 -d estoque_aula_test -f db/postgresql/03-verificar-rollback-seed.sql
+~~~
+
+Se estiver usando o serviço `db` do Compose, rode os comandos abaixo no PowerShell.
+
+~~~powershell
+docker compose up -d --wait db
+$usuarioPg = (docker compose exec -T db printenv POSTGRES_USER).Trim()
+docker compose exec -T db createdb -U $usuarioPg estoque_aula_test
+docker compose exec -T db mkdir -p /tmp/estoque-aula/postgresql
+docker compose cp db/seed.sql db:/tmp/estoque-aula/seed.sql
+docker compose cp db/postgresql/01-schema.sql db:/tmp/estoque-aula/postgresql/01-schema.sql
+docker compose cp db/postgresql/02-verificar.sql db:/tmp/estoque-aula/postgresql/02-verificar.sql
+docker compose cp db/postgresql/03-verificar-rollback-seed.sql db:/tmp/estoque-aula/postgresql/03-verificar-rollback-seed.sql
+docker compose exec -T db psql -X -U $usuarioPg -d estoque_aula_test -v ON_ERROR_STOP=1 -1 -f /tmp/estoque-aula/postgresql/01-schema.sql
+docker compose exec -T db psql -X -U $usuarioPg -d estoque_aula_test -v ON_ERROR_STOP=1 -1 -f /tmp/estoque-aula/seed.sql
+docker compose exec -T db psql -X -U $usuarioPg -d estoque_aula_test -v ON_ERROR_STOP=1 -f /tmp/estoque-aula/postgresql/02-verificar.sql
+docker compose exec -T db psql -X -U $usuarioPg -d estoque_aula_test -v ON_ERROR_STOP=1 -f /tmp/estoque-aula/postgresql/03-verificar-rollback-seed.sql
+~~~
+
+O seed apaga a tabela filha antes da pai. A opção `-1` aplica a carga inteira em uma transação. O verificador anuncia cada cenário que passou e desfaz as alterações às linhas no final. Em caso de falha, o `psql` encerra com erro. As sequências podem avançar mesmo quando as inserções são desfeitas.
+
+No CT-V2-26, o PostgreSQL emite um `23514` esperado para a restrição temporária `ck_teste_seed_recusa_produto_6`. Em seguida, a mensagem de aprovação confirma que todas as colunas das duas tabelas voltaram aos valores anteriores. O teste também desfaz os registros que usou na preparação. Para o BD-06 da planilha, o teste de movimentação em [test_alerts.py](../backend/tests/test_alerts.py) já simula uma falha na geração de alertas e verifica a ausência de lote e movimentação após o rollback.
+
+Para reproduzir o CT-V2-24, insira os dois registros extras no banco da aula. Em seguida, execute novamente o seed e o verificador.
+
+~~~sql
+BEGIN;
+INSERT INTO estoque_aula.suppliers (id, nome) VALUES (90, 'Fornecedor extra');
+INSERT INTO estoque_aula.products (id, nome, codigo_barras, fornecedor_id)
+VALUES (90, 'Produto extra', '9000000000000', 90);
+COMMIT;
+~~~
+
+### Matriz de cenários
+
+| ID | Regra ou requisito | Ação | Resultado esperado |
+|---|---|---|---|
+| CT-V2-01 | Seed | Conferir as duas tabelas após a carga | Fornecedores com IDs 1 a 3 e produtos com IDs 1 a 6 |
+| CT-V2-02 | RN-24 e `JOIN` | Consultar produtos com `LEFT JOIN` de fornecedores | Dois produtos de cada um dos fornecedores 1 e 2, e dois produtos sem fornecedor |
+| CT-V2-03 | Relação 1:N e `GROUP BY` | Contar produtos por fornecedor | Totais 2, 2 e 0 para os fornecedores 1, 2 e 3 |
+| CT-V2-04 | RN-04, RN-05, RN-06 e RN-24 | Inserir fornecedor sem CNPJ e produto com código de 50 caracteres sem preencher campos opcionais | IDs automáticos, estoque mínimo 0, controle de validade desligado, dias de alerta e fornecedor nulos |
+| CT-V2-05 | PK | Inserir fornecedor com ID 1 já usado | `23505` · `suppliers_pkey` |
+| CT-V2-06 | PK | Inserir produto com ID 1 já usado e código novo | `23505` · `products_pkey` |
+| CT-V2-07 | RN-25 e CT-25 | Inserir fornecedor com CNPJ já cadastrado | `23505` · `uq_suppliers_cnpj` |
+| CT-V2-08 | RN-04 e CT-05 | Inserir produto com código de barras já cadastrado | `23505` · `ix_products_codigo_barras` |
+| CT-V2-09 | RN-25 e CT-25 | Gravar CNPJ com 13 dígitos | `23514` · `ck_suppliers_cnpj_14_digitos` |
+| CT-V2-10 | RN-25 e CT-25 | Gravar CNPJ com 14 caracteres incluindo uma letra | `23514` · `ck_suppliers_cnpj_14_digitos` |
+| CT-V2-11 | RN-24 e CT-24 | Vincular produto a fornecedor inexistente | `23503` · `fk_products_fornecedor_id_suppliers` |
+| CT-V2-12 | FK com `RESTRICT` | Tentar excluir por SQL um fornecedor que tem produtos vinculados | `23503` · `fk_products_fornecedor_id_suppliers` |
+| CT-V2-13 | RN-05 | Gravar estoque mínimo −1 por SQL | `23514` · `ck_products_estoque_minimo_nao_negativo` |
+| CT-V2-14 | RN-26 e CT-26 | Apagar os dias de alerta de produto que controla validade | `23514` · `ck_products_dias_alerta_validade` |
+| CT-V2-15 | RN-26 e CT-26 | Gravar zero dias de alerta em produto que controla validade | `23514` · `ck_products_dias_alerta_validade` |
+| CT-V2-16 | RN-26 e CT-26 | Gravar um dia de alerta em produto sem controle de validade | `23514` · `ck_products_dias_alerta_validade` |
+| CT-V2-17 | RN-04 e CT-82 | Gravar código com espaço comum | `23514` · `ck_products_codigo_barras_sem_espacos` |
+| CT-V2-18 | RN-04 e CT-82 | Gravar código com tabulação | `23514` · `ck_products_codigo_barras_sem_espacos` |
+| CT-V2-19 | RN-04 e CT-82 | Gravar código com espaço inseparável (U+00A0) | `23514` · `ck_products_codigo_barras_sem_espacos` |
+| CT-V2-20 | RN-06 | Inserir fornecedor com nome nulo | `23502` · coluna `nome` |
+| CT-V2-21 | Campo obrigatório | Inserir produto com nome nulo | `23502` · coluna `nome` |
+| CT-V2-22 | RN-04 | Inserir produto com código de barras nulo | `23502` · coluna `codigo_barras` |
+| CT-V2-23 | RN-04 e valor-limite | Inserir código com 51 caracteres, um acima do limite | `22001` · comprimento excedido |
+| CT-V2-24 | Reexecução do seed | Inserir fornecedor e produto vinculados com ID 90, reaplicar o seed e rodar o verificador | Registros extras removidos e verificador aprovado na segunda rodada |
+| CT-V2-25 | RN-26 e valor-limite | Gravar −1 dia de alerta em produto que controla validade | `23514` · `ck_products_dias_alerta_validade` |
+| CT-V2-26 | Atomicidade do seed | Forçar uma falha ao gravar produtos, depois que o seed apagou as tabelas e reinseriu os fornecedores | `23514` esperado e rollback restaura o conteúdo anterior das duas tabelas |
+
+Para a apresentação, rode o verificador e mostre o nome da restrição junto do SQLSTATE. Para demonstrar um erro diretamente no cliente SQL, use um comando individual da matriz em [02-verificar.sql](../db/postgresql/02-verificar.sql) no banco `estoque_aula_test`.

@@ -59,7 +59,7 @@ export function ProdutosPage() {
         {/* Um único botão primário: sem produtos, ele fica no convite abaixo */}
         {dados && !semProdutos && (
           <div className="pagina__acoes">
-            <BotaoLink to="/produtos/novo" variante="primaria" icone={IconPlus}>
+            <BotaoLink to="/produtos/novo" variante="primaria" icone={IconPlus} data-cy="btn-cadastrar-produto">
               Cadastrar produto
             </BotaoLink>
           </div>
@@ -78,6 +78,7 @@ export function ProdutosPage() {
             rotulo="Buscar por nome ou código de barras"
             type="search"
             name="busca"
+            data-cy="input-busca-produto"
             autoComplete="off"
             maxLength={MAX_BUSCA}
             value={busca}
@@ -103,7 +104,7 @@ export function ProdutosPage() {
             icone={IconBox}
             titulo="Nenhum produto cadastrado"
             acao={
-              <BotaoLink to="/produtos/novo" variante="primaria">
+              <BotaoLink to="/produtos/novo" variante="primaria" data-cy="btn-cadastrar-produto">
                 Cadastrar produto
               </BotaoLink>
             }
@@ -127,7 +128,7 @@ export function ProdutosPage() {
 
       {dados && dados.length > 0 && (
         <div className="painel painel--dados tabela-empilhavel">
-          <table className="tabela produtos" aria-busy={buscando}>
+          <table className="tabela produtos" aria-busy={buscando} data-cy="tabela-produtos">
             <caption className="visualmente-oculto">Produtos cadastrados</caption>
             <thead>
               <tr>
@@ -141,9 +142,9 @@ export function ProdutosPage() {
             </thead>
             <tbody>
               {dados.map((p) => (
-                <tr key={p.id}>
+                <tr key={p.id} data-cy={`produto-${p.id}`}>
                   <td className="produtos__nome tabela__principal">
-                    <Link to={`/produtos/${p.id}`} className="tabela__link">
+                    <Link to={`/produtos/${p.id}`} className="tabela__link" data-cy="link-produto">
                       <NomeEmLista nome={p.nome} />
                     </Link>
                   </td>

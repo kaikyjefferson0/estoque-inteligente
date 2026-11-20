@@ -68,7 +68,7 @@ jobs:
 
       - name: Rodar o pytest
         # -rs mostra no log o motivo de qualquer teste pulado
-        run: pytest -rs
+        run: pytest -rs --cov --cov-report=term-missing
 
   frontend:
     name: Frontend (Vitest)
@@ -163,6 +163,14 @@ jobs:
       - name: Rodar o teste de ponta a ponta
         working-directory: frontend
         run: npm run test:e2e
+
+      - name: Instalar o Cypress
+        working-directory: frontend/e2e/cypress
+        run: npm install --no-package-lock
+
+      - name: Rodar o CRUD de usuários no Cypress
+        working-directory: frontend
+        run: npm run test:cypress
 
       - name: Enviar o relatório do Playwright
         if: failure()

@@ -257,6 +257,27 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
 
 8. **Rodar os testes:** `pytest` (dentro de `backend`), `npm run test` e `npm run test:e2e` (dentro de `frontend`).
 
+   Dentro de `backend`, com as dependências de desenvolvimento instaladas e o PostgreSQL de testes configurado:
+
+   ```powershell
+   python -m pytest unit -v
+   python -m pytest -m integracao -v
+   python -m pytest --cov --cov-report=term-missing --cov-report=html
+   ```
+
+   Os cenários marcados com `integracao` testam cadastro, consulta, edição e desativação de usuário e confirmam que o PostgreSQL rejeita um e-mail duplicado. A cobertura da suíte completa mede linhas e desvios do código em `app`, exige pelo menos 80% no total e gera o relatório em `backend/htmlcov/index.html`.
+
+   Dentro de `frontend`, depois de instalar as dependências do frontend e configurar o banco `_e2e`, execute:
+
+   ```powershell
+   npm install --prefix e2e/cypress --no-package-lock
+   npm run test:cypress
+   ```
+
+   O Cypress recria o banco de testes antes de cada cenário. Ele cobre cadastro, consulta, edição, desativação com bloqueio de acesso e e-mail duplicado. A desativação é a operação de remoção de acesso do cadastro de usuários e responde com HTTP 200.
+
+9. **Apresentação.** Mostre o relacionamento entre fornecedores e produtos e uma violação no PostgreSQL, depois demonstre o cadastro de usuários na tela e execute os testes unitários, de integração e de ponta a ponta. Os comandos do esquema, do seed e das verificações estão no [documento de casos de teste](docs/casos-de-teste.md#verificação-sql-de-fornecedores-e-produtos).
+
 ## Limitações conhecidas
 
 - **Ambiente de demonstração.** O site público roda em planos gratuitos e recria os dados de exemplo uma vez por dia, por isso é uma demonstração, não um ambiente de produção.
