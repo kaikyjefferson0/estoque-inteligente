@@ -136,7 +136,7 @@ Todas as rotas exigem login com token JWT (no cabeçalho `Authorization: Bearer`
 
 **Camadas no backend.** O código é separado por responsabilidade: `routers` só cuidam do HTTP (recebem a requisição e devolvem a resposta), `services` concentram as regras de negócio e as transações, `models` descrevem as tabelas (SQLAlchemy) e `schemas` validam entrada e saída (Pydantic). Nenhuma regra de negócio mora no router.
 
-**As regras também no banco.** Além das validações da aplicação, o PostgreSQL garante as invariantes com *constraints* e *triggers*: o histórico de movimentações não aceita UPDATE nem DELETE, os saldos não ficam negativos e as relações entre produto, lote e movimentação são protegidas. Assim as regras valem mesmo diante de um acesso fora da API.
+**As regras também no banco.** Além das validações da aplicação, o PostgreSQL garante as invariantes com *constraints* e *triggers*: o histórico de movimentações não aceita UPDATE nem DELETE, os saldos não ficam negativos e as relações entre produto, lote e movimentação são protegidas. Assim as regras valem mesmo diante de um acesso fora da API. O esquema e uma carga de exemplo também estão em SQL puro, com exemplos de restrições sendo violadas: veja [`db/README.md`](db/README.md).
 
 **Menor privilégio no banco.** A aplicação pode rodar com dois usuários: o *dono* aplica as migrations (DDL) e um *usuário da aplicação* só tem o necessário para ler e gravar dados, sem poder alterar a estrutura. Isso limita o estrago de uma eventual falha na API. As permissões do usuário da aplicação são sincronizadas e verificadas a cada deploy e, se estiverem erradas, a API não sobe.
 
