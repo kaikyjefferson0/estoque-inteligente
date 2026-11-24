@@ -1,13 +1,16 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi.errors import RateLimitExceeded
 
 from app.core import permissoes
 from app.core.config import settings
 from app.core.database import engine
+from app.core.erros_validacao import erro_de_validacao
 from app.core.limiter import limite_excedido, limiter
+from app.core.tamanho_corpo import LimiteDoCorpo
 from app.routers import alerts, auth, dashboard, products, stock, suppliers, users
 from app.services import demo
 
@@ -48,6 +51,12 @@ def criar_app() -> FastAPI:
     # RN-47 e RN-52: limites de tentativas (o decorador fica na rota)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, limite_excedido)
+    # RN-63: o 422 de validação nunca devolve o valor recebido (que pode ser uma senha)
+    app.add_exception_handler(RequestValidationError, erro_de_validacao)
+
+    # RN-64: teto do corpo da requisição. Registrado antes do CORS, fica por dentro dele, e o 413
+    # sai com os cabeçalhos do CORS, para a tela conseguir ler a mensagem
+    app.add_middleware(LimiteDoCorpo)
 
     # O token vai no cabeçalho Authorization (não em cookie), então não há credenciais de cookie
     app.add_middleware(

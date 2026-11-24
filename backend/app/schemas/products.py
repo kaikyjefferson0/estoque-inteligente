@@ -15,7 +15,8 @@ from pydantic import (
 )
 from pydantic_core import PydanticCustomError
 
-MAX_INTEGER = 2_147_483_647  # limite da coluna INTEGER do PostgreSQL
+from app.schemas.comum import MAX_INTEGER, EntradaBase
+
 # RN-60: limite da coluna NUMERIC(10,2), 8 dígitos inteiros e 2 casas
 PRECO_MAXIMO = Decimal("99999999.99")
 CENTAVO = Decimal("0.01")
@@ -88,10 +89,8 @@ Preco = Annotated[
 PrecoOut = Annotated[Decimal, PlainSerializer(_preco_em_texto, return_type=str, when_used="json")]
 
 
-class ProductCreate(BaseModel):
+class ProductCreate(EntradaBase):
     """RN-05: estoque mínimo, controle de validade e dias de alerta."""
-
-    model_config = ConfigDict(extra="forbid")
 
     nome: Nome
     codigo_barras: CodigoBarras
@@ -102,11 +101,9 @@ class ProductCreate(BaseModel):
     preco: Preco | None = None  # RN-60: sem preço = null
 
 
-class ProductUpdate(BaseModel):
+class ProductUpdate(EntradaBase):
     """Envie só os campos a alterar. dias_alerta_validade, fornecedor_id e preco aceitam null
     (preco: null apaga o preço)."""
-
-    model_config = ConfigDict(extra="forbid")
 
     nome: Nome | None = None
     codigo_barras: CodigoBarras | None = None

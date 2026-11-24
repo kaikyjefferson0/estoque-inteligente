@@ -3,13 +3,12 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-from app.schemas.products import MAX_INTEGER, CodigoBarras
+from app.schemas.comum import MAX_INTEGER, EntradaBase
+from app.schemas.products import CodigoBarras
 
 
-class StockEntryCreate(BaseModel):
+class StockEntryCreate(EntradaBase):
     """Entrada de estoque. As regras de validade (RN-08, RN-31) são checadas no service."""
-
-    model_config = ConfigDict(extra="forbid")
 
     codigo_barras: CodigoBarras
     # RN-07: quantidade maior que zero
@@ -67,10 +66,8 @@ class MovementOut(BaseModel):
     criado_em: datetime
 
 
-class StockExitCreate(BaseModel):
+class StockExitCreate(EntradaBase):
     """Saída de estoque. FEFO e saldo (RN-09, RN-10, RN-36) são checados no service."""
-
-    model_config = ConfigDict(extra="forbid")
 
     codigo_barras: CodigoBarras
     # RN-07: quantidade maior que zero
@@ -99,10 +96,8 @@ class StockExitOut(BaseModel):
 Motivo = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=255)]
 
 
-class StockAdjustmentCreate(BaseModel):
+class StockAdjustmentCreate(EntradaBase):
     """Ajuste de estoque (RN-33): o admin informa o saldo contado do lote."""
-
-    model_config = ConfigDict(extra="forbid")
 
     lote_id: Annotated[int, Field(ge=1, le=MAX_INTEGER)]
     # RN-35: o saldo contado nunca é negativo
