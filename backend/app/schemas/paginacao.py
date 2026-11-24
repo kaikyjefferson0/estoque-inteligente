@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import Query
 from pydantic import BaseModel
 
-from app.schemas.products import MAX_INTEGER
+from app.schemas.comum import MAX_INTEGER
 
 # RN-51: 50 por página, no máximo 200
 LIMITE_PADRAO = 50

@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, StringConstraints, WrapValidator, model_validator
 from pydantic_core import PydanticCustomError, ValidationError
 
+from app.schemas.comum import EntradaBase
+
 SENHA_MINIMA = 8
 SENHA_MAXIMA = 128
 MENSAGEM_EMAIL_INVALIDO = "Informe um e-mail válido, como nome@empresa.com.br."
@@ -23,19 +25,15 @@ SenhaNova = Annotated[str, Field(min_length=SENHA_MINIMA, max_length=SENHA_MAXIM
 Email = Annotated[EmailStr, WrapValidator(_email_em_portugues)]
 
 
-class UserCreate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class UserCreate(EntradaBase):
     nome: Nome
     email: Email
     senha: SenhaNova
     perfil: Perfil
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(EntradaBase):
     """Só nome, perfil e ativo podem ser alterados; qualquer outro campo é recusado."""
-
-    model_config = ConfigDict(extra="forbid")
 
     nome: Nome | None = None
     perfil: Perfil | None = None
@@ -49,10 +47,8 @@ class UserUpdate(BaseModel):
         return self
 
 
-class UserPasswordIn(BaseModel):
+class UserPasswordIn(EntradaBase):
     """RN-49: o admin define a nova senha de outro usuário."""
-
-    model_config = ConfigDict(extra="forbid")
 
     senha_nova: SenhaNova
 

@@ -110,6 +110,28 @@ describe('mensagens de erro', () => {
     expect(erro.campos).toEqual({ senha_atual: 'A senha atual não confere.', 'query.limite': 'Use até 200.' })
   })
 
+  it('RN-63: o 422 só com loc, msg e type continua marcando o campo', async () => {
+    simularFetch(
+      resposta(422, {
+        detail: [{ loc: ['body', 'nome'], msg: 'O texto tem um caractere invisível que não é aceito (NUL).', type: 'texto_com_nul' }],
+      }),
+    )
+    const erro = await erroDe(api('/suppliers', { body: {} }))
+    expect(erro.status).toBe(422)
+    expect(erro.campos).toEqual({ nome: 'O texto tem um caractere invisível que não é aceito (NUL).' })
+  })
+
+  it('RN-64: no 413, mostra a mensagem da API ou, sem ela, a do status', async () => {
+    const mensagem = 'O envio passou do tamanho máximo aceito (64 KB). Confira os dados e tente de novo.'
+    simularFetch(resposta(413, { detail: mensagem }))
+    expect((await erroDe(api('/products', { body: {} }))).message).toBe(mensagem)
+
+    simularFetch(resposta(413, {}))
+    expect((await erroDe(api('/products', { body: {} }))).message).toBe(
+      'O envio passou do tamanho máximo aceito. Confira os dados e tente de novo.',
+    )
+  })
+
   it('sem detail, usa a mensagem do status', async () => {
     simularFetch(resposta(403, {}))
     expect((await erroDe(api('/users'))).message).toBe(

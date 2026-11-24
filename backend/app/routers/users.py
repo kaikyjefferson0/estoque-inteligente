@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import require_admin
 from app.models.user import User
+from app.schemas.comum import IdNaUrl
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.users import UserCreate, UserOut, UserPasswordIn, UserUpdate
 from app.services import users as service
@@ -28,7 +29,7 @@ def criar(dados: UserCreate, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.get("/{usuario_id}", response_model=UserOut)
-def obter(usuario_id: int, db: Annotated[Session, Depends(get_db)]):
+def obter(usuario_id: IdNaUrl, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.obter_usuario(db, usuario_id)
     except service.UsuarioNaoEncontradoError:
@@ -37,7 +38,7 @@ def obter(usuario_id: int, db: Annotated[Session, Depends(get_db)]):
 
 @router.patch("/{usuario_id}", response_model=UserOut)
 def atualizar(
-    usuario_id: int,
+    usuario_id: IdNaUrl,
     dados: UserUpdate,
     admin: Annotated[User, Depends(require_admin)],
     db: Annotated[Session, Depends(get_db)],
@@ -52,7 +53,7 @@ def atualizar(
 
 @router.post("/{usuario_id}/password", status_code=status.HTTP_204_NO_CONTENT)
 def definir_senha(
-    usuario_id: int,
+    usuario_id: IdNaUrl,
     dados: UserPasswordIn,
     admin: Annotated[User, Depends(require_admin)],
     db: Annotated[Session, Depends(get_db)],

@@ -7,6 +7,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
 from app.core.limiter import limitar_escrita_da_demo
 from app.models.user import User
+from app.schemas.comum import IdNaUrl, SemNul
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.stock import (
     ExitBatchOut,
@@ -33,7 +34,7 @@ def listar_estoque(
     db: Annotated[Session, Depends(get_db)],
     pagina: Annotated[Paginacao, Depends(paginacao)],
     situacao: Situacao | None = None,
-    busca: Annotated[str | None, Query(max_length=120, description="Parte do nome ou do código de barras")] = None,
+    busca: Annotated[str | None, SemNul, Query(max_length=120, description="Parte do nome ou do código de barras")] = None,
 ):
     return service.listar_estoque(db, pagina.limite, pagina.deslocamento, situacao=situacao, busca=busca)
 
@@ -129,7 +130,7 @@ def registrar_ajuste(
 
 
 @router.get("/products/{produto_id}/stock", response_model=ProductStockOut)
-def consultar_saldo(produto_id: int, db: Annotated[Session, Depends(get_db)]):
+def consultar_saldo(produto_id: IdNaUrl, db: Annotated[Session, Depends(get_db)]):
     try:
         saldo = service.consultar_saldo(db, produto_id)
     except service.ProdutoNaoEncontradoError:
@@ -144,7 +145,7 @@ def consultar_saldo(produto_id: int, db: Annotated[Session, Depends(get_db)]):
 
 @router.get("/products/{produto_id}/movements", response_model=Pagina[MovementOut])
 def listar_movimentacoes(
-    produto_id: int,
+    produto_id: IdNaUrl,
     db: Annotated[Session, Depends(get_db)],
     pagina: Annotated[Paginacao, Depends(paginacao)],
 ):

@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [navigate])
 
   const entrar = useCallback(async (email: string, senha: string, aoAcordar?: () => void) => {
-    // OAuth2PasswordRequestForm: o campo username recebe o e-mail
+    // Formulário OAuth2 (FormularioLogin na API): o campo username recebe o e-mail
     const form = new URLSearchParams({ username: email, password: senha })
     // O login pode se repetir: um 503 do Render nem chega à API (e não conta no limite da RN-47)
     const token = await api<Token>('/auth/login', { method: 'POST', form, aoAcordar })

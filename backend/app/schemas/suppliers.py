@@ -3,24 +3,22 @@ from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, StringConstraints, model_validator
 
+from app.schemas.comum import EntradaBase
+
 Nome = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
 # Aceita com ou sem pontuação; o service valida e guarda só os 14 números (RN-25)
 CnpjEntrada = Annotated[str, StringConstraints(strip_whitespace=True, max_length=20)]
 
 
-class SupplierCreate(BaseModel):
+class SupplierCreate(EntradaBase):
     """RN-06: só o nome é obrigatório."""
-
-    model_config = ConfigDict(extra="forbid")
 
     nome: Nome
     cnpj: CnpjEntrada | None = None
 
 
-class SupplierUpdate(BaseModel):
+class SupplierUpdate(EntradaBase):
     """Só nome e CNPJ podem ser alterados; cnpj null remove o CNPJ."""
-
-    model_config = ConfigDict(extra="forbid")
 
     nome: Nome | None = None
     cnpj: CnpjEntrada | None = None
@@ -32,10 +30,8 @@ class SupplierUpdate(BaseModel):
         return self
 
 
-class SupplierReplace(BaseModel):
+class SupplierReplace(EntradaBase):
     """RN-19: PUT, o fornecedor inteiro. As duas chaves são obrigatórias; cnpj null deixa sem CNPJ (RN-06)."""
-
-    model_config = ConfigDict(extra="forbid")
 
     nome: Nome
     cnpj: CnpjEntrada | None

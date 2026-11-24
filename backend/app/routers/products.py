@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.limiter import limitar_escrita_da_demo
+from app.schemas.comum import IdNaUrl, SemNul
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.products import CodigoBarras, ProductCreate, ProductOut, ProductUpdate
 from app.services import products as service
@@ -19,7 +20,7 @@ router = APIRouter(prefix="/products", tags=["products"], dependencies=[Depends(
 def listar(
     db: Annotated[Session, Depends(get_db)],
     pagina: Annotated[Paginacao, Depends(paginacao)],
-    busca: Annotated[str | None, Query(max_length=120, description="Parte do nome ou do código de barras")] = None,
+    busca: Annotated[str | None, SemNul, Query(max_length=120, description="Parte do nome ou do código de barras")] = None,
 ):
     return service.listar_produtos(db, pagina.limite, pagina.deslocamento, busca)
 
@@ -40,7 +41,7 @@ def criar(dados: ProductCreate, db: Annotated[Session, Depends(get_db)]):
 
 @router.get("/by-barcode/{codigo_barras}", response_model=ProductOut)
 def obter_por_codigo(
-    codigo_barras: Annotated[CodigoBarras, Path(description="Código de barras exato; espaços em qualquer posição são ignorados (RN-04)")],
+    codigo_barras: Annotated[CodigoBarras, SemNul, Path(description="Código de barras exato; espaços em qualquer posição são ignorados (RN-04)")],
     db: Annotated[Session, Depends(get_db)],
 ):
     try:
@@ -50,7 +51,7 @@ def obter_por_codigo(
 
 
 @router.get("/{produto_id}", response_model=ProductOut)
-def obter(produto_id: int, db: Annotated[Session, Depends(get_db)]):
+def obter(produto_id: IdNaUrl, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.obter_produto(db, produto_id)
     except service.ProdutoNaoEncontradoError:
@@ -58,7 +59,7 @@ def obter(produto_id: int, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.patch("/{produto_id}", response_model=ProductOut, dependencies=[Depends(get_current_user), Depends(limitar_escrita_da_demo)])  # RN-56
-def atualizar(produto_id: int, dados: ProductUpdate, db: Annotated[Session, Depends(get_db)]):
+def atualizar(produto_id: IdNaUrl, dados: ProductUpdate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.atualizar_produto(db, produto_id, dados.model_dump(exclude_unset=True))
     except service.ProdutoNaoEncontradoError:

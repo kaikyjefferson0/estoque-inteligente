@@ -1,7 +1,6 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -9,7 +8,7 @@ from app.core.deps import get_current_user
 from app.core.limiter import LIMITE_LOGIN, LIMITE_TROCA_SENHA, limiter, usuario_do_token
 from app.core.security import create_access_token
 from app.models.user import User
-from app.schemas.auth import ChangePasswordIn, TokenOut
+from app.schemas.auth import ChangePasswordIn, FormularioLogin, TokenOut
 from app.schemas.users import UserOut
 from app.services import auth as service
 
@@ -28,7 +27,7 @@ def erro_de_campo(campo: str, mensagem: str) -> HTTPException:
 @limiter.limit(LIMITE_LOGIN)  # RN-47
 def login(
     request: Request,  # usado pelo limiter para achar o IP
-    form: Annotated[OAuth2PasswordRequestForm, Depends()],
+    form: Annotated[FormularioLogin, Depends()],
     db: Annotated[Session, Depends(get_db)],
 ):
     # O campo username do formulário OAuth2 recebe o e-mail

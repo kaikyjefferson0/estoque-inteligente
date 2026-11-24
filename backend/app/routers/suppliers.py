@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
 from app.core.limiter import limitar_escrita_da_demo
+from app.schemas.comum import IdNaUrl, SemNul
 from app.schemas.paginacao import Pagina, Paginacao, paginacao
 from app.schemas.suppliers import SupplierCreate, SupplierOut, SupplierReplace, SupplierUpdate
 from app.services import suppliers as service
@@ -21,7 +22,7 @@ router = APIRouter(prefix="/suppliers", tags=["suppliers"], dependencies=[Depend
 def listar(
     db: Annotated[Session, Depends(get_db)],
     pagina: Annotated[Paginacao, Depends(paginacao)],
-    busca: Annotated[str | None, Query(max_length=120, description="Parte do nome ou do CNPJ")] = None,
+    busca: Annotated[str | None, SemNul, Query(max_length=120, description="Parte do nome ou do CNPJ")] = None,
 ):
     return service.listar_fornecedores(db, pagina.limite, pagina.deslocamento, busca)
 
@@ -39,7 +40,7 @@ def criar(dados: SupplierCreate, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.get("/{fornecedor_id}", response_model=SupplierOut)
-def obter(fornecedor_id: int, db: Annotated[Session, Depends(get_db)]):
+def obter(fornecedor_id: IdNaUrl, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.obter_fornecedor(db, fornecedor_id)
     except service.FornecedorNaoEncontradoError:
@@ -47,7 +48,7 @@ def obter(fornecedor_id: int, db: Annotated[Session, Depends(get_db)]):
 
 
 @router.patch("/{fornecedor_id}", response_model=SupplierOut, dependencies=[Depends(get_current_user), Depends(limitar_escrita_da_demo)])  # RN-56
-def atualizar(fornecedor_id: int, dados: SupplierUpdate, db: Annotated[Session, Depends(get_db)]):
+def atualizar(fornecedor_id: IdNaUrl, dados: SupplierUpdate, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.atualizar_fornecedor(db, fornecedor_id, dados.model_dump(exclude_unset=True))
     except service.FornecedorNaoEncontradoError:
@@ -59,7 +60,7 @@ def atualizar(fornecedor_id: int, dados: SupplierUpdate, db: Annotated[Session, 
 
 
 @router.put("/{fornecedor_id}", response_model=SupplierOut, dependencies=[Depends(get_current_user), Depends(limitar_escrita_da_demo)])  # RN-56
-def substituir(fornecedor_id: int, dados: SupplierReplace, db: Annotated[Session, Depends(get_db)]):
+def substituir(fornecedor_id: IdNaUrl, dados: SupplierReplace, db: Annotated[Session, Depends(get_db)]):
     try:
         return service.substituir_fornecedor(db, fornecedor_id, nome=dados.nome, cnpj=dados.cnpj)
     except service.FornecedorNaoEncontradoError:
@@ -77,7 +78,7 @@ def substituir(fornecedor_id: int, dados: SupplierReplace, db: Annotated[Session
     response_class=Response,
     dependencies=[Depends(require_admin), Depends(limitar_escrita_da_demo)],
 )
-def excluir(fornecedor_id: int, db: Annotated[Session, Depends(get_db)]):
+def excluir(fornecedor_id: IdNaUrl, db: Annotated[Session, Depends(get_db)]):
     try:
         service.excluir_fornecedor(db, fornecedor_id)
     except service.FornecedorNaoEncontradoError:
