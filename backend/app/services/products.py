@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy import exists, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -18,6 +20,7 @@ CAMPOS_EDITAVEIS = (
     "controla_validade",
     "dias_alerta_validade",
     "fornecedor_id",
+    "preco",
 )
 
 
@@ -97,6 +100,7 @@ def criar_produto(
     controla_validade: bool = False,
     dias_alerta_validade: int | None = None,
     fornecedor_id: int | None = None,
+    preco: Decimal | None = None,
 ) -> Product:
     codigo_barras = normalizar_codigo_barras(codigo_barras)  # RN-04
     conferir_teto(db, Product, "produtos")  # RN-57
@@ -112,6 +116,7 @@ def criar_produto(
         controla_validade=controla_validade,
         dias_alerta_validade=dias_alerta_validade,
         fornecedor_id=fornecedor_id,
+        preco=preco,  # RN-60: validado no schema; o banco garante o >= 0 (ck_products_preco_nao_negativo)
     )
     db.add(produto)
     return _salvar(db, produto, codigo_barras)

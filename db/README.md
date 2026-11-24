@@ -13,7 +13,7 @@ exemplo (seed), em SQL puro, para PostgreSQL 18.
 **A fonte oficial do esquema continua sendo o Alembic** (`backend\alembic\versions`). A API, os
 testes, o teste de ponta a ponta e o deploy criam o banco pelas migrations, nunca por estes scripts.
 
-O `01-schema.sql` é uma cópia legível do banco migrado até a revisão `9a0c1c19b39f` (head),
+O `01-schema.sql` é uma cópia legível do banco migrado até a revisão `30a97c4f4643` (head),
 gerada com `pg_dump --schema-only` e organizada à mão. Ele é igual ao banco das migrations, com
 duas exceções de propósito:
 
@@ -68,7 +68,7 @@ Os dois scripts precisam rodar com o **dono** das tabelas (`estoque`), não com 
 | 4 Café torrado 500 g | estoque normal, com um alerta antigo já resolvido (RN-39) |
 | 5 Iogurte natural 170 g | um lote **vencido** há 2 dias (RN-15) e outro bom |
 | 6 Detergente neutro 500 ml | **ajuste** de -2 com motivo e saldos anterior e novo (RN-33, RN-34) |
-| 7 Sabonete 90 g | sem fornecedor (RN-24) e estoque mínimo 0 |
+| 7 Sabonete 90 g | sem fornecedor (RN-24), estoque mínimo 0 e **sem preço** (`preco` NULL, RN-60) |
 | 8 Pão de forma 500 g | controla validade, lote dentro da validade |
 
 Também há 2 usuários, 3 fornecedores, 10 lotes, 13 movimentações e 5 alertas. O saldo de cada lote é
@@ -126,7 +126,36 @@ docker compose exec -T db psql -U estoque -d estoque_sql -c "INSERT INTO product
 ```
 ```
 ERROR:  new row for relation "products" violates check constraint "ck_products_estoque_minimo_nao_negativo"
-DETAIL:  Failing row contains (9, Produto teste, 7899999999999, -1, f, null, null, <data e hora>).
+DETAIL:  Failing row contains (9, Produto teste, 7899999999999, -1, f, null, null, <data e hora>, null).
+```
+
+**CHECK**: preço negativo (RN-60). Sem preço (NULL) é aceito; negativo, nunca, nem no INSERT nem no UPDATE.
+
+```bat
+docker compose exec -T db psql -U estoque -d estoque_sql -c "INSERT INTO products (nome, codigo_barras, preco) VALUES ('Produto teste', '7899999999999', -0.01)"
+```
+```
+ERROR:  new row for relation "products" violates check constraint "ck_products_preco_nao_negativo"
+DETAIL:  Failing row contains (9, Produto teste, 7899999999999, 0, f, null, null, <data e hora>, -0.01).
+```
+
+```bat
+docker compose exec -T db psql -U estoque -d estoque_sql -c "UPDATE products SET preco = -1 WHERE id = 1"
+```
+```
+ERROR:  new row for relation "products" violates check constraint "ck_products_preco_nao_negativo"
+DETAIL:  Failing row contains (1, Leite integral 1 L, 7890000000011, 10, t, 7, 1, <data e hora>, -1.00).
+```
+
+Por que `NUMERIC` e não `float`: a soma de 0,10 com 0,20 é exata no `NUMERIC` e erra no `float8`.
+
+```bat
+docker compose exec -T db psql -U estoque -d estoque_sql -c "SELECT 0.10::numeric(10,2) + 0.20::numeric(10,2) AS numeric, 0.10::float8 + 0.20::float8 AS float8"
+```
+```
+ numeric |       float8
+---------+---------------------
+    0.30 | 0.30000000000000004
 ```
 
 **FK**: fornecedor que não existe (RN-24).

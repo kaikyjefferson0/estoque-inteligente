@@ -9,7 +9,9 @@ id, nome, cnpj (opcional; único quando informado), criado_em
 - Pode ser excluído só sem produtos vinculados (RN-59). A FK `fk_products_fornecedor_id_suppliers` (RESTRICT) garante isso no banco: a API transforma a recusa (23503) em 409 na exclusão e em 422 no cadastro ou na edição do produto (RN-24). Depois da exclusão, o CNPJ fica livre (RN-25).
 
 ## products
-id, nome, codigo_barras (único, sem espaço em branco), estoque_minimo, controla_validade, dias_alerta_validade (opcional), fornecedor_id (opcional, referência a suppliers com RESTRICT), criado_em
+id, nome, codigo_barras (único, sem espaço em branco), estoque_minimo, controla_validade, dias_alerta_validade (opcional), fornecedor_id (opcional, referência a suppliers com RESTRICT), criado_em, preco (opcional, NUMERIC(10,2))
+- preco: NUMERIC(10,2), nulo quando o produto não tem preço (RN-60). Valor exato, nunca float: até 99.999.999,99, com 2 casas. A API recebe e devolve como texto ("79.90"). Criada pela migration 30a97c4f4643 só com ADD COLUMN, sem preenchimento: os produtos cadastrados antes ficam sem preço. Não entra em nenhuma regra de estoque, nos alertas nem no painel.
+- CHECK ck_products_preco_nao_negativo: `preco >= 0` (RN-60). NULL passa (sem preço); negativo é recusado mesmo num INSERT ou UPDATE feito fora da API.
 - CHECK ck_products_codigo_barras_sem_espacos: o código de barras não tem nenhum espaço em branco (RN-04). A condição lista os mesmos caracteres que a API tira (espaço, tabulação, quebras de linha, espaço inseparável e os outros espaços do Unicode), sem usar o `\s` do PostgreSQL, que depende do locale do banco. Criada pela migration 9a0c1c19b39f, depois de limpar os códigos já gravados.
 
 ## batches

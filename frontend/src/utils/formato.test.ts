@@ -6,10 +6,13 @@ import {
   formatarDataHora,
   formatarDiaDaSemana,
   formatarHora,
+  formatarPreco,
   hojeIso,
   lerData,
+  lerPreco,
   normalizarCodigoDeBarras,
   partesDoDia,
+  precoParaCampo,
   semQuebraNaUnidade,
   somenteDigitos,
 } from './formato'
@@ -158,5 +161,116 @@ describe('semQuebraNaUnidade', () => {
   it('não mexe no resto do texto', () => {
     expect(semQuebraNaUnidade('Pão de forma tradicional')).toBe('Pão de forma tradicional')
     expect(semQuebraNaUnidade('Lote 14, validade 01/11/2026')).toBe('Lote 14, validade 01/11/2026')
+  })
+})
+
+// CT-94 / RN-60: o preço vai para a API como texto com ponto e 2 casas, sem passar por float
+// Espaço inseparável, o que o Intl põe entre o R$ e o número
+const NBSP = String.fromCharCode(0xa0)
+
+describe('lerPreco (campo Preço do produto)', () => {
+  it.each([
+    ['12,50', '12.50'],
+    ['12,5', '12.50'],
+    ['12,', '12.00'],
+    [',99', '0.99'],
+    ['0,10', '0.10'],
+    ['0', '0.00'],
+    ['0,01', '0.01'],
+    ['7', '7.00'],
+    ['1.234,56', '1234.56'],
+    ['1.234.567,89', '1234567.89'],
+    ['99.999.999,99', '99999999.99'],
+    ['99999999,99', '99999999.99'],
+    ['007,50', '7.50'],
+    ['  12,50 ', '12.50'],
+    ['R$ 12,50', '12.50'],
+    [`R$${NBSP}12,50`, '12.50'], // espaço inseparável, como o Intl escreve
+  ])('vírgula: "%s" vai como "%s"', (digitado, enviado) => {
+    expect(lerPreco(digitado)).toEqual({ ok: true, valor: enviado })
+  })
+
+  it.each([
+    ['12.5', '12.50'],
+    ['12.50', '12.50'],
+    ['12.', '12.00'],
+    ['.5', '0.50'],
+    ['12.3', '12.30'],
+  ])('ponto: "%s" vai como "%s"', (digitado, enviado) => {
+    expect(lerPreco(digitado)).toEqual({ ok: true, valor: enviado })
+  })
+
+  // "12.345" seria doze mil no pt-BR ou 12 e uns centavos no estilo americano: em vez de adivinhar
+  // (e gravar mil vezes mais ou menos), pede a vírgula
+  it.each(['12.345', '1.234', '1.500', '1.234.567', '99.999.999'])('ponto em grupos de 3, sem vírgula ("%s"), é ambíguo e recusado', (digitado) => {
+    expect(lerPreco(digitado)).toEqual({
+      ok: false,
+      erro: 'Ficou ambíguo. Use vírgula nos centavos (12,34) ou escreva sem ponto (12345).',
+    })
+  })
+
+  it.each(['', '   ', 'R$', 'R$ '])('vazio ("%s") vai como null, sem preço', (digitado) => {
+    expect(lerPreco(digitado)).toEqual({ ok: true, valor: null })
+  })
+
+  it.each(['-1', '-0,01', '−12,50', ' -5'])('negativo ("%s") é recusado', (digitado) => {
+    expect(lerPreco(digitado)).toEqual({ ok: false, erro: 'O preço não pode ser negativo. Use 0 ou mais, ou deixe vazio.' })
+  })
+
+  it.each(['12,345', '0,001', '1.234,567', '0.001', '12.3456'])('3 casas ou mais ("%s") são recusadas', (digitado) => {
+    expect(lerPreco(digitado)).toEqual({ ok: false, erro: 'Use no máximo 2 casas depois da vírgula. Exemplo: 12,50.' })
+  })
+
+  it.each(['100.000.000,00', '100000000', '123456789,5'])('acima de 99.999.999,99 ("%s") é recusado', (digitado) => {
+    expect(lerPreco(digitado)).toEqual({ ok: false, erro: 'Use um preço de até R$ 99.999.999,99.' })
+  })
+
+  it.each(['abc', '12,50,1', '12.34,56', '1,234.56', ',', '.', '1e3', '12a', '0x10', 'NaN', 'Infinity', '+5'])(
+    'formato inválido ("%s") é recusado',
+    (digitado) => {
+      expect(lerPreco(digitado)).toEqual({ ok: false, erro: 'Use só números, com vírgula nos centavos. Exemplo: 12,50.' })
+    },
+  )
+
+  it('não perde centavo em valores que o float erra', () => {
+    // 0.1 + 0.2 em float é 0.30000000000000004; aqui o texto vai inteiro
+    expect(lerPreco('0,30')).toEqual({ ok: true, valor: '0.30' })
+    expect(lerPreco('99.999.999,99')).toEqual({ ok: true, valor: '99999999.99' })
+    expect(lerPreco('1,10')).toEqual({ ok: true, valor: '1.10' })
+  })
+})
+
+describe('precoParaCampo (editar o preço salvo)', () => {
+  it('troca o ponto pela vírgula e põe os pontos de milhar, como na lista', () => {
+    expect(precoParaCampo('1234.50')).toBe('1.234,50')
+    expect(precoParaCampo('99999999.99')).toBe('99.999.999,99')
+    expect(precoParaCampo('123.45')).toBe('123,45')
+    expect(precoParaCampo('0.00')).toBe('0,00')
+  })
+
+  it('sem preço, o campo fica vazio', () => {
+    expect(precoParaCampo(null)).toBe('')
+  })
+
+  it('o que vai para o campo volta igual para a API', () => {
+    for (const preco of ['0.00', '0.01', '12.50', '1234.56', '123456.78', '99999999.99']) {
+      expect(lerPreco(precoParaCampo(preco))).toEqual({ ok: true, valor: preco })
+    }
+  })
+})
+
+describe('formatarPreco (lista e detalhe)', () => {
+  it.each([
+    ['12.50', `R$${NBSP}12,50`],
+    ['0.00', `R$${NBSP}0,00`],
+    ['0.01', `R$${NBSP}0,01`],
+    ['1234.56', `R$${NBSP}1.234,56`],
+    ['99999999.99', `R$${NBSP}99.999.999,99`],
+  ])('"%s" sai como "%s", com espaço inseparável depois do R$', (preco, texto) => {
+    expect(formatarPreco(preco)).toBe(texto)
+  })
+
+  it('sem preço, mostra "Sem preço", como o "Sem fornecedor"', () => {
+    expect(formatarPreco(null)).toBe('Sem preço')
   })
 })

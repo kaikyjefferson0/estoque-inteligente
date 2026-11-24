@@ -9,6 +9,7 @@ from collections.abc import Generator, Iterator
 from contextlib import contextmanager
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -265,6 +266,11 @@ def test_ct69_recriacao_deixa_so_as_duas_contas_e_os_dados_de_exemplo(engine, re
             .order_by(Batch.validade)
         ).all()
         assert leite == [18, 40]
+
+        # RN-60: todo produto de exemplo tem preço, gravado como Decimal exato
+        precos = db.scalars(select(Product.preco).order_by(Product.id)).all()
+        assert precos == [Decimal(produto[5]) for produto in demo._PRODUTOS]
+        assert all(isinstance(preco, Decimal) and preco > 0 for preco in precos)
 
 
 def test_ao_iniciar_com_um_usuario_so_recria_sem_o_revisor_ui(engine, recriacao):

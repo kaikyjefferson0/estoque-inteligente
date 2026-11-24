@@ -72,18 +72,19 @@ INSERT INTO public.suppliers (id, nome, cnpj) VALUES
     (3, 'Limpa Bem Produtos de Limpeza', NULL);
 
 -- -----------------------------------------------------------------------------
--- 4. Produtos (RN-04, RN-05, RN-26)
+-- 4. Produtos (RN-04, RN-05, RN-26; RN-60: preço em NUMERIC, e o Sabonete sem preço, NULL).
+--    Um literal como 5.49 já é numeric exato no PostgreSQL, nunca float.
 -- -----------------------------------------------------------------------------
 INSERT INTO public.products
-    (id, nome, codigo_barras, estoque_minimo, controla_validade, dias_alerta_validade, fornecedor_id) VALUES
-    (1, 'Leite integral 1 L',     '7890000000011', 10, true,  7,    1),
-    (2, 'Arroz branco 5 kg',      '7890000000028', 10, false, NULL, 2),
-    (3, 'Feijão carioca 1 kg',    '7890000000035',  5, false, NULL, 2),
-    (4, 'Café torrado 500 g',     '7890000000042',  5, false, NULL, 2),
-    (5, 'Iogurte natural 170 g',  '7890000000059',  6, true,  5,    1),
-    (6, 'Detergente neutro 500 ml','7890000000066', 8, false, NULL, 3),
-    (7, 'Sabonete 90 g',          '7890000000073',  0, false, NULL, NULL),
-    (8, 'Pão de forma 500 g',     '7890000000080',  4, true,  3,    NULL);
+    (id, nome, codigo_barras, estoque_minimo, controla_validade, dias_alerta_validade, fornecedor_id, preco) VALUES
+    (1, 'Leite integral 1 L',     '7890000000011', 10, true,  7,    1,     5.49),
+    (2, 'Arroz branco 5 kg',      '7890000000028', 10, false, NULL, 2,    27.90),
+    (3, 'Feijão carioca 1 kg',    '7890000000035',  5, false, NULL, 2,     8.99),
+    (4, 'Café torrado 500 g',     '7890000000042',  5, false, NULL, 2,    32.90),
+    (5, 'Iogurte natural 170 g',  '7890000000059',  6, true,  5,    1,     3.29),
+    (6, 'Detergente neutro 500 ml','7890000000066', 8, false, NULL, 3,     2.59),
+    (7, 'Sabonete 90 g',          '7890000000073',  0, false, NULL, NULL,  NULL),
+    (8, 'Pão de forma 500 g',     '7890000000080',  4, true,  3,    NULL,  8.49);
 
 -- -----------------------------------------------------------------------------
 -- 5. Lotes (RN-27: sem validade, um lote só; RN-28: com validade, um lote por data)

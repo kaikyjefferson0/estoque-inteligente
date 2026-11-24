@@ -14,13 +14,14 @@ import { useErrosDoFormulario, type ErrosDeCampo } from '../components/useErrosD
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Fornecedor } from '../types/fornecedor'
 import type { Produto, SaldoProduto } from '../types/produto'
-import { formatarCnpj, normalizarCodigoDeBarras } from '../utils/formato'
+import { formatarCnpj, lerPreco, normalizarCodigoDeBarras, precoParaCampo } from '../utils/formato'
 
 // Ordem dos campos na tela: o foco vai para o primeiro inválido
 const CAMPOS = [
   'nome',
   'codigo_barras',
   'estoque_minimo',
+  'preco',
   'fornecedor_id',
   'controla_validade',
   'dias_alerta_validade',
@@ -30,6 +31,7 @@ type CampoProduto = (typeof CAMPOS)[number]
 const MAX_NOME = 120
 const MAX_CODIGO = 50
 const MAX_INTEIRO = 2_147_483_647 // limite da coluna INTEGER do banco
+const MAX_PRECO = 20
 const INTEIRO = /^\d+$/
 // Opções por busca no campo de fornecedor; o resto aparece digitando
 const OPCOES_POR_BUSCA = 20
@@ -38,6 +40,8 @@ interface Valores {
   nome: string
   codigoBarras: string
   estoqueMinimo: string
+  // RN-60: como digitado ("12,50"); vai para a API como texto ("12.50"), nunca como número
+  preco: string
   fornecedorId: string
   // Só para mostrar no campo; não vai para a API
   fornecedorNome: string
@@ -59,6 +63,10 @@ function validar(v: Valores): ErrosDeCampo<CampoProduto> {
   else if (!INTEIRO.test(minimo)) erros.estoque_minimo = 'Use um número inteiro, 0 ou maior.'
   else if (Number(minimo) > MAX_INTEIRO) erros.estoque_minimo = 'Use um número menor.'
 
+  // RN-60: opcional, não negativo, até 2 casas e até 99.999.999,99
+  const preco = lerPreco(v.preco)
+  if (!preco.ok) erros.preco = preco.erro
+
   // RN-26: com controle de validade, os dias de alerta são obrigatórios e maiores que zero
   if (v.controlaValidade) {
     const dias = v.diasAlerta.trim()
@@ -70,12 +78,22 @@ function validar(v: Valores): ErrosDeCampo<CampoProduto> {
   return erros
 }
 
+// Texto do começo ao fim, sem passar por número; vazio vai como null (sem preço).
+// Só é chamada depois de validar(), que já recusou o preço inválido. Se um dia chegar inválido aqui,
+// é erro de programação: falha alto em vez de mandar null, que apagaria o preço salvo sem aviso.
+function precoParaApi(digitado: string): string | null {
+  const preco = lerPreco(digitado)
+  if (!preco.ok) throw new Error(`Preço inválido chegou ao envio: ${preco.erro}`)
+  return preco.valor
+}
+
 function paraApi(v: Valores) {
   return {
     nome: v.nome.trim(),
     // RN-04: sem espaços em nenhuma posição (colado da tela, pode vir "3037 3543")
     codigo_barras: normalizarCodigoDeBarras(v.codigoBarras),
     estoque_minimo: Number(v.estoqueMinimo.trim()),
+    preco: precoParaApi(v.preco),
     controla_validade: v.controlaValidade,
     // RN-26: sem controle de validade, os dias ficam vazios
     dias_alerta_validade: v.controlaValidade ? Number(v.diasAlerta.trim()) : null,
@@ -88,6 +106,7 @@ function valoresIniciais(p?: Produto): Valores {
     nome: p?.nome ?? '',
     codigoBarras: p?.codigo_barras ?? '',
     estoqueMinimo: p ? String(p.estoque_minimo) : '',
+    preco: precoParaCampo(p?.preco ?? null),
     fornecedorId: p?.fornecedor_id ? String(p.fornecedor_id) : '',
     fornecedorNome: p?.fornecedor_nome ?? '',
     controlaValidade: p?.controla_validade ?? false,
@@ -237,6 +256,26 @@ function FormularioProduto({
         value={valores.estoqueMinimo}
         onChange={(e) => alterar('estoqueMinimo', e.target.value, 'estoque_minimo')}
         erro={erros.estoque_minimo}
+      />
+      <Campo
+        rotulo="Preço (opcional)"
+        name="preco"
+        inputMode="decimal"
+        autoComplete="off"
+        // "99.999.999,99" com folga para "R$ " colado; o resto a validação explica
+        maxLength={MAX_PRECO}
+        className="numero campo--com-prefixo"
+        dica="Em reais, com vírgula nos centavos (12,50). Pode ficar vazio."
+        // O R$ vem antes do número (order-first), em tinta para não parecer texto de exemplo; a dica
+        // diz a moeda ao leitor de tela
+        acessorio={
+          <span aria-hidden className="order-first shrink-0 ps-esp-3 text-texto">
+            R$
+          </span>
+        }
+        value={valores.preco}
+        onChange={(e) => alterar('preco', e.target.value, 'preco')}
+        erro={erros.preco}
       />
       <SelecaoDeFornecedor
         valor={valores.fornecedorId ? { id: Number(valores.fornecedorId), texto: valores.fornecedorNome } : null}

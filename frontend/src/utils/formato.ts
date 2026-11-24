@@ -162,3 +162,62 @@ export function normalizarCodigoDeBarras(valor: string): string {
 export function semQuebraNaUnidade(texto: string): string {
   return texto.replace(/(\d)[ \t]+(?=[\p{L}\d])/gu, '$1 ')
 }
+
+// ---------- Preço (RN-60) ----------
+// A API recebe e devolve o preço como texto com ponto e 2 casas ("79.90"). Aqui ele também fica em
+// texto, de ponta a ponta: nada de parseFloat nem Number, que trocariam 0,10 + 0,20 por 0,30000000000000004.
+
+const MOEDA = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+// Limite da coluna NUMERIC(10,2): 8 dígitos antes da vírgula
+const MAX_DIGITOS_INTEIROS = 8
+// Milhar não começa com zero: "0.001" é 3 casas, não mil
+const MILHARES = /^[1-9]\d{0,2}(?:\.\d{3})+$/
+const COM_VIRGULA = /^(\d+|[1-9]\d{0,2}(?:\.\d{3})+)?,(\d*)$/
+const COM_PONTO = /^(\d*)(?:\.(\d*))?$/
+
+export type PrecoLido = { ok: true; valor: string | null } | { ok: false; erro: string }
+
+/** Parte inteira (sem os pontos de milhar) e centavos; null se não for um número. */
+function separarCentavos(texto: string): [string, string] | null {
+  // Com vírgula: ela separa os centavos, e os pontos antes dela são de milhar ("1.234,56")
+  const virgula = COM_VIRGULA.exec(texto)
+  if (virgula) return virgula[1] || virgula[2] ? [(virgula[1] ?? '').replaceAll('.', ''), virgula[2]] : null
+  // Sem vírgula, um ponto só separa os centavos ("12.5")
+  const ponto = COM_PONTO.exec(texto)
+  if (ponto && (ponto[1] || ponto[2])) return [ponto[1], ponto[2] ?? '']
+  return null
+}
+
+/** O que a pessoa digitou no campo Preço -> o texto que vai para a API.
+ *  "12,50" -> "12.50", "1.234,56" -> "1234.56", "12.5" -> "12.50", "R$ 7" -> "7.00", vazio -> null. */
+export function lerPreco(texto: string): PrecoLido {
+  const limpo = texto.replace(/\s/g, '').replace(/^R\$/i, '')
+  if (!limpo) return { ok: true, valor: null }
+  if (/^[-−]/.test(limpo)) return { ok: false, erro: 'O preço não pode ser negativo. Use 0 ou mais, ou deixe vazio.' }
+  // Sem vírgula, "12.345" tanto pode ser doze mil (pt-BR) quanto 12 e uns centavos (estilo americano):
+  // adivinhar gravaria um valor mil vezes maior ou menor, então a pessoa escolhe
+  if (MILHARES.test(limpo))
+    return { ok: false, erro: 'Ficou ambíguo. Use vírgula nos centavos (12,34) ou escreva sem ponto (12345).' }
+
+  const partes = separarCentavos(limpo)
+  if (!partes) return { ok: false, erro: 'Use só números, com vírgula nos centavos. Exemplo: 12,50.' }
+  const [digitos, centavos] = partes
+  if (centavos.length > 2) return { ok: false, erro: 'Use no máximo 2 casas depois da vírgula. Exemplo: 12,50.' }
+  const inteiro = digitos.replace(/^0+/, '') || '0'
+  if (inteiro.length > MAX_DIGITOS_INTEIROS) return { ok: false, erro: 'Use um preço de até R$ 99.999.999,99.' }
+  return { ok: true, valor: `${inteiro}.${centavos.padEnd(2, '0')}` }
+}
+
+/** Preço da API -> texto para editar no campo, como na lista: "1234.50" -> "1.234,50"; sem preço,
+ *  vazio. Com a vírgula, os pontos de milhar não são ambíguos e o lerPreco devolve o mesmo valor. */
+export function precoParaCampo(preco: string | null): string {
+  if (preco === null) return ''
+  const [inteiro, centavos] = preco.split('.')
+  return `${inteiro.replace(/\B(?=(\d{3})+$)/g, '.')},${centavos}`
+}
+
+/** Preço da API em reais: "1234.50" -> "R$ 1.234,50" (com espaço inseparável); sem preço, "Sem preço",
+ *  como o "Sem fornecedor". O Intl formata o texto como decimal exato, sem converter para float. */
+export function formatarPreco(preco: string | null): string {
+  return preco === null ? 'Sem preço' : MOEDA.format(preco as Intl.StringNumericLiteral)
+}

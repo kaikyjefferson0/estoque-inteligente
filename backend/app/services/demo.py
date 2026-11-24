@@ -9,6 +9,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
+from decimal import Decimal
 
 from psycopg.errors import LockNotAvailable
 from pydantic import TypeAdapter, ValidationError
@@ -212,20 +213,21 @@ _FORNECEDORES = [
     ("Higiene & Lar Atacado", None),
 ]
 
-# (nome, código de barras, estoque mínimo, dias de alerta ou None se não controla validade, fornecedor)
+# (nome, código de barras, estoque mínimo, dias de alerta ou None se não controla validade, fornecedor,
+#  preço em texto: RN-60, Decimal exato, nunca float)
 _PRODUTOS = [
-    ("Leite integral 1 L", "7896000000011", 24, 10, 0),
-    ("Iogurte natural 170 g", "7896000000028", 12, 7, 0),
-    ("Queijo muçarela fatiado 150 g", "7896000000035", 10, 10, 0),
-    ("Pão de forma tradicional", "7896000000042", 10, 3, 1),
-    ("Arroz branco tipo 1 5 kg", "7896000000059", 10, 60, 1),
-    ("Feijão carioca 1 kg", "7896000000066", 15, 45, 1),
-    ("Café torrado e moído 500 g", "7896000000073", 12, 30, 1),
-    ("Refrigerante cola 2 L", "7896000000080", 24, 30, 1),
-    ("Biscoito recheado chocolate 130 g", "7896000000097", 15, 20, 1),
-    ("Detergente neutro 500 ml", "7896000000103", 20, None, 2),
-    ("Sabão em pó 1 kg", "7896000000110", 10, None, 2),
-    ("Papel higiênico folha dupla 12 rolos", "7896000000127", 8, None, 2),
+    ("Leite integral 1 L", "7896000000011", 24, 10, 0, "5.49"),
+    ("Iogurte natural 170 g", "7896000000028", 12, 7, 0, "3.29"),
+    ("Queijo muçarela fatiado 150 g", "7896000000035", 10, 10, 0, "9.90"),
+    ("Pão de forma tradicional", "7896000000042", 10, 3, 1, "8.49"),
+    ("Arroz branco tipo 1 5 kg", "7896000000059", 10, 60, 1, "27.90"),
+    ("Feijão carioca 1 kg", "7896000000066", 15, 45, 1, "8.99"),
+    ("Café torrado e moído 500 g", "7896000000073", 12, 30, 1, "32.90"),
+    ("Refrigerante cola 2 L", "7896000000080", 24, 30, 1, "10.99"),
+    ("Biscoito recheado chocolate 130 g", "7896000000097", 15, 20, 1, "3.79"),
+    ("Detergente neutro 500 ml", "7896000000103", 20, None, 2, "2.59"),
+    ("Sabão em pó 1 kg", "7896000000110", 10, None, 2, "14.90"),
+    ("Papel higiênico folha dupla 12 rolos", "7896000000127", 8, None, 2, "21.90"),
 ]
 
 # (código de barras, quantidade, dias até a validade ou None)
@@ -260,7 +262,7 @@ def _criar_dados_de_exemplo(db: Session, admin: User, demo: User) -> None:
     em Brasília. As entradas e saídas ficam no nome da conta de demonstração; o ajuste, do admin."""
     dia: date = hoje()
     fornecedores = [criar_fornecedor(db, nome=nome, cnpj=cnpj).id for nome, cnpj in _FORNECEDORES]
-    for nome, codigo, minimo, dias_alerta, fornecedor in _PRODUTOS:
+    for nome, codigo, minimo, dias_alerta, fornecedor, preco in _PRODUTOS:
         produto = criar_produto(
             db,
             nome=nome,
@@ -269,6 +271,7 @@ def _criar_dados_de_exemplo(db: Session, admin: User, demo: User) -> None:
             controla_validade=dias_alerta is not None,
             dias_alerta_validade=dias_alerta,
             fornecedor_id=fornecedores[fornecedor],
+            preco=Decimal(preco),
         )
         # RN-40: o produto sem nenhuma entrada já ganha o alerta de estoque baixo
         alerts.gerar_alertas_produto(db, produto.id)

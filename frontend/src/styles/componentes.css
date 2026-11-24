@@ -432,6 +432,12 @@
   border-radius: var(--raio-p);
 }
 
+/* Campo com prefixo antes do número (o "R$" do Preço): o recuo do prefixo já afasta da borda, então
+   o número fica a 8px dele, e não a 24px (12px do prefixo + 12px do recuo da entrada) */
+.campo--com-prefixo .campo__entrada {
+  padding-left: var(--esp-2);
+}
+
 /* Campo com erro fica na cor crítica em todos os estados, inclusive hover e foco */
 .campo--erro .campo__caixa,
 .campo--erro .campo__caixa:hover {
