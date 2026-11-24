@@ -180,8 +180,7 @@ export function LoginPage({ contaDemo = CONTA_DEMO }: { contaDemo?: ContaDemo | 
               Só quer conhecer o sistema?
             </h2>
             <p className="login__apoio">
-              Entre como operador numa conta de demonstração, com dados de exemplo. Tudo o que você mudar volta ao original
-              uma vez por dia.
+              Entre como operador numa conta de demonstração, com dados de exemplo.
             </p>
             <Botao
               type="button"

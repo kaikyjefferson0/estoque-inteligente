@@ -59,7 +59,7 @@ Os endereços públicos (`CORS_ORIGINS` e `VITE_API_URL`) também são preenchid
 | `DATABASE_URL` | URL direta do Neon com o usuário da aplicação (`estoque_app`). **Secreta.** |
 | `MIGRATIONS_DATABASE_URL` | URL direta do Neon com o dono (`neondb_owner`). **Secreta.** |
 | `APP_DB_ROLE` | Nome do usuário da aplicação: `estoque_app`. Precisa ser igual ao usuário da `DATABASE_URL`. |
-| `ADMIN_EMAIL` | E-mail do admin do dono do sistema, recriado a cada recriação da demo. Não pode ser `revisor-ui@estoque.local` nem igual ao `DEMO_EMAIL`. |
+| `ADMIN_EMAIL` | E-mail do admin do dono do sistema, recriado a cada recriação da demo (só com `DEMO_MODE=true` ou pelo comando manual). Não pode ser `revisor-ui@estoque.local` nem igual ao `DEMO_EMAIL`. |
 | `ADMIN_PASSWORD` | Senha desse admin (8 a 128 caracteres). **Secreta**: só você sabe. |
 | `DEMO_EMAIL` | E-mail da conta de demonstração (operador), usada pelos visitantes. É pública (vai no README e no botão do login). |
 | `DEMO_PASSWORD` | Senha da conta de demonstração (8 a 128 caracteres). Também é pública, então não reaproveite uma senha sua. |
@@ -101,9 +101,9 @@ O endereço sem sufixo (`estoque-api.onrender.com`) existe, mas **é de outra pe
 - Aba **Logs**: a saída do build e da execução. Na API, procure por:
   - `Running upgrade ...`: o Alembic aplicando as migrations (não aparece quando não há nenhuma pendente);
   - `Permissões sincronizadas no banco ...`: o resumo do `sincronizar_permissoes`, sem nenhum segredo. Aparece a cada subida;
-  - `Application startup complete`: a API subiu (inclusive a recriação da demo e a verificação das permissões, que rodam antes disso);
+  - `Application startup complete`: a API subiu (inclusive a verificação das permissões e, com `DEMO_MODE=true`, a recriação da demo, que rodam antes disso);
   - um `RuntimeError` ou `DemoRecusadaError` logo no início: falta ou está errada alguma variável. A mensagem diz qual, sem mostrar o valor;
-  - `DiasDeAlertaAcimaDoTetoError`: a migration do teto dos dias de alerta (RN-26) achou produto com mais de 3650 dias e parou sem alterar nada. A mensagem lista os produtos; corrija-os pela versão anterior, que continua no ar, e faça o deploy de novo. Na demonstração, a conta pública pode gravar o valor outra vez antes do deploy: a saída definitiva é rodar `py -m app.scripts.reset_demo` com o código novo, que recria o banco já com o teto (apaga todos os dados, só para a demonstração). Para conferir antes: `SELECT id, nome, dias_alerta_validade FROM products WHERE dias_alerta_validade > 3650`;
+  - `DiasDeAlertaAcimaDoTetoError`: a migration do teto dos dias de alerta (RN-26) achou produto com mais de 3650 dias e parou sem alterar nada. A mensagem lista os produtos; corrija-os pela versão anterior, que continua no ar, e faça o deploy de novo. Na demonstração, a conta pública pode gravar o valor outra vez antes do deploy: a saída definitiva é rodar `py -m app.scripts.reset_demo` com o código novo, que recria o banco já com o teto (**apaga todos os dados, inclusive os cadastrados no site**). Para conferir antes: `SELECT id, nome, dias_alerta_validade FROM products WHERE dias_alerta_validade > 3650`;
   - `LockNotAvailable` durante o `alembic upgrade head`: a tabela estava em uso e a migration desistiu em 5 segundos, sem alterar nada. Faça o deploy de novo;
   - `PermissoesError` ou `O usuário ... está com as permissões erradas`: a verificação da RN-58 barrou a subida. A mensagem lista o que falta ou sobra;
   - `DemoOcupadaError`: outra recriação segurou a trava por mais de 60 segundos. Nada foi apagado; o Render sobe a API de novo e ela tenta outra vez;
@@ -112,7 +112,7 @@ O endereço sem sufixo (`estoque-api.onrender.com`) existe, mas **é de outra pe
 
 ## Primeira visita depois de um tempo parado
 
-**A primeira visita depois de um tempo parado pode demorar até um minuto.** A API acorda, roda as migrations e a sincronização das permissões e, se a última recriação passou de 24 horas, recria a demo. Só depois disso ela abre a porta. Enquanto isso, o proxy do Render responde **503** (uma página HTML do Render, não o JSON da API).
+**A primeira visita depois de um tempo parado pode demorar até um minuto.** A API acorda e roda as migrations e a sincronização das permissões. Só depois disso ela abre a porta. Enquanto isso, o proxy do Render responde **503** (uma página HTML do Render, não o JSON da API).
 
 O site já trata isso no login. Quando a API responde 503 ou não responde, ele mostra "A API está acordando, isso pode levar até um minuto" e tenta de novo sozinho, com esperas crescentes (2, 4, 8, 16 e 30 segundos). Só mostra erro se a API não acordar depois disso. A conferência da sessão salva, ao recarregar a página, também espera, sem aviso. As outras chamadas não se repetem: um envio de estoque nunca é reenviado às cegas.
 
@@ -143,7 +143,7 @@ Os endereços abaixo são os atuais (veja "Endereços com sufixo"); num Blueprin
 
 ## Recriar a demo na hora
 
-A recriação acontece sozinha quando a API sobe e a última foi há mais de 24 horas (inclusive quando ela acorda depois de dormir). Para recriar antes disso, use o comando manual `py -m app.scripts.reset_demo` no seu computador:
+Com `DEMO_MODE=false`, a recriação não acontece sozinha. Para recriar os dados de exemplo, use o comando manual `py -m app.scripts.reset_demo` no seu computador. **Ele apaga tudo o que foi cadastrado no site**:
 
 1. No `cmd`, dentro de `backend`, defina **só nessa janela** (nunca no `.env` do projeto) `DEMO_MODE=true`, `DATABASE_URL` (Neon, `estoque_app`), `MIGRATIONS_DATABASE_URL` (Neon, `neondb_owner`) e `APP_DB_ROLE=estoque_app`, além de `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `DEMO_EMAIL` e `DEMO_PASSWORD` iguais aos do painel. O `backend\.env` local também é lido e preenche o que faltar. **Nunca deixe a `APP_DB_ROLE` vazia aqui**: a recriação sairia sem as permissões certas.
 2. Rode `py -m app.scripts.reset_demo`.
