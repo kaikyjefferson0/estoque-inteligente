@@ -31,3 +31,8 @@ dist-ssr
 # Saída do Playwright (teste de ponta a ponta)
 test-results/
 playwright-report/
+
+# Saída do Cypress (teste de ponta a ponta)
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/

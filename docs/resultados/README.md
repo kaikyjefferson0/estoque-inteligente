@@ -5,18 +5,18 @@ Execução de 24/11/2026, na máquina de desenvolvimento (Windows 11, Python 3.1
 | Suíte | Comando | Total | Aprovados | Falhas | Tempo | Cobertura (%) |
 |---|---|---|---|---|---|---|
 | [Unitários](unitarios.txt) | `pytest -m unitario -v` | 74 | 74 | 0 | 0,27 s | não medida à parte |
-| [Integração](integracao.txt) | `pytest -m integracao -v` | 613 | 613 | 0 | 99,83 s | não medida à parte |
-| [Backend completo](pytest-completo.txt) | `pytest -rs` | 746 | 746 | 0 | 98,58 s | ver a linha abaixo |
-| [Cobertura do backend](cobertura.txt) | `pytest --cov=app --cov-report=term-missing` | 746 | 746 | 0 | 99,43 s | **97** (1.821 de 1.883 linhas) |
+| [Integração](integracao.txt) | `pytest -m integracao -v` | 621 | 621 | 0 | 111,50 s | não medida à parte |
+| [Backend completo](pytest-completo.txt) | `pytest -rs` | 778 | 778 | 0 | 108,56 s | ver a linha abaixo |
+| [Cobertura do backend](cobertura.txt) | `pytest --cov=app --cov-report=term-missing` | 778 | 778 | 0 | 114,03 s | **97** (1.920 de 1.983 linhas) |
 | [Frontend (Vitest)](vitest.txt) | `npm run test` | 181 | 181 | 0 | 18,49 s | não medida |
 | [E2E extra (Playwright)](playwright.txt) | `npm run test:e2e` | 26 | 26 | 0 | 156,6 s | não se aplica |
-| E2E com Cypress: no próximo PR | – | – | – | – | – | – |
+| [E2E com Cypress](cypress.txt) | `npm run cy:e2e` | 6 | 6 | 0 | 37,5 s | não se aplica |
 
-Os comandos `pytest` rodam dentro de `backend`; os `npm`, dentro de `frontend`. Nenhum teste foi pulado. O tempo é o que a própria suíte informa; o do Playwright é o total do comando, que também recria o banco e sobe a API e o site.
+Os comandos `pytest` rodam dentro de `backend`; os `npm`, dentro de `frontend`. Nenhum teste foi pulado. O tempo é o que a própria suíte informa; o do Cypress e o do Playwright são o total do comando, que também recria o banco e sobe a API e o site.
 
 Os unitários rodaram com o Docker desligado e com `DATABASE_URL` e `SECRET_KEY` falsas, apontando para uma porta sem banco. Além disso, `backend/tests/unit/conftest.py` recusa qualquer tentativa de conexão.
 
-O total do backend é maior que a soma de unitários e integração: 59 testes antigos (configuração, CORS, cabeçalhos HTTP e limites de entrada, entre outros) não usam as fixtures do banco e ainda não foram movidos para `tests/unit`, então ficam sem marcador. 74 + 613 + 59 = 746.
+O total do backend é maior que a soma de unitários e integração: 83 testes (configuração, CORS, cabeçalhos HTTP e limites de entrada, entre outros) não usam as fixtures do banco e ainda não foram movidos para `tests/unit`, então ficam sem marcador. 74 + 621 + 83 = 778.
 
 A cobertura é de linhas, mede todo o `app` (inclusive `app/scripts`, sem `omit`) e passa da meta de 80%. O relatório navegável é gerado com `pytest --cov=app --cov-report=html`, em `backend/htmlcov/index.html` (fora do git).
 
@@ -29,4 +29,4 @@ No projeto, o **teste unitário** chama uma função pura com valores escolhidos
 | Unitário | Uma regra pura e seus valores-limite | Não | Não | pytest (`-m unitario`) |
 | Integração | Rota + service + SQL + restrições do banco | Sim (`_test`) | Não | pytest (`-m integracao`) |
 | Frontend | Funções e componentes da tela | Não | Não | Vitest |
-| E2E | O fluxo inteiro: site + API + banco | Sim (`_e2e`) | Sim | Playwright (extra); Cypress no próximo PR |
+| E2E | O fluxo inteiro: site + API + banco | Sim (`_e2e`) | Sim | Cypress; Playwright (extra) |

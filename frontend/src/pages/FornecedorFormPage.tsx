@@ -69,16 +69,17 @@ function FormularioFornecedor({ inicial }: { inicial?: Fornecedor }) {
   }
 
   return (
-    <form className="painel formulario" onSubmit={aoEnviar} noValidate>
+    <form className="painel formulario" onSubmit={aoEnviar} noValidate data-cy="form-fornecedor">
       <AnuncioDeErros mensagem={anuncio} />
       {erroGeral && (
-        <Aviso situacao="critico">
+        <Aviso situacao="critico" dataCy="mensagem-erro">
           <p>{erroGeral}</p>
         </Aviso>
       )}
       <Campo
         rotulo="Nome"
         name="nome"
+        data-cy="input-nome"
         autoComplete="organization"
         autoFocus={!inicial}
         maxLength={MAX_NOME}
@@ -92,6 +93,7 @@ function FormularioFornecedor({ inicial }: { inicial?: Fornecedor }) {
       <Campo
         rotulo="CNPJ (opcional)"
         name="cnpj"
+        data-cy="input-cnpj"
         inputMode="numeric"
         autoComplete="off"
         placeholder="00.000.000/0000-00"
@@ -105,10 +107,16 @@ function FormularioFornecedor({ inicial }: { inicial?: Fornecedor }) {
         erro={erros.cnpj}
       />
       <div className="formulario__acoes">
-        <Botao type="submit" variante="primaria" carregando={enviando} textoCarregando={inicial ? 'Salvando…' : 'Cadastrando…'}>
+        <Botao
+          type="submit"
+          variante="primaria"
+          carregando={enviando}
+          textoCarregando={inicial ? 'Salvando…' : 'Cadastrando…'}
+          data-cy="btn-salvar"
+        >
           {inicial ? 'Salvar alterações' : 'Cadastrar fornecedor'}
         </Botao>
-        <BotaoLink to="/fornecedores" variante="fantasma">
+        <BotaoLink to="/fornecedores" variante="fantasma" data-cy="btn-cancelar">
           Cancelar
         </BotaoLink>
       </div>

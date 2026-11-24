@@ -61,7 +61,7 @@ No celular (390 px), com a folha do mês e a barra inferior:
 - **Segurança:** login com JWT, senhas com Argon2, perfis admin e operador, limite de tentativas de login e menor privilégio no banco.
 - **Feito para o celular:** barra inferior com as tarefas do dia a dia e telas que funcionam a partir de 320 px.
 - **Acessibilidade conferida:** contraste de pelo menos 4,5:1, foco visível pelo teclado e situação sempre escrita, nunca só na cor.
-- **Qualidade:** 378 testes automatizados, entre backend, frontend e ponta a ponta, rodando no CI a cada push e pull request.
+- **Qualidade:** 991 testes automatizados, entre backend, frontend e ponta a ponta, rodando no CI a cada push e pull request.
 
 ## Tecnologias
 
@@ -72,9 +72,9 @@ No celular (390 px), com a folha do mês e a barra inferior:
 | Segurança | Argon2 (hash de senha), JWT com PyJWT (autenticação) e SlowAPI (limite de tentativas) |
 | Frontend | React, TypeScript, Vite e React Router |
 | Interface | Tailwind CSS v4 com design system próprio, Radix UI e Tabler Icons |
-| Testes | pytest (backend), Vitest + Testing Library (unidade do frontend) e Playwright (ponta a ponta) |
+| Testes | pytest (backend), Vitest + Testing Library (unidade do frontend) e Cypress (ponta a ponta), com Playwright como cobertura extra |
 | Qualidade de código | oxlint, com a regra que recusa classes com valores fora do tema |
-| Infraestrutura | Docker e Docker Compose (ambiente local completo) e GitHub Actions (CI com os três tipos de teste a cada push e pull request) |
+| Infraestrutura | Docker e Docker Compose (ambiente local completo) e GitHub Actions (CI com todos os testes a cada push e pull request) |
 | Deploy | API e site no Render (plano gratuito, com a Cloudflare à frente) e banco PostgreSQL no Neon |
 
 ### O que há de novo na interface
@@ -156,9 +156,10 @@ Todas as rotas exigem login com token JWT (no cabeçalho `Authorization: Bearer`
 
 Os números abaixo refletem a suíte atual do projeto:
 
-- **Backend — pytest: 272 testes.** Cobrem as regras de negócio (cada caso de teste `CT-xx` da documentação vira um teste), os *services* e as rotas, autenticação e perfis, segurança HTTP e CORS, paginação, concorrência com conexões reais, permissões do banco, partida a frio, o modo de demonstração e a migration e a *constraint* do código de barras sem espaços.
-- **Frontend — Vitest: 80 testes.** Cobrem o cliente de API, a formatação e o fuso das datas (rodam com o computador no fuso de Tóquio para provar que as datas seguem America/Sao_Paulo), a paginação, a página de demonstração, a leitura do código de barras e a régua de vencimentos.
-- **Ponta a ponta — Playwright: 26 testes.** Rodam contra a API e um banco reais (recriado a cada execução), seguindo fluxos completos de cadastro, entrada, saída, ajuste e alertas, o código de barras copiado de uma lista e colado na busca da entrada, a barra inferior do celular e a responsividade das telas.
+- **Backend — pytest: 778 testes.** Cobrem as regras de negócio (cada caso de teste `CT-xx` da documentação vira um teste), os *services* e as rotas, autenticação e perfis, segurança HTTP e CORS, paginação, concorrência com conexões reais, permissões do banco, partida a frio, o modo de demonstração e a migration e a *constraint* do código de barras sem espaços.
+- **Frontend — Vitest: 181 testes.** Cobrem o cliente de API, a formatação e o fuso das datas (rodam com o computador no fuso de Tóquio para provar que as datas seguem America/Sao_Paulo), a paginação, a página de demonstração, a leitura do código de barras e a régua de vencimentos.
+- **Ponta a ponta — Cypress: 6 testes.** O CRUD de fornecedores e os caminhos de erro, com o banco resetado antes de cada teste (veja [Testes de ponta a ponta com Cypress](#testes-de-ponta-a-ponta-com-cypress)).
+- **Ponta a ponta, cobertura extra — Playwright: 26 testes.** Rodam contra a API e um banco reais (recriado a cada execução), seguindo fluxos completos de cadastro, entrada, saída, ajuste e alertas, o código de barras copiado de uma lista e colado na busca da entrada, a barra inferior do celular e a responsividade das telas.
 
 ## Rodando com Docker
 
@@ -235,7 +236,7 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
 7. **Bancos dos testes.** Os testes automatizados nunca usam o banco de desenvolvimento: eles apagam e recriam o banco a cada execução, por isso cada um tem uma trava que recusa rodar se o nome do banco não terminar no sufixo esperado. Os valores de exemplo de todas as variáveis abaixo estão em `backend\.env.example`.
 
    - **pytest:** precisa de um banco com nome terminado em `_test`, configurado em `TEST_DATABASE_URL` com o usuário dono do banco (as migrations rodam nele). Sem essa variável, ou com outro nome de banco, o pytest para no primeiro teste que usa o banco; os unitários (`pytest -m unitario`) rodam sem ela.
-   - **`npm run test:e2e`:** precisa do banco `estoque_e2e`, de um usuário da aplicação separado do dono e de três variáveis: `E2E_DATABASE_URL` (o dono), `E2E_APP_DATABASE_URL` (o usuário da aplicação, no mesmo banco) e `APP_DB_ROLE` (o nome desse usuário). O teste sobe a API com o usuário da aplicação, como em produção.
+   - **`npm run cy:e2e`, `npm run cy:open` e `npm run test:e2e`:** precisam do banco `estoque_e2e`, de um usuário da aplicação separado do dono e de três variáveis: `E2E_DATABASE_URL` (o dono), `E2E_APP_DATABASE_URL` (o usuário da aplicação, no mesmo banco) e `APP_DB_ROLE` (o nome desse usuário). O teste sobe a API com o usuário da aplicação, como em produção.
    - **Opcional:** `TEST_APP_DATABASE_URL` (o banco `_test` com o usuário da aplicação) liga os testes de permissão do banco; sem ela, esses testes são pulados.
 
    Para criar os bancos, no `psql` como `postgres` (troque as senhas):
@@ -255,9 +256,39 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
    E2E_DATABASE_URL=postgresql+psycopg://estoque:senha-do-dono@localhost:5432/estoque_e2e
    E2E_APP_DATABASE_URL=postgresql+psycopg://estoque_app:senha-da-aplicacao@localhost:5432/estoque_e2e
    ```
-   As permissões do usuário da aplicação nas tabelas são concedidas pelas próprias migrations, a partir da `APP_DB_ROLE`. O teste de ponta a ponta também usa as portas 8001 e 5175, que precisam estar livres.
+   As permissões do usuário da aplicação nas tabelas são concedidas pelas próprias migrations, a partir da `APP_DB_ROLE`. Os testes de ponta a ponta também usam as portas 8001 e 5175, que precisam estar livres.
 
-8. **Rodar os testes:** `pytest` (dentro de `backend`), `npm run test` e `npm run test:e2e` (dentro de `frontend`).
+8. **Rodar os testes:** `pytest` (dentro de `backend`), `npm run test`, `npm run cy:e2e` e `npm run test:e2e` (dentro de `frontend`).
+
+## Testes de ponta a ponta com Cypress
+
+O Cypress abre um navegador de verdade e usa o site, a API e o PostgreSQL reais. Antes da primeira vez, faça os passos 2, 3 e 7 de [Como rodar localmente](#como-rodar-localmente-windows) (as dependências do backend, o `backend\.env` com as variáveis `E2E_*` e `APP_DB_ROLE`, e o banco `estoque_e2e`) e rode `npm install` em `frontend`. Se o binário do Cypress não for baixado, rode `npx cypress install`.
+
+Dentro de `frontend`:
+
+| Comando | O que faz |
+|---|---|
+| `npm run cy:e2e` | Roda a suíte inteira no terminal |
+| `npm run cy:open` | Abre a interface gráfica: escolha um navegador, clique em "Start E2E Testing" e em `fornecedores.cy.ts` |
+
+Não é preciso subir a API nem o site antes: os dois comandos recriam o banco `estoque_e2e` pelas migrations, geram as senhas das contas (só em memória), sobem a API (porta 8001) e o site (porta 5175) e, no fim ou ao fechar a janela do Cypress, param os dois, mesmo se algo falhar. Por isso, abra o Cypress sempre por esses comandos: com `npx cypress open` direto, a API não estaria no ar e o teste não teria a senha. As portas 8001 e 5175 precisam estar livres.
+
+**O que cada teste cobre** (`frontend/cypress/e2e/fornecedores.cy.ts`):
+
+| Teste | Operação | O que confere |
+|---|---|---|
+| CT-115 | Read | 200, e a lista mostra os fornecedores do seed |
+| CT-116 | Create | 201, mensagem de sucesso e o fornecedor novo na lista |
+| CT-117 | Update | 200, e a lista mostra o nome e o CNPJ novos |
+| CT-118 | Delete | 204 depois do diálogo de confirmação, e o fornecedor sem produtos some |
+| CT-119 | Erro | 409 ao excluir fornecedor com produtos: o aviso aparece e ele continua na lista |
+| CT-120 | Erro | 409 com CNPJ repetido: o erro aparece no campo e nada é cadastrado |
+
+**Como o reset funciona.** Antes de cada teste, o `beforeEach` chama `POST /_test/reset`, que apaga os dados, recomeça os ids e recria o mesmo seed: um admin, um operador, um fornecedor com produto e um sem. Assim, cada teste parte do mesmo estado, em qualquer ordem. Depois, o teste entra pela API (`cy.request`) e abre a página já com o token. A rota de reset só existe com `E2E_RESET=true`, num banco com nome terminado em `_e2e` e fora de produção; sem isso, responde 404 (RN-67, provado no pytest pelos CT-111 a CT-114).
+
+Os seletores são sempre `data-cy` (`cy.dataCy('btn-salvar')`), que não quebram quando o visual ou o texto muda. Numa falha, a captura fica em `frontend/cypress/screenshots` (fora do git) e, no CI, vira um artifact. A última execução está em [docs/resultados/cypress.txt](docs/resultados/cypress.txt).
+
+**Cobertura extra com Playwright.** `npm run test:e2e` roda outros 26 testes: entrada, saída, ajuste, alertas, barra inferior e a responsividade das telas.
 
 ## Limitações conhecidas
 

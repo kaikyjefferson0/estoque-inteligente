@@ -9,10 +9,12 @@ interface PaginacaoProps {
   aoMudar: (deslocamento: number) => void
   // Nome da lista para o leitor de tela, por exemplo "produtos"
   nomeDaLista: string
+  // Seletor do teste de ponta a ponta (Cypress)
+  dataCy?: string
 }
 
 /** Componente único de paginação das listas: "Anterior", "Próxima" e "1 a 50 de 312". */
-export function Paginacao({ total, limite, deslocamento, aoMudar, nomeDaLista }: PaginacaoProps) {
+export function Paginacao({ total, limite, deslocamento, aoMudar, nomeDaLista, dataCy = 'paginacao' }: PaginacaoProps) {
   const anterior = useRef<HTMLButtonElement>(null)
   const proxima = useRef<HTMLButtonElement>(null)
   // Quem foi clicado pode ficar bloqueado (primeira ou última página); o foco passa para o outro
@@ -40,7 +42,7 @@ export function Paginacao({ total, limite, deslocamento, aoMudar, nomeDaLista }:
   }
 
   return (
-    <nav className="paginacao" aria-label={`Páginas de ${nomeDaLista}`}>
+    <nav className="paginacao" aria-label={`Páginas de ${nomeDaLista}`} data-cy={dataCy}>
       <p className="paginacao__texto numero" aria-live="polite">
         {descreverIntervalo(total, limite, deslocamento)}
       </p>
@@ -48,6 +50,7 @@ export function Paginacao({ total, limite, deslocamento, aoMudar, nomeDaLista }:
         <div className="paginacao__botoes">
           <Botao
             ref={anterior}
+            data-cy="btn-anterior"
             variante="secundaria"
             disabled={!temAnterior}
             onClick={() => ir(Math.max(deslocamento - limite, 0), proxima.current, deslocamento - limite <= 0)}
@@ -56,6 +59,7 @@ export function Paginacao({ total, limite, deslocamento, aoMudar, nomeDaLista }:
           </Botao>
           <Botao
             ref={proxima}
+            data-cy="btn-proxima"
             variante="secundaria"
             disabled={!temProxima}
             onClick={() => ir(deslocamento + limite, anterior.current, deslocamento + 2 * limite >= total)}

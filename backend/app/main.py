@@ -11,8 +11,8 @@ from app.core.database import engine
 from app.core.erros_validacao import erro_de_validacao
 from app.core.limiter import limite_excedido, limiter
 from app.core.tamanho_corpo import LimiteDoCorpo
-from app.routers import alerts, auth, dashboard, products, stock, suppliers, users
-from app.services import demo
+from app.routers import alerts, auth, dashboard, e2e, products, stock, suppliers, users
+from app.services import demo, e2e_reset
 
 # Valem para todas as respostas: a API só devolve JSON e nunca é aberta dentro de outra página
 CABECALHOS_DE_SEGURANCA = {
@@ -75,7 +75,7 @@ def criar_app() -> FastAPI:
             response.headers["Strict-Transport-Security"] = HSTS
         return response
 
-    # RN-18: /health e /auth/login são as únicas rotas públicas;
+    # RN-18: /health e /auth/login são as únicas rotas públicas (a da RN-67 só existe no teste E2E);
     # as demais declaram get_current_user ou require_admin.
     app.include_router(auth.router)
     app.include_router(users.router)
@@ -84,6 +84,10 @@ def criar_app() -> FastAPI:
     app.include_router(stock.router)
     app.include_router(alerts.router)
     app.include_router(dashboard.router)
+    # RN-67: só com E2E_RESET, banco _e2e e fora de produção; senão, a rota de reset não existe
+    if e2e_reset.permitido(settings):
+        e2e_reset.ler_senhas(settings)  # sem as senhas das contas, a API não sobe
+        app.include_router(e2e.router)
 
     @app.get("/health")
     def health():

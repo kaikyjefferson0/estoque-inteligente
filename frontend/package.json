@@ -9,6 +9,8 @@
     "lint": "oxlint -c oxlint.config.ts",
     "test": "vitest run",
     "test:e2e": "node e2e/rodar.mjs",
+    "cy:e2e": "node cypress/rodar.mjs",
+    "cy:open": "node cypress/rodar.mjs --abrir",
     "preview": "vite preview",
     "capturas": "node scripts/capturas-ui.mjs",
     "capturas:readme": "node scripts/capturas-readme-rodar.mjs"
@@ -32,6 +34,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "cypress": "^16.3.0",
     "eslint-plugin-better-tailwindcss": "^4.11.0",
     "jsdom": "^30.1.3",
     "oxlint": "^1.89.0",
