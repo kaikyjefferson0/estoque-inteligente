@@ -29,7 +29,7 @@ def main() -> int:
         print("MIGRATIONS_DATABASE_URL não é uma URL de banco válida.", file=sys.stderr)
         return 1
 
-    engine = criar_engine(settings.MIGRATIONS_DATABASE_URL, poolclass=NullPool, hide_parameters=True)
+    engine = criar_engine(settings.MIGRATIONS_DATABASE_URL, poolclass=NullPool)
     try:
         with engine.begin() as conexao:
             resumo = permissoes.sincronizar(conexao, settings.APP_DB_ROLE, dono)

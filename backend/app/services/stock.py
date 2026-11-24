@@ -10,6 +10,7 @@ from app.models.batch import Batch
 from app.models.product import Product
 from app.models.stock_movement import StockMovement
 from app.models.user import User
+from app.schemas.comum import MAX_INTEGER
 from app.schemas.products import normalizar_codigo_barras
 from app.services import alerts as alertas
 from app.services import condicoes
@@ -19,6 +20,10 @@ from app.services.products import ProdutoNaoEncontradoError, filtro_nome_ou_codi
 
 class QuantidadeInvalidaError(Exception):
     """RN-07."""
+
+
+class LoteCheioError(Exception):
+    """RN-65: a entrada faria o saldo do lote passar do máximo."""
 
 
 class ValidadeInvalidaError(Exception):
@@ -76,6 +81,22 @@ def _mensagem_saldo_insuficiente(disponivel: int, pedido: int) -> str:
     return f"Saldo insuficiente: há {_unidades(disponivel)} {disponiveis} e foram pedidas {pedido}. Informe até {disponivel}."
 
 
+def _conferir_espaco_no_lote(saldo_do_lote: int, entrada: int) -> None:
+    """RN-65: o saldo do lote cabe na coluna INTEGER. Com o lote já travado, o saldo não muda depois."""
+    cabe = MAX_INTEGER - saldo_do_lote
+    if entrada <= cabe:
+        return
+    if cabe == 0:
+        raise LoteCheioError(
+            f"O lote já tem {_unidades(saldo_do_lote)}, o máximo de um lote, e não cabe mais nenhuma."
+            " Confira a quantidade e o saldo do lote."
+        )
+    raise LoteCheioError(
+        f"O lote tem {_unidades(saldo_do_lote)} e vai até {MAX_INTEGER}:"
+        f" {'cabe' if cabe == 1 else 'cabem'} mais {_unidades(cabe)}. Informe até {cabe}."
+    )
+
+
 def _validar_validade_da_entrada(produto: Product, validade: date | None) -> None:
     if produto.controla_validade:
         # RN-08
@@ -90,6 +111,7 @@ def _validar_validade_da_entrada(produto: Product, validade: date | None) -> Non
 
 
 def _saldo_total(db: Session, produto_id: int) -> int:
+    # No PostgreSQL, SUM de INTEGER é BIGINT: a soma dos lotes passa do máximo de um lote sem estourar (RN-65)
     return db.scalar(select(func.coalesce(func.sum(Batch.quantidade), 0)).where(Batch.produto_id == produto_id))
 
 
@@ -142,6 +164,8 @@ def registrar_entrada(
         _validar_validade_da_entrada(produto, validade)
 
         lote = _travar_lote(db, produto.id, validade)
+        # RN-65: recusa antes de mexer no lote (a transação desfeita leva junto o lote recém-criado)
+        _conferir_espaco_no_lote(lote.quantidade, quantidade)
         lote.quantidade += quantidade
         # RN-12: o histórico só recebe inserções
         movimentacao = StockMovement(
@@ -247,6 +271,9 @@ def registrar_ajuste(
     # RN-35
     if saldo_contado < 0:
         raise QuantidadeInvalidaError("Informe quantas unidades você contou, 0 ou mais.")
+    # RN-65: com os dois saldos de 0 a MAX_INTEGER, a diferença também cabe no INTEGER
+    if saldo_contado > MAX_INTEGER:
+        raise QuantidadeInvalidaError(f"Um lote vai até {_unidades(MAX_INTEGER)}. Confira a contagem.")
     # RN-11
     motivo = (motivo or "").strip()
     if not motivo:

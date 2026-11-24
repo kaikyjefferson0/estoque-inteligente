@@ -62,7 +62,8 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = create_engine(DATABASE_URL, poolclass=pool.NullPool)
+    # RN-66: um erro de SQL numa migration não manda os valores para o log do deploy
+    connectable = create_engine(DATABASE_URL, poolclass=pool.NullPool, hide_parameters=True)
 
     with connectable.connect() as connection:
         context.configure(

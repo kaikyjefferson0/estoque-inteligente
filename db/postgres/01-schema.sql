@@ -3,7 +3,7 @@
 -- =============================================================================
 --
 -- Fonte oficial do esquema: as migrations do Alembic (backend\alembic\versions).
--- Este arquivo é uma cópia legível do banco migrado até a revisão 30a97c4f4643 (head),
+-- Este arquivo é uma cópia legível do banco migrado até a revisão 8f3454618767 (head),
 -- gerada com `pg_dump --schema-only --no-owner --no-privileges` e reorganizada à mão:
 -- as restrições foram para dentro do CREATE TABLE e as tabelas seguem a ordem das FKs.
 -- O banco criado por este script é igual ao das migrations (veja db\README.md, "Prova").
@@ -92,6 +92,8 @@ CREATE TABLE public.products (
         (controla_validade AND dias_alerta_validade IS NOT NULL AND dias_alerta_validade > 0)
         OR (NOT controla_validade AND dias_alerta_validade IS NULL)
     ),
+    -- RN-26: no máximo 3650 dias (10 anos); NULL passa
+    CONSTRAINT ck_products_dias_alerta_validade_maximo CHECK (dias_alerta_validade <= 3650),
     -- RN-04: o código de barras nunca tem espaço em branco. A lista tem, um a um, os caracteres
     -- que o str.split() do Python trata como espaço (tabulação, quebra de linha, espaço
     -- inseparável U+00A0, U+2000 a U+200A, U+3000...), escritos literalmente entre os colchetes.

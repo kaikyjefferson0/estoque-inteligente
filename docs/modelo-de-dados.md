@@ -12,11 +12,12 @@ id, nome, cnpj (opcional; único quando informado), criado_em
 id, nome, codigo_barras (único, sem espaço em branco), estoque_minimo, controla_validade, dias_alerta_validade (opcional), fornecedor_id (opcional, referência a suppliers com RESTRICT), criado_em, preco (opcional, NUMERIC(10,2))
 - preco: NUMERIC(10,2), nulo quando o produto não tem preço (RN-60). Valor exato, nunca float: até 99.999.999,99, com 2 casas. A API recebe e devolve como texto ("79.90"). Criada pela migration 30a97c4f4643 só com ADD COLUMN, sem preenchimento: os produtos cadastrados antes ficam sem preço. Não entra em nenhuma regra de estoque, nos alertas nem no painel.
 - CHECK ck_products_preco_nao_negativo: `preco >= 0` (RN-60). NULL passa (sem preço); negativo é recusado mesmo num INSERT ou UPDATE feito fora da API.
+- CHECK ck_products_dias_alerta_validade_maximo: `dias_alerta_validade <= 3650` (RN-26). NULL passa (produto que não controla validade). Criada pela migration 8f3454618767, que antes confere se algum produto já passa do teto e, se passar, para sem alterar nada. O mínimo e a coerência com controla_validade são da ck_products_dias_alerta_validade.
 - CHECK ck_products_codigo_barras_sem_espacos: o código de barras não tem nenhum espaço em branco (RN-04). A condição lista os mesmos caracteres que a API tira (espaço, tabulação, quebras de linha, espaço inseparável e os outros espaços do Unicode), sem usar o `\s` do PostgreSQL, que depende do locale do banco. Criada pela migration 9a0c1c19b39f, depois de limpar os códigos já gravados.
 
 ## batches
 id, produto_id, validade (opcional), quantidade, criado_em
-- quantidade maior ou igual a zero.
+- quantidade de zero a 2.147.483.647 (INTEGER); a entrada que passaria disso é recusada antes de gravar (RN-65).
 - Um lote por produto + validade, valendo também para validade vazia (NULLS NOT DISTINCT): produto sem controle de validade tem um único lote sem validade (RN-27, RN-28).
 
 ## stock_movements

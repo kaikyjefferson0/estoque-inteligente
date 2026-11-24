@@ -13,7 +13,7 @@ exemplo (seed), em SQL puro, para PostgreSQL 18.
 **A fonte oficial do esquema continua sendo o Alembic** (`backend\alembic\versions`). A API, os
 testes, o teste de ponta a ponta e o deploy criam o banco pelas migrations, nunca por estes scripts.
 
-O `01-schema.sql` é uma cópia legível do banco migrado até a revisão `30a97c4f4643` (head),
+O `01-schema.sql` é uma cópia legível do banco migrado até a revisão `8f3454618767` (head),
 gerada com `pg_dump --schema-only` e organizada à mão. Ele é igual ao banco das migrations, com
 duas exceções de propósito:
 

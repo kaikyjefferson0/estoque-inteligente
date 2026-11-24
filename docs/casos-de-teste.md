@@ -30,6 +30,8 @@
 | CT-29 | Dar entrada com validade já vencida | Sistema recusa | Entrada é aceita com lote vencido |
 | CT-30 | Dar entrada de produto sem validade informando uma validade | Sistema recusa | Entrada é aceita com validade |
 | CT-31 | Tentar mudar "controla validade" de produto que já tem lotes | Sistema recusa | Campo alterado com lotes existentes |
+| CT-101 | Dar entrada que deixa o lote exatamente em 2147483647; depois, uma que passaria disso (lote com 2000000000, com 2147483646 e já cheio; produto com e sem validade); e duas entradas simultâneas de 2000000000 no mesmo lote. Regra: [RN-65](regras-negocio.md) | A primeira é aceita; as outras são recusadas com 422 dizendo quanto ainda cabe no lote, sem gravar lote, movimentação nem alerta; das simultâneas, uma é aceita e a outra recusada; outra validade continua aceitando, e uma saída abre espaço no lote | Erro do servidor (500), lote acima do máximo ou movimentação gravada na entrada recusada |
+| CT-102 | Levar ao extremo as outras contas: ajuste de 2147483647 para 0 e de volta; saldo contado e saída de 2147483648; produto com dois lotes cheios e estoque mínimo 2147483647 (detalhe, lista de estoque, painel, alertas, saída por dois lotes e lotes vencidos); e números como 1e400, NaN e um de 5000 dígitos, e validades como "0000-01-01" e 10000-01-01, no JSON. Regra: [RN-65](regras-negocio.md) | Dentro do limite, tudo é aceito, e o saldo do produto aparece certo mesmo acima de 2147483647; fora dele, 422 (ou 400, se o número do JSON não puder ser lido) e nada gravado | Erro do servidor (500), saldo errado ou gravação parcial |
 
 ## Saídas de estoque
 
@@ -92,6 +94,7 @@
 | CT-24 | Cadastrar ou editar produto com fornecedor inexistente, inclusive quando o fornecedor é excluído entre a conferência e a gravação (o banco recusa pela FK). Regras: [RN-24 e RN-59](regras-negocio.md) | Sistema recusa (422) com a mensagem de fornecedor inexistente | Produto salvo com fornecedor que não existe, ou erro 500 |
 | CT-25 | Cadastrar fornecedor com CNPJ repetido ou inválido | Sistema recusa e avisa | Fornecedor salvo com CNPJ duplicado ou inválido |
 | CT-26 | Cadastrar produto que controla validade sem dias de alerta | Sistema recusa | Produto salvo sem dias de alerta |
+| CT-99 | Cadastrar e editar produto com 0, 1, 3650, 3651 e 2147483647 dias de alerta (e também negativo e acima do INTEGER), pela API e pela tela. Regra: [RN-26](regras-negocio.md) | 1 e 3650 são aceitos, e os alertas são gerados até com a maior validade possível; os outros são recusados com 422 no campo, com o limite na mensagem, e nada é gravado; a tela mostra o limite na dica e no erro, sem enviar | Erro do servidor (500), produto salvo fora da faixa ou mensagem sem o limite |
 
 ## Produtos: preço
 
@@ -148,6 +151,8 @@
 | CT-80 | Em `APP_ENV=production`, subir sem `APP_DB_ROLE`, sem `MIGRATIONS_DATABASE_URL`, com a `DATABASE_URL` em outro usuário ou com o dono como usuário da aplicação | Recusa com mensagem clara, sem mostrar a URL, antes de qualquer migration; fora de produção, um usuário só continua valendo | Sobe mesmo assim ou mostra a URL |
 | CT-81 | Subir a API em produção com o usuário da aplicação sem permissão, com UPDATE no histórico e depois da sincronização | Não sobe nos dois primeiros casos; sobe no terceiro | API no ar com permissões erradas |
 | CT-83 | Aplicar a migration do código de barras com produtos gravados com espaços no código, e depois com dois produtos que ficariam com o mesmo código sem os espaços ("3037 3543" e "30373543"); depois, gravar direto no banco (fora da API) um código com espaço. Regra: [RN-04](regras-negocio.md) | No primeiro caso, os espaços somem de todos os códigos, rodar de novo não muda nada e a CHECK é criada; no segundo, a migration para com uma mensagem que lista os produtos que colidem, sem alterar nenhum código; a gravação direta é recusada pela CHECK ck_products_codigo_barras_sem_espacos | Código com espaço sobrando, código repetido gravado, alteração parcial antes do erro, ou o banco aceitando código com espaço |
+| CT-100 | Aplicar a migration do teto dos dias de alerta num banco com produtos até 3650 dias, desfazer e aplicar de novo; aplicar com um produto acima do teto; depois, gravar 3651 direto no banco (fora da API), num INSERT e num UPDATE. Regra: [RN-26](regras-negocio.md) | No primeiro caso, a CHECK é criada e removida sem mudar nenhum produto; no segundo, a migration para com a lista dos produtos acima do teto, sem corrigir nada; a gravação direta é recusada pela CHECK ck_products_dias_alerta_validade_maximo | Dias alterados pela migration, CHECK criada com dado fora da faixa, ou o banco aceitando 3651 |
+| CT-103 | Provocar um erro de SQL com um valor conhecido entre os parâmetros, com o engine da API, e conferir os das migrations, da recriação da demonstração e da sincronização de permissões. Regra: [RN-66](regras-negocio.md) | O texto do erro (o que vai para o log) tem o comando e o motivo, mas não os valores; a resposta da API também não | Valor do parâmetro no texto do erro ou na resposta |
 
 ## Listas paginadas
 

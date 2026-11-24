@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.batch import Batch
 from app.models.product import Product
 from app.models.supplier import Supplier
-from app.schemas.products import normalizar_codigo_barras
+from app.schemas.products import DIAS_ALERTA_MAXIMO, MENSAGEM_DIAS_ALERTA, normalizar_codigo_barras
 from app.services import alerts as alertas
 from app.services.suppliers import FK_PRODUTO_FORNECEDOR, nome_da_restricao
 from app.services.paginacao import padrao_de_busca, paginar
@@ -45,12 +45,15 @@ class ControlaValidadeBloqueadoError(Exception):
 
 
 def _validar_validade(controla_validade: bool, dias_alerta_validade: int | None) -> None:
-    """RN-26: controla validade -> dias obrigatórios e > 0; senão, vazios."""
+    """RN-26: controla validade -> dias obrigatórios, de 1 a 3650; senão, vazios."""
     if controla_validade:
-        if dias_alerta_validade is None or dias_alerta_validade <= 0:
+        if dias_alerta_validade is None:
             raise DiasAlertaInvalidoError(
-                "Informe em quantos dias antes de vencer o alerta deve aparecer, maior que zero."
+                f"Informe em quantos dias antes de vencer o alerta deve aparecer, de 1 a {DIAS_ALERTA_MAXIMO}."
             )
+        # Sem o teto, hoje + dias passaria da maior data do banco na geração de alertas (RN-40)
+        if not 1 <= dias_alerta_validade <= DIAS_ALERTA_MAXIMO:
+            raise DiasAlertaInvalidoError(MENSAGEM_DIAS_ALERTA)
     elif dias_alerta_validade is not None:
         raise DiasAlertaInvalidoError("Dias de alerta só valem para produto que controla validade. Deixe o campo vazio.")
 

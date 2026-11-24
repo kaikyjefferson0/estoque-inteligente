@@ -31,6 +31,7 @@ type CampoProduto = (typeof CAMPOS)[number]
 const MAX_NOME = 120
 const MAX_CODIGO = 50
 const MAX_INTEIRO = 2_147_483_647 // limite da coluna INTEGER do banco
+const MAX_DIAS_ALERTA = 3650 // RN-26: 10 anos, o mesmo teto da API e do banco
 const MAX_PRECO = 20
 const INTEIRO = /^\d+$/
 // Opções por busca no campo de fornecedor; o resto aparece digitando
@@ -67,13 +68,13 @@ function validar(v: Valores): ErrosDeCampo<CampoProduto> {
   const preco = lerPreco(v.preco)
   if (!preco.ok) erros.preco = preco.erro
 
-  // RN-26: com controle de validade, os dias de alerta são obrigatórios e maiores que zero
+  // RN-26: com controle de validade, os dias de alerta são obrigatórios, de 1 a 3650
   if (v.controlaValidade) {
     const dias = v.diasAlerta.trim()
     if (!dias) erros.dias_alerta_validade = 'Informe com quantos dias de antecedência avisar.'
     else if (!INTEIRO.test(dias) || Number(dias) === 0)
-      erros.dias_alerta_validade = 'Use um número inteiro de dias, maior que zero.'
-    else if (Number(dias) > MAX_INTEIRO) erros.dias_alerta_validade = 'Use um número menor.'
+      erros.dias_alerta_validade = `Use um número inteiro de dias, de 1 a ${MAX_DIAS_ALERTA}.`
+    else if (Number(dias) > MAX_DIAS_ALERTA) erros.dias_alerta_validade = `Use no máximo ${MAX_DIAS_ALERTA} dias (10 anos).`
   }
   return erros
 }
@@ -313,7 +314,7 @@ function FormularioProduto({
             inputMode="numeric"
             autoComplete="off"
             className="numero"
-            dica="Quantos dias antes de vencer o lote entra em alerta."
+            dica={`Quantos dias antes de vencer o lote entra em alerta, de 1 a ${MAX_DIAS_ALERTA}.`}
             value={valores.diasAlerta}
             onChange={(e) => alterar('diasAlerta', e.target.value, 'dias_alerta_validade')}
             erro={erros.dias_alerta_validade}
