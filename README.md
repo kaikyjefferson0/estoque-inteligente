@@ -258,7 +258,25 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
    ```
    As permissões do usuário da aplicação nas tabelas são concedidas pelas próprias migrations, a partir da `APP_DB_ROLE`. Os testes de ponta a ponta também usam as portas 8001 e 5175, que precisam estar livres.
 
-8. **Rodar os testes:** `pytest` (dentro de `backend`), `npm run test`, `npm run cy:e2e` e `npm run test:e2e` (dentro de `frontend`).
+8. **Rodar os testes:** veja os comandos de cada suíte em [Testes](#testes).
+
+## Testes
+
+Os comandos `pytest` rodam com o ambiente virtual ativo (`.venv\Scripts\activate`). Os bancos que cada suíte usa estão no passo 7 de [Como rodar localmente](#como-rodar-localmente-windows).
+
+| Suíte | Pasta | Comando |
+|---|---|---|
+| Backend, tudo | `backend` | `pytest` |
+| Unitários (sem banco) | `backend` | `pytest -m unitario` |
+| Integração (banco `_test`) | `backend` | `pytest -m integracao` |
+| Cobertura, no terminal | `backend` | `pytest --cov=app --cov-report=term-missing` |
+| Cobertura, em HTML | `backend` | `pytest --cov=app --cov-report=html` (abra `backend\htmlcov\index.html`) |
+| Frontend (Vitest) | `frontend` | `npm run test` |
+| Ponta a ponta, Cypress no terminal | `frontend` | `npm run cy:e2e` |
+| Ponta a ponta, Cypress com interface gráfica | `frontend` | `npm run cy:open` |
+| Ponta a ponta, cobertura extra (Playwright) | `frontend` | `npm run test:e2e` |
+
+Os resultados da última execução de cada suíte, com a cobertura e a diferença entre unitário, integração e ponta a ponta, estão em [docs/resultados/README.md](docs/resultados/README.md).
 
 ## Testes de ponta a ponta com Cypress
 
