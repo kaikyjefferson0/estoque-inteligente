@@ -103,6 +103,8 @@ O endereço sem sufixo (`estoque-api.onrender.com`) existe, mas **é de outra pe
   - `Permissões sincronizadas no banco ...`: o resumo do `sincronizar_permissoes`, sem nenhum segredo. Aparece a cada subida;
   - `Application startup complete`: a API subiu (inclusive a recriação da demo e a verificação das permissões, que rodam antes disso);
   - um `RuntimeError` ou `DemoRecusadaError` logo no início: falta ou está errada alguma variável. A mensagem diz qual, sem mostrar o valor;
+  - `DiasDeAlertaAcimaDoTetoError`: a migration do teto dos dias de alerta (RN-26) achou produto com mais de 3650 dias e parou sem alterar nada. A mensagem lista os produtos; corrija-os pela versão anterior, que continua no ar, e faça o deploy de novo. Na demonstração, a conta pública pode gravar o valor outra vez antes do deploy: a saída definitiva é rodar `py -m app.scripts.reset_demo` com o código novo, que recria o banco já com o teto (apaga todos os dados, só para a demonstração). Para conferir antes: `SELECT id, nome, dias_alerta_validade FROM products WHERE dias_alerta_validade > 3650`;
+  - `LockNotAvailable` durante o `alembic upgrade head`: a tabela estava em uso e a migration desistiu em 5 segundos, sem alterar nada. Faça o deploy de novo;
   - `PermissoesError` ou `O usuário ... está com as permissões erradas`: a verificação da RN-58 barrou a subida. A mensagem lista o que falta ou sobra;
   - `DemoOcupadaError`: outra recriação segurou a trava por mais de 60 segundos. Nada foi apagado; o Render sobe a API de novo e ela tenta outra vez;
   - `connection timeout` ou `OperationalError` do psycopg: o banco não respondeu em 10 segundos (`connect_timeout`). Confira no painel do Neon se o banco está disponível.

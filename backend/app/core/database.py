@@ -12,8 +12,17 @@ TEMPO_LIMITE_CONEXAO_SEGUNDOS = 10
 
 
 def criar_engine(url: str, **opcoes) -> Engine:
-    """Toda conexão do projeto com o banco passa por aqui, com o tempo limite de conexão."""
-    return create_engine(url, connect_args={"connect_timeout": TEMPO_LIMITE_CONEXAO_SEGUNDOS}, **opcoes)
+    """Toda conexão da API e dos scripts passa por aqui (as das migrations são do alembic/env.py).
+
+    RN-66: hide_parameters deixa os valores enviados (nome, e-mail, hash de senha...) fora do texto do
+    erro de SQL e, por isso, fora do log.
+    """
+    return create_engine(
+        url,
+        connect_args={"connect_timeout": TEMPO_LIMITE_CONEXAO_SEGUNDOS},
+        hide_parameters=True,
+        **opcoes,
+    )
 
 
 engine = criar_engine(settings.DATABASE_URL, pool_pre_ping=True)

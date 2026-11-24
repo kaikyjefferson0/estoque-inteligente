@@ -11,6 +11,7 @@ from pydantic import (
     Field,
     PlainSerializer,
     StringConstraints,
+    WithJsonSchema,
     model_validator,
 )
 from pydantic_core import PydanticCustomError
@@ -20,6 +21,10 @@ from app.schemas.comum import MAX_INTEGER, EntradaBase
 # RN-60: limite da coluna NUMERIC(10,2), 8 dígitos inteiros e 2 casas
 PRECO_MAXIMO = Decimal("99999999.99")
 CENTAVO = Decimal("0.01")
+
+# RN-26: 10 anos. O banco repete o teto na CHECK ck_products_dias_alerta_validade_maximo
+DIAS_ALERTA_MAXIMO = 3650
+MENSAGEM_DIAS_ALERTA = f"Informe de 1 a {DIAS_ALERTA_MAXIMO} dias de alerta (no máximo 10 anos)."
 
 
 def normalizar_codigo_barras(codigo: str) -> str:
@@ -38,8 +43,21 @@ Nome = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max
 # Usado também na entrada e na saída (schemas.stock) e na busca exata (GET /products/by-barcode)
 CodigoBarras = Annotated[str, BeforeValidator(_codigo_sem_espacos), StringConstraints(min_length=1, max_length=50)]
 EstoqueMinimo = Annotated[int, Field(ge=0, le=MAX_INTEGER)]
-# O valor > 0 e a coerência com controla_validade (RN-26) são checados no service
-DiasAlerta = Annotated[int, Field(le=MAX_INTEGER)]
+
+
+def _dias_de_alerta_na_faixa(valor: int) -> int:
+    # Mensagem própria em vez do ge/le do Pydantic, que responderia em inglês
+    if not 1 <= valor <= DIAS_ALERTA_MAXIMO:
+        raise PydanticCustomError("dias_alerta_fora_da_faixa", MENSAGEM_DIAS_ALERTA)
+    return valor
+
+
+# RN-26: de 1 a 3650 dias. A coerência com controla_validade é checada no service, que também repete a faixa
+DiasAlerta = Annotated[
+    int,
+    AfterValidator(_dias_de_alerta_na_faixa),
+    WithJsonSchema({"type": "integer", "minimum": 1, "maximum": DIAS_ALERTA_MAXIMO}),
+]
 FornecedorId = Annotated[int, Field(ge=1, le=MAX_INTEGER)]
 
 

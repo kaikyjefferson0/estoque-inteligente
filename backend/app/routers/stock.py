@@ -49,7 +49,7 @@ def registrar_entrada(
         resultado = service.registrar_entrada(db, usuario, **dados.model_dump())
     except service.ProdutoNaoEncontradoError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Produto não encontrado. Ele pode ter sido removido; confira o código ou atualize a página.")
-    except (service.QuantidadeInvalidaError, service.ValidadeInvalidaError) as erro:
+    except (service.QuantidadeInvalidaError, service.ValidadeInvalidaError, service.LoteCheioError) as erro:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(erro))
     movimentacao, lote = resultado.movimentacao, resultado.lote
     return StockEntryOut(

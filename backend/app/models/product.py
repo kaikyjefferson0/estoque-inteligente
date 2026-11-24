@@ -18,6 +18,8 @@ class Product(Base):
             " OR (NOT controla_validade AND dias_alerta_validade IS NULL)",
             name="ck_products_dias_alerta_validade",
         ),
+        # RN-26: no máximo 3650 dias (10 anos). NULL passa (produto que não controla validade)
+        CheckConstraint("dias_alerta_validade <= 3650", name="ck_products_dias_alerta_validade_maximo"),
         # RN-04: sem espaço em branco (os mesmos caracteres que a API tira). Criada pela migration
         # 9a0c1c19b39f, que tem a cópia desta condição: as duas precisam ser iguais.
         CheckConstraint(

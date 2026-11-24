@@ -1,4 +1,4 @@
-"""CT-62 a CT-64: movimentações simultâneas no mesmo produto, gravando de verdade.
+"""CT-62 a CT-64 e CT-101: movimentações simultâneas no mesmo produto, gravando de verdade.
 CT-86 e CT-24: exclusão de fornecedor ao mesmo tempo que um produto é ligado a ele (RN-59).
 CT-87: edição ou segunda exclusão de um fornecedor que está sendo excluído.
 
@@ -210,6 +210,29 @@ def test_ct64_entrada_e_saida_simultaneas_deixam_saldo_correto(engine, sessoes, 
     assert len(lotes) == 1
     assert lotes[0].quantidade == 10 + 5 - 8
     assert sorted(m.tipo for m in movimentacoes) == ["entrada", "entrada", "saida"]
+
+
+def test_ct101_duas_entradas_simultaneas_que_juntas_passam_do_maximo_do_lote(engine, sessoes, token):
+    """CT-101 / RN-65: cada uma cabe sozinha; a segunda vê o saldo da primeira e é recusada com 422."""
+    produto = novo_produto(sessoes, "7891000010101")
+
+    respostas = disputar(
+        engine,
+        sessoes,
+        token,
+        produto.id,
+        [
+            ("/stock/entries", {"codigo_barras": produto.codigo_barras, "quantidade": 2_000_000_000}),
+            ("/stock/entries", {"codigo_barras": produto.codigo_barras, "quantidade": 2_000_000_000}),
+        ],
+    )
+
+    assert sorted(r.status_code for r in respostas) == [201, 422], respostas
+    [recusada] = [r for r in respostas if r.status_code == 422]
+    assert "Informe até 147483647." in recusada.json()["detail"]
+    lotes, movimentacoes = lotes_e_movimentacoes(sessoes, produto.id)
+    assert [lote.quantidade for lote in lotes] == [2_000_000_000]
+    assert [m.quantidade for m in movimentacoes] == [2_000_000_000]
 
 
 # --- Exclusão de fornecedor x produto ligado a ele (RN-59) ---

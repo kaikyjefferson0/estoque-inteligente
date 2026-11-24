@@ -192,3 +192,102 @@ describe('Cadastrar e editar produto: preço', () => {
     expect(corpoDoPatch()).toEqual({ preco: '2.59' })
   })
 })
+
+// CT-99 / RN-26
+describe('Cadastrar e editar produto: dias de alerta de 1 a 3650', () => {
+  const NO_MAXIMO = 'Use no máximo 3650 dias (10 anos).'
+  const DE_1_A_3650 = 'Use um número inteiro de dias, de 1 a 3650.'
+
+  async function cadastrarComDias(usuario: ReturnType<typeof userEvent.setup>, dias: string) {
+    await usuario.type(screen.getByLabelText('Nome'), 'Leite integral 1 L')
+    await usuario.type(screen.getByLabelText('Código de barras'), '7891000000011')
+    await usuario.type(screen.getByLabelText('Estoque mínimo'), '10')
+    await usuario.click(screen.getByLabelText('Controla validade'))
+    await usuario.type(screen.getByLabelText('Dias de alerta'), dias)
+    await usuario.click(screen.getByRole('button', { name: 'Cadastrar produto' }))
+  }
+
+  it.each([
+    ['1', 1],
+    ['3650', 3650],
+  ])('envia "%s"', async (digitado, enviado) => {
+    apiSimulada.mockResolvedValue({ id: 99 })
+    const usuario = userEvent.setup()
+    abrirCadastro()
+
+    await cadastrarComDias(usuario, digitado)
+
+    expect(apiSimulada).toHaveBeenCalledWith('/products', {
+      body: expect.objectContaining({ dias_alerta_validade: enviado }),
+    })
+  })
+
+  it.each([
+    ['0', DE_1_A_3650],
+    ['-1', DE_1_A_3650],
+    ['3.650', DE_1_A_3650],
+    ['3651', NO_MAXIMO],
+    ['2147483647', NO_MAXIMO],
+  ])('com "%s", mostra o limite no campo, põe o foco nele e não envia', async (digitado, mensagem) => {
+    const usuario = userEvent.setup()
+    abrirCadastro()
+
+    await cadastrarComDias(usuario, digitado)
+
+    const campo = screen.getByLabelText('Dias de alerta')
+    expect(apiSimulada).not.toHaveBeenCalled()
+    expect(campo).toHaveProperty('ariaInvalid', 'true')
+    expect(document.activeElement).toBe(campo)
+    expect(screen.getByText(mensagem)).toBeTruthy()
+
+    // O erro some assim que a pessoa edita
+    await usuario.clear(campo)
+    expect(screen.queryByText(mensagem)).toBeNull()
+  })
+
+  it('a dica diz o limite antes de qualquer erro', async () => {
+    const usuario = userEvent.setup()
+    abrirCadastro()
+    await usuario.click(screen.getByLabelText('Controla validade'))
+
+    expect(screen.getByText('Quantos dias antes de vencer o lote entra em alerta, de 1 a 3650.')).toBeTruthy()
+  })
+
+  it('na edição, acima do teto não envia e no teto envia só os dias', async () => {
+    const produto = {
+      id: 6,
+      nome: 'Leite integral 1 L',
+      codigo_barras: '7891000000011',
+      estoque_minimo: 5,
+      controla_validade: true,
+      dias_alerta_validade: 30,
+      fornecedor_id: null,
+      fornecedor_nome: null,
+      preco: null,
+      criado_em: '2026-11-20T12:00:00Z',
+    }
+    apiSimulada.mockImplementation(async (caminho: string) =>
+      caminho === '/products/6/stock' ? { lotes: [], saldo_fisico: 0, saldo_disponivel: 0 } : produto,
+    )
+    const usuario = userEvent.setup()
+    render(
+      <MemoryRouter initialEntries={['/produtos/6/editar']}>
+        <Routes>
+          <Route path="/produtos/:id/editar" element={<ProdutoEditarPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    const campo = await screen.findByLabelText('Dias de alerta')
+    await usuario.clear(campo)
+    await usuario.type(campo, '3651')
+    await usuario.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+    expect(screen.getByText(NO_MAXIMO)).toBeTruthy()
+
+    await usuario.clear(campo)
+    await usuario.type(campo, '3650')
+    await usuario.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+    const envios = apiSimulada.mock.calls.filter(([, opcoes]) => opcoes?.method === 'PATCH')
+    expect(envios).toEqual([['/products/6', { method: 'PATCH', body: { dias_alerta_validade: 3650 } }]])
+  })
+})

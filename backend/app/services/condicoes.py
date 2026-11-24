@@ -59,7 +59,10 @@ def situacao_do_lote(dia: date) -> ColumnElement[str]:
 
 
 def saldo_fisico() -> ColumnElement[int]:
-    """Soma de todos os lotes, vencidos inclusive (agregação sobre Batch)."""
+    """Soma de todos os lotes, vencidos inclusive (agregação sobre Batch).
+
+    RN-65: SUM de INTEGER é BIGINT no PostgreSQL, então a soma não estoura.
+    """
     return func.coalesce(func.sum(Batch.quantidade), 0)
 
 
