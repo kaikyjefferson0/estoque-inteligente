@@ -84,6 +84,9 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 24.21.0
+      # O build do site não usa o Cypress: sem isto, o npm ci baixaria o binário dele
+      - key: CYPRESS_INSTALL_BINARY
+        value: "0"
       # Lidas no build (npm run build): mudar qualquer uma exige um novo deploy do site.
       # Endereço público da API, preenchido no painel (ex.: https://estoque-api-pqbo.onrender.com).
       # Não sai do nome do serviço: com o sufixo que o Render acrescenta quando o nome já é de

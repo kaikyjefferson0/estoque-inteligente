@@ -53,6 +53,11 @@ Sistema web de controle de estoque com validade de lotes, alertas e dashboard.
 - O que acontece (`frontend\e2e\rodar.mjs`): gera senhas aleatórias só em memória (variáveis de ambiente, nunca arquivo); recria o `estoque_e2e` pelas migrations e cria o admin e o operador (`backend\tests\e2e_preparar.py`); sobe a API na porta 8001 com o usuário da aplicação e CORS para `http://localhost:5175` (`backend\tests\e2e_api.py`) e o site na 5175; roda `frontend\e2e\*.spec.ts`; no fim, para a API e o site (no Windows, com `taskkill /T`), mesmo se um teste falhar.
 - Portas 8001 e 5175 precisam estar livres. Numa falha, a captura e o retrato da página ficam em `frontend\test-results\e2e\<etapa>` (fora do git; uma pasta por arquivo de teste), com as senhas trocadas por `***`.
 
+## Teste de ponta a ponta oficial (Cypress contra a API real)
+- Comandos (dentro de `frontend`): `npm run cy:e2e` (terminal) e `npm run cy:open` (interface gráfica). Não precisa subir nada antes; mesmos pré-requisitos e portas do Playwright, que continua como cobertura extra.
+- `frontend\cypress\rodar.mjs` recria o `estoque_e2e`, gera as senhas em memória, sobe a API com `E2E_RESET=true` e o site e, no fim, para tudo. Cada teste chama `POST /_test/reset` antes (RN-67; `backend\app\services\e2e_reset.py`).
+- Seletores só por `data-cy`; o seed está em `e2e_reset.py` e em `frontend\cypress\support\seed.ts` (mude os dois juntos).
+
 ## Roteiro de fases
 - [x] Fase 0: ambiente — concluída
 - [x] Fase 1: documentação — concluída

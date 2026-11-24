@@ -37,7 +37,7 @@ export function Campo({ rotulo, erro, dica, acessorio, id, className, ...resto }
         </p>
       )}
       {erro && (
-        <p id={idErro} className="campo__erro">
+        <p id={idErro} className="campo__erro" data-cy={resto.name && `erro-${resto.name}`}>
           {erro}
         </p>
       )}

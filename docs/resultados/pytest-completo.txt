@@ -1,49 +1,52 @@
-Data: 24/11/2026 08:47:01
+Data: 24/11/2026 09:27:33
 Pasta: backend
 Comando: pytest -rs
 Código de saída: 0
-Tempo total: 101.1 s
+Tempo total: 111.4 s
 --------------------------------------------------------------------------------
 
-======================================= test session starts =======================================
+============================= test session starts =============================
 platform win32 -- Python 3.14.8, pytest-9.1.1, pluggy-1.7.0
 rootdir: C:\Users\PC\estoque-inteligente\backend
 configfile: pytest.ini
 testpaths: tests
 plugins: anyio-4.15.1, platformdirs-4.13.6, cov-7.1.0
-collected 746 items
+collected 778 items
 
-tests\test_alerts.py .........................                                               [  3%]
-tests\test_auth.py ..............                                                            [  5%]
-tests\test_cadastros.py ....                                                                 [  5%]
-tests\test_concorrencia.py ...........                                                       [  7%]
-tests\test_config.py .......                                                                 [  8%]
-tests\test_cors.py .....                                                                     [  8%]
-tests\test_create_admin.py .                                                                 [  8%]
-tests\test_dashboard.py .........                                                            [ 10%]
-tests\test_demo.py ............................                                              [ 13%]
-tests\test_erro_sql_sem_valores.py .......                                                   [ 14%]
-tests\test_health.py .                                                                       [ 15%]
-tests\test_limites_numericos.py ............................................................ [ 23%]
-.........................                                                                    [ 26%]
-tests\test_migracao_codigo_barras.py ...........                                             [ 27%]
-tests\test_migracao_dias_alerta.py ..........                                                [ 29%]
-tests\test_migracao_preco.py .....                                                           [ 29%]
-tests\test_paginacao.py .....................                                                [ 32%]
-tests\test_partida_a_frio.py .....                                                           [ 33%]
-tests\test_permissoes_banco.py ....                                                          [ 33%]
-tests\test_preco.py ..................................................                       [ 40%]
-tests\test_products.py ....................                                                  [ 43%]
-tests\test_regras_sql.py .....................................................               [ 50%]
-tests\test_seguranca_http.py .........                                                       [ 51%]
-tests\test_senhas.py ....................                                                    [ 54%]
-tests\test_sincronizar_permissoes.py .....................                                   [ 57%]
-tests\test_stock.py ......................................................                   [ 64%]
-tests\test_suppliers.py .......................                                              [ 67%]
-tests\test_validacao_entrada.py ............................................................ [ 75%]
-............................................................................................ [ 87%]
-.................                                                                            [ 90%]
-tests\unit\test_regras.py .................................................................. [ 98%]
-........                                                                                     [100%]
+tests\test_alerts.py .........................                           [  3%]
+tests\test_auth.py ..............                                        [  5%]
+tests\test_cadastros.py ....                                             [  5%]
+tests\test_concorrencia.py ...........                                   [  6%]
+tests\test_config.py .......                                             [  7%]
+tests\test_cors.py .....                                                 [  8%]
+tests\test_create_admin.py .                                             [  8%]
+tests\test_dashboard.py .........                                        [  9%]
+tests\test_demo.py ............................                          [ 13%]
+tests\test_e2e_reset.py ................................                 [ 17%]
+tests\test_erro_sql_sem_valores.py .......                               [ 18%]
+tests\test_health.py .                                                   [ 18%]
+tests\test_limites_numericos.py ........................................ [ 23%]
+.............................................                            [ 29%]
+tests\test_migracao_codigo_barras.py ...........                         [ 30%]
+tests\test_migracao_dias_alerta.py ..........                            [ 32%]
+tests\test_migracao_preco.py .....                                       [ 32%]
+tests\test_paginacao.py .....................                            [ 35%]
+tests\test_partida_a_frio.py .....                                       [ 36%]
+tests\test_permissoes_banco.py ....                                      [ 36%]
+tests\test_preco.py ..................................................   [ 43%]
+tests\test_products.py ....................                              [ 45%]
+tests\test_regras_sql.py ............................................... [ 51%]
+......                                                                   [ 52%]
+tests\test_seguranca_http.py .........                                   [ 53%]
+tests\test_senhas.py ....................                                [ 56%]
+tests\test_sincronizar_permissoes.py .....................               [ 58%]
+tests\test_stock.py .................................................... [ 65%]
+..                                                                       [ 65%]
+tests\test_suppliers.py .......................                          [ 68%]
+tests\test_validacao_entrada.py ........................................ [ 73%]
+........................................................................ [ 83%]
+.........................................................                [ 90%]
+tests\unit\test_regras.py .............................................. [ 96%]
+............................                                             [100%]
 
-================================= 746 passed in 98.58s (0:01:38) ==================================
+======================= 778 passed in 108.56s (0:01:48) =======================

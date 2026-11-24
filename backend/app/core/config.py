@@ -128,6 +128,11 @@ class Settings:
     DEMO_PASSWORD: str = os.getenv("DEMO_PASSWORD", "")
     ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "").strip()
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "")
+    # RN-67: rota de reset do teste de ponta a ponta (Cypress). Ligada só pelo frontend\cypress\rodar.mjs,
+    # que também gera as senhas das contas, só em memória. A flag sozinha não basta: ver e2e_reset.permitido
+    E2E_RESET: bool = ler_booleano(os.getenv("E2E_RESET"))
+    E2E_SENHA_ADMIN: str = os.getenv("E2E_SENHA_ADMIN", "")
+    E2E_SENHA_OPERADOR: str = os.getenv("E2E_SENHA_OPERADOR", "")
     # Definida pelo próprio Render em todos os serviços dele
     NO_RENDER: bool = bool(os.getenv("RENDER", "").strip())
 

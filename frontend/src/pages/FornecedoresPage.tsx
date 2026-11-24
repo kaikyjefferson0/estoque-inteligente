@@ -105,7 +105,7 @@ export function FornecedoresPage() {
         {/* Um único botão primário: sem fornecedores, ele fica no convite abaixo */}
         {dados && !vazio && (
           <div className="pagina__acoes">
-            <BotaoLink to="/fornecedores/novo" variante="primaria" icone={IconPlus}>
+            <BotaoLink to="/fornecedores/novo" variante="primaria" icone={IconPlus} data-cy="btn-novo">
               Cadastrar fornecedor
             </BotaoLink>
           </div>
@@ -114,7 +114,7 @@ export function FornecedoresPage() {
 
       {erroExclusao && (
         <div ref={avisoDeErro} tabIndex={-1}>
-          <Aviso situacao="critico">
+          <Aviso situacao="critico" dataCy="mensagem-erro">
             <p className="texto-inteiro">
               Não foi possível excluir {erroExclusao.nome}. {erroExclusao.mensagem}
               {erroExclusao.comProdutos && ' Para excluir, troque o fornecedor desses produtos ou deixe-os sem fornecedor.'}
@@ -124,7 +124,7 @@ export function FornecedoresPage() {
       )}
 
       {mensagem && (
-        <Aviso situacao="ok">
+        <Aviso situacao="ok" dataCy="mensagem">
           <p className="texto-inteiro">{mensagem}</p>
         </Aviso>
       )}
@@ -138,7 +138,7 @@ export function FornecedoresPage() {
             icone={IconTruck}
             titulo="Nenhum fornecedor cadastrado"
             acao={
-              <BotaoLink to="/fornecedores/novo" variante="primaria">
+              <BotaoLink to="/fornecedores/novo" variante="primaria" data-cy="btn-novo">
                 Cadastrar fornecedor
               </BotaoLink>
             }
@@ -150,7 +150,7 @@ export function FornecedoresPage() {
 
       {dados && !vazio && (
         <div className="painel painel--dados tabela-empilhavel">
-          <table className="tabela fornecedores">
+          <table className="tabela fornecedores" data-cy="tabela-fornecedores">
             <caption className="visualmente-oculto">Fornecedores cadastrados</caption>
             <thead>
               <tr>
@@ -163,11 +163,11 @@ export function FornecedoresPage() {
             </thead>
             <tbody>
               {dados.map((f) => (
-                <tr key={f.id}>
-                  <td className="fornecedores__nome tabela__principal">
+                <tr key={f.id} data-cy={`fornecedor-${f.id}`}>
+                  <td className="fornecedores__nome tabela__principal" data-cy="nome">
                     <NomeEmLista nome={f.nome} />
                   </td>
-                  <td className="fornecedores__cnpj tabela__etiqueta">
+                  <td className="fornecedores__cnpj tabela__etiqueta" data-cy="cnpj">
                     {f.cnpj ? (
                       <span className="numero">{formatarCnpj(f.cnpj)}</span>
                     ) : (
@@ -181,12 +181,19 @@ export function FornecedoresPage() {
                         variante="fantasma"
                         icone={IconPencil}
                         aria-label={`Editar ${f.nome}`}
+                        data-cy="btn-editar"
                       >
                         Editar
                       </BotaoLink>
                       {/* Esconder é conveniência: o backend recusa o operador com 403 (require_admin) */}
                       {admin && (
-                        <Botao variante="fantasma" icone={IconTrash} onClick={(evento) => abrirExclusao(f, evento.currentTarget)} aria-label={`Excluir ${f.nome}`}>
+                        <Botao
+                          variante="fantasma"
+                          icone={IconTrash}
+                          onClick={(evento) => abrirExclusao(f, evento.currentTarget)}
+                          aria-label={`Excluir ${f.nome}`}
+                          data-cy="btn-excluir"
+                        >
                           Excluir
                         </Botao>
                       )}

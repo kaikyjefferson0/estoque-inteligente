@@ -1,0 +1,81 @@
+Data: 24/11/2026 09:34:01
+Pasta: frontend
+Comando: npm run cy:e2e
+Observação: segunda de duas execuções seguidas, sem falhas em nenhuma
+Código de saída: 0
+Tempo total: 37.5 s
+--------------------------------------------------------------------------------
+
+> frontend@0.0.0 cy:e2e
+> node cypress/rodar.mjs
+
+[cypress] Recriando o banco estoque_e2e pelas migrations…
+[e2e] Banco recriado pelas migrations; admin e operador criados.
+[cypress] Subindo a API em http://127.0.0.1:8001 e o site em http://localhost:5175…
+[cypress] Rodando o Cypress…
+
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        16.3.0                                                                         │
+  │ Browser:        Electron 150 (headless) (deprecated)                                           │
+  │ Node Version:   v24.21.0 (C:\Program Files\nodejs\node.exe)                                    │
+  │ Specs:          1 found (fornecedores.cy.ts)                                                   │
+  │ Searched:       cypress/e2e/**/*.cy.ts                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Warning: The Electron browser is deprecated as a test browser and will be removed in a future version of Cypress.
+
+Switch to Chrome or another installed browser to avoid a breaking change when you upgrade.
+
+Read more about supported browsers: https://on.cypress.io/launching-browsers
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  fornecedores.cy.ts                                                              (1 of 1)
+
+
+  CRUD de fornecedores
+    √ CT-115: lista os fornecedores do seed (READ) (4179ms)
+    √ CT-116: cadastra um fornecedor (CREATE) (2811ms)
+    √ CT-117: edita o nome e o CNPJ de um fornecedor (UPDATE) (2662ms)
+    √ CT-118: exclui um fornecedor sem produtos (DELETE) (3724ms)
+    √ CT-119: não exclui um fornecedor com produtos (409, RN-59) (1564ms)
+    √ CT-120: recusa CNPJ repetido no cadastro (409 no campo) (4544ms)
+
+
+  6 passing (20s)
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        6                                                                                │
+  │ Passing:      6                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     19 seconds                                                                       │
+  │ Spec Ran:     fornecedores.cy.ts                                                               │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  fornecedores.cy.ts                       00:19        6        6        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        00:19        6        6        -        -        -
+
+[cypress] API parado.
+[cypress] Site parado.

@@ -31,6 +31,8 @@ CMD ["sh", "-c", "alembic upgrade head && python -m app.scripts.sincronizar_perm
 FROM node:24-slim AS site-build
 WORKDIR /frontend
 COPY frontend/package.json frontend/package-lock.json ./
+# O binário do Cypress não é usado na imagem
+ENV CYPRESS_INSTALL_BINARY=0
 RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
 # As VITE_* entram no build: mudar qualquer uma exige docker compose up --build
