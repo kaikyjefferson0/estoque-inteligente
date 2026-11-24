@@ -11,9 +11,12 @@ import sys
 from pathlib import Path
 
 import pytest
+from alembic.config import Config
+from alembic.script import ScriptDirectory
 from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 
+from app.core import migracoes
 from app.models.product import Product
 
 ARQUIVO = Path(__file__).resolve().parents[1] / "alembic" / "versions" / "9a0c1c19b39f_codigo_de_barras_sem_espacos.py"
@@ -57,7 +60,12 @@ def codigo_gravado(db, produto: Product) -> str:
 
 
 def test_ct83_migration_esta_aplicada_no_banco(db):
-    assert db.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == migracao.revision
+    """Aplicada: é a revisão do banco ou uma das anteriores a ela (já não é a head)."""
+    config = Config()
+    config.set_main_option("script_location", str(migracoes.PASTA_BACKEND / "alembic"))
+    atual = db.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+    aplicadas = {script.revision for script in ScriptDirectory.from_config(config).iterate_revisions(atual, "base")}
+    assert migracao.revision in aplicadas
 
 
 def test_ct83_migration_tira_os_espacos_dos_codigos_gravados(banco_antes_da_migration):

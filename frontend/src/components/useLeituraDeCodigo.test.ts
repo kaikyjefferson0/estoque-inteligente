@@ -22,6 +22,7 @@ const PRODUTO: Produto = {
   dias_alerta_validade: null,
   fornecedor_id: null,
   fornecedor_nome: null,
+  preco: '5.49',
   criado_em: '2026-11-11T12:00:00Z',
 }
 const SALDO: SaldoProduto = { produto_id: 14, saldo_fisico: 5, saldo_disponivel: 5, lotes: [] }

@@ -13,6 +13,7 @@ import os
 import secrets
 import sys
 from datetime import timedelta
+from decimal import Decimal
 
 from tests import e2e_ambiente
 
@@ -26,6 +27,8 @@ PRODUTO_LONGO_SEM_ESTOQUE = "Desinfetante perfumado para uso geral, lavanda, gal
 USUARIO_LONGO = "Maria Aparecida dos Santos Albuquerque de Oliveira Figueiredo"
 EMAIL_LONGO = "maria.aparecida.albuquerque.figueiredo@distribuidoras.com.br"
 SALDO_GRANDE = 99_999
+# RN-60: o maior preço aceito, no produto de saldo grande; o outro produto longo fica sem preço ("Sem preço")
+PRECO_GRANDE = Decimal("99999999.99")
 
 
 def _senha(variavel: str) -> str:
@@ -58,6 +61,7 @@ def _criar_demo_e_casos_extremos(db, admin, operador) -> None:
         controla_validade=True,
         dias_alerta_validade=10,
         fornecedor_id=fornecedor.id,
+        preco=PRECO_GRANDE,
     )
     sem_estoque = criar_produto(
         db,

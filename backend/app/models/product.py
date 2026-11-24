@@ -1,6 +1,7 @@
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, String, false, func, select
+from sqlalchemy import Boolean, CheckConstraint, DateTime, ForeignKey, Integer, Numeric, String, false, func, select
 from sqlalchemy.orm import Mapped, column_property, mapped_column
 
 from app.core.database import Base
@@ -24,6 +25,8 @@ class Product(Base):
             r"    　]'",
             name="ck_products_codigo_barras_sem_espacos",
         ),
+        # RN-60: preço opcional e nunca negativo
+        CheckConstraint("preco >= 0", name="ck_products_preco_nao_negativo"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -41,6 +44,8 @@ class Product(Base):
         index=True,
     )
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # RN-60: preço em NUMERIC (valor exato, nunca float), até 99.999.999,99; vazio = sem preço
+    preco: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     # Só leitura (não é coluna): nome do fornecedor, para as telas não buscarem a lista de fornecedores
     fornecedor_nome: Mapped[str | None] = column_property(
         select(Supplier.nome).where(Supplier.id == fornecedor_id).correlate_except(Supplier).scalar_subquery()

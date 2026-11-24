@@ -25,7 +25,15 @@ import type { TipoMovimentacao } from '../types/dashboard'
 import type { Movimentacao } from '../types/estoque'
 import type { Pagina } from '../types/pagina'
 import type { Produto, SaldoProduto } from '../types/produto'
-import { formatarComSinal, formatarDataHora, formatarNumero, hojeIso, plural, semQuebraNaUnidade } from '../utils/formato'
+import {
+  formatarComSinal,
+  formatarDataHora,
+  formatarNumero,
+  formatarPreco,
+  hojeIso,
+  plural,
+  semQuebraNaUnidade,
+} from '../utils/formato'
 import { descreverLote, situacaoDoLote } from '../utils/situacao'
 import './ProdutoDetalhePage.css'
 
@@ -52,6 +60,11 @@ function Ficha({ produto }: { produto: Produto }) {
         <div className="ficha__item">
           <dt>Estoque mínimo</dt>
           <dd className="numero">{formatarNumero(produto.estoque_minimo)}</dd>
+        </div>
+        <div className="ficha__item">
+          <dt>Preço</dt>
+          {/* RN-60: em reais, ou "Sem preço" em texto suave, como o "Sem fornecedor" */}
+          <dd className={produto.preco === null ? 'ficha__vazio' : 'numero'}>{formatarPreco(produto.preco)}</dd>
         </div>
         <div className="ficha__item">
           <dt>Validade</dt>

@@ -3,7 +3,7 @@
 -- =============================================================================
 --
 -- Fonte oficial do esquema: as migrations do Alembic (backend\alembic\versions).
--- Este arquivo é uma cópia legível do banco migrado até a revisão 9a0c1c19b39f (head),
+-- Este arquivo é uma cópia legível do banco migrado até a revisão 30a97c4f4643 (head),
 -- gerada com `pg_dump --schema-only --no-owner --no-privileges` e reorganizada à mão:
 -- as restrições foram para dentro do CREATE TABLE e as tabelas seguem a ordem das FKs.
 -- O banco criado por este script é igual ao das migrations (veja db\README.md, "Prova").
@@ -79,9 +79,14 @@ CREATE TABLE public.products (
     dias_alerta_validade  integer,                 -- antecedência do alerta de vencimento (RN-14)
     fornecedor_id         integer,                 -- RN-24: opcional
     criado_em             timestamp with time zone DEFAULT now() NOT NULL,
+    -- RN-60: preço opcional, exato (NUMERIC, nunca float), até 99.999.999,99. Fica por último
+    -- porque a migration 30a97c4f4643 o acrescentou com ADD COLUMN.
+    preco                 numeric(10,2),
 
     CONSTRAINT products_pkey PRIMARY KEY (id),
     CONSTRAINT ck_products_estoque_minimo_nao_negativo CHECK (estoque_minimo >= 0),
+    -- RN-60: nunca negativo; sem preço (NULL) passa
+    CONSTRAINT ck_products_preco_nao_negativo CHECK (preco >= 0),
     -- RN-26: controla validade => dias obrigatórios e > 0; não controla => dias vazios
     CONSTRAINT ck_products_dias_alerta_validade CHECK (
         (controla_validade AND dias_alerta_validade IS NOT NULL AND dias_alerta_validade > 0)

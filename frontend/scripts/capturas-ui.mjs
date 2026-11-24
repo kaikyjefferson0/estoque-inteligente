@@ -84,10 +84,10 @@ const FORNECEDORES = [
   { id: 3, nome: 'Atacado Central de Ferragens e Materiais de Construção Ltda', cnpj: '98765432000110', criado_em: '2026-09-03T12:00:00Z' },
 ]
 const PRODUTOS_SEM_FORNECEDOR = [
-  { id: 1, nome: 'Arroz tipo 1, pacote de 5 kg', codigo_barras: '7891000100103', estoque_minimo: 20, controla_validade: false, dias_alerta_validade: null, fornecedor_id: 1, criado_em: '2026-09-10T13:30:00Z' },
-  { id: 2, nome: 'Leite integral UHT 1 L', codigo_barras: '7896051111016', estoque_minimo: 48, controla_validade: true, dias_alerta_validade: 10, fornecedor_id: 2, criado_em: '2026-09-11T09:00:00Z' },
-  { id: 3, nome: 'Parafuso sextavado zincado M8 x 40 mm, caixa com 100 unidades', codigo_barras: '7899999000123', estoque_minimo: 1200, controla_validade: false, dias_alerta_validade: null, fornecedor_id: null, criado_em: '2026-09-12T10:00:00Z' },
-  { id: 4, nome: 'Café torrado e moído 500 g', codigo_barras: '7896005800018', estoque_minimo: 12, controla_validade: true, dias_alerta_validade: 30, fornecedor_id: 3, criado_em: '2026-09-13T15:45:00Z' },
+  { id: 1, nome: 'Arroz tipo 1, pacote de 5 kg', codigo_barras: '7891000100103', estoque_minimo: 20, controla_validade: false, dias_alerta_validade: null, fornecedor_id: 1, preco: '27.90', criado_em: '2026-09-10T13:30:00Z' },
+  { id: 2, nome: 'Leite integral UHT 1 L', codigo_barras: '7896051111016', estoque_minimo: 48, controla_validade: true, dias_alerta_validade: 10, fornecedor_id: 2, preco: null, criado_em: '2026-09-11T09:00:00Z' },
+  { id: 3, nome: 'Parafuso sextavado zincado M8 x 40 mm, caixa com 100 unidades', codigo_barras: '7899999000123', estoque_minimo: 1200, controla_validade: false, dias_alerta_validade: null, fornecedor_id: null, preco: '99999999.99', criado_em: '2026-09-12T10:00:00Z' },
+  { id: 4, nome: 'Café torrado e moído 500 g', codigo_barras: '7896005800018', estoque_minimo: 12, controla_validade: true, dias_alerta_validade: 30, fornecedor_id: 3, preco: '32.90', criado_em: '2026-09-13T15:45:00Z' },
 ]
 // A API manda o nome do fornecedor junto com o produto
 const PRODUTOS = PRODUTOS_SEM_FORNECEDOR.map((p) => ({ ...p, fornecedor_nome: FORNECEDORES.find((f) => f.id === p.fornecedor_id)?.nome ?? null }))

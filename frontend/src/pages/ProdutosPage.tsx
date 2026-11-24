@@ -15,7 +15,7 @@ import { usePaginaNaUrl } from '../components/usePaginaNaUrl'
 import { useTituloDaPagina } from '../components/useTituloDaPagina'
 import type { Pagina } from '../types/pagina'
 import type { Produto } from '../types/produto'
-import { formatarNumero, plural } from '../utils/formato'
+import { formatarNumero, formatarPreco, plural } from '../utils/formato'
 import { useAtraso } from '../utils/useAtraso'
 import './ProdutosPage.css'
 
@@ -135,6 +135,9 @@ export function ProdutosPage() {
                 <th scope="col">Código de barras</th>
                 <th scope="col">Fornecedor</th>
                 <th scope="col" className="tabela__numero">
+                  Preço
+                </th>
+                <th scope="col" className="tabela__numero">
                   Estoque mínimo
                 </th>
               </tr>
@@ -155,6 +158,18 @@ export function ProdutosPage() {
                       <span className="tabela__vazio">Sem fornecedor</span>
                     ) : (
                       <NomeEmLista nome={p.fornecedor_nome} />
+                    )}
+                  </td>
+                  {/* RN-60: em reais, ou "Sem preço" como o "Sem fornecedor" (texto suave e, no celular,
+                      sem o rótulo, que já está no texto); o R$ e o número nunca se separam */}
+                  <td className="produtos__preco tabela__numero tabela__etiqueta numero">
+                    {p.preco === null ? (
+                      <span className="tabela__vazio">{formatarPreco(p.preco)}</span>
+                    ) : (
+                      <>
+                        <span className="tabela__rotulo-celular">Preço </span>
+                        {formatarPreco(p.preco)}
+                      </>
                     )}
                   </td>
                   <td className="produtos__minimo tabela__numero tabela__etiqueta numero">

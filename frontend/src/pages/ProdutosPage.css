@@ -29,7 +29,8 @@
 }
 
 /* ---------- Tabela ---------- */
-.produtos__codigo {
+.produtos__codigo,
+.produtos__preco {
   white-space: nowrap;
 }
 

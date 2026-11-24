@@ -93,6 +93,15 @@
 | CT-25 | Cadastrar fornecedor com CNPJ repetido ou inválido | Sistema recusa e avisa | Fornecedor salvo com CNPJ duplicado ou inválido |
 | CT-26 | Cadastrar produto que controla validade sem dias de alerta | Sistema recusa | Produto salvo sem dias de alerta |
 
+## Produtos: preço
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-91 | Cadastrar e editar produto com preço -0,01, 0, 0,01, 99.999.999,99, 100.000.000,00, com 3 casas decimais ("12.345", "12.340"), sem preço (`null` ou sem o campo), com texto inválido ("12,50", "1e2", " 5 ") e como número no JSON (12.5 sem aspas, e 12.5000000000000001); depois, apagar o preço na edição (`null`). Regra: [RN-60](regras-negocio.md) | 0, 0,01, 99.999.999,99 e sem preço são aceitos (201/200); -0,01, 100.000.000,00, 3 casas, texto inválido e número no JSON são recusados (422) sem salvar nada; a API devolve o preço como texto com 2 casas ("79.90") na lista, no detalhe e na busca por código, ou `null` quando não há; `null` na edição apaga o preço | Preço negativo, acima do limite ou com 3 casas salvo; preço devolvido como número; edição recusada que altera outro campo |
+| CT-92 | Gravar direto no banco (fora da API) um preço negativo, num INSERT e num UPDATE; gravar 100.000.000,00; somar no banco os preços 0,10 e 0,20. Regra: [RN-60](regras-negocio.md) | Negativo recusado pela CHECK ck_products_preco_nao_negativo; 100.000.000,00 recusado pelo limite do NUMERIC(10,2); a soma dá exatamente 0,30 | Banco aceitando preço negativo ou acima do limite; soma diferente de 0,30 (erro de ponto flutuante) |
+| CT-93 | Aplicar a migration do preço num banco com produtos já cadastrados, desfazer (downgrade) e aplicar de novo. Regra: [RN-60](regras-negocio.md) | O upgrade cria a coluna `preco` NUMERIC(10,2) nula e a CHECK, e os produtos antigos ficam sem preço (nenhum preenchimento); o downgrade remove a coluna e a CHECK | Coluna obrigatória, preço preenchido sozinho, outro campo alterado ou downgrade que deixa a coluna ou a CHECK |
+| CT-94 | Na tela, digitar o preço no formato brasileiro (12,50; 1.234,56; 12.5; vazio; -1; 12,345; 12.345 sem vírgula) ao cadastrar e editar, e ver o preço na lista e no detalhe. Regra: [RN-60](regras-negocio.md) | "12,50" é enviado como "12.50" e "1.234,56" como "1234.56", sem passar por número de ponto flutuante; vazio envia `null` (apaga o preço na edição); negativo, 3 casas e o ambíguo "12.345" mostram o erro no campo, sem enviar; na edição, o preço salvo aparece como na lista ("1.234,50") e o mesmo valor escrito de outro jeito não é reenviado; a lista e o detalhe mostram "R$ 1.234,50" (alinhado como os outros números) e, sem preço, "Sem preço" em texto suave, como o "Sem fornecedor" (no celular, a etiqueta é só "Sem preço", sem o rótulo "Preço" na frente) | Preço enviado com vírgula ou arredondado, formulário enviado com preço inválido, ou lista mostrando "null", "NaN", "R$ 0,00" ou "Preço Sem preço" para produto sem preço |
+
 ## Fornecedores: exclusão e substituição
 
 | ID | Teste | Resultado esperado | Resultado não esperado |

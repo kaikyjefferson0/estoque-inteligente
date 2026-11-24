@@ -10,6 +10,8 @@ export interface Produto {
   fornecedor_id: number | null
   // Só leitura: nome do fornecedor, para a tela não buscar a lista de fornecedores
   fornecedor_nome: string | null
+  // RN-60: texto com ponto e 2 casas ("79.90"), nunca número; null = sem preço
+  preco: string | null
   criado_em: string
 }
 
