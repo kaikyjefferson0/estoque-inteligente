@@ -116,7 +116,9 @@ Todas as rotas exigem login com token JWT (no cabeçalho `Authorization: Bearer`
 | GET | `/suppliers` | Lista os fornecedores, com busca por nome ou CNPJ |
 | POST | `/suppliers` | Cadastra um fornecedor |
 | GET | `/suppliers/{fornecedor_id}` | Dados de um fornecedor |
-| PATCH | `/suppliers/{fornecedor_id}` | Edita um fornecedor |
+| PATCH | `/suppliers/{fornecedor_id}` | Edita um fornecedor, só os campos enviados |
+| PUT | `/suppliers/{fornecedor_id}` | Substitui um fornecedor, com `nome` e `cnpj` obrigatórios no corpo (`cnpj: null` deixa sem CNPJ) |
+| DELETE | `/suppliers/{fornecedor_id}` | Exclui um fornecedor sem produtos vinculados: 204; com produtos, 409 com a quantidade (admin) |
 | GET | `/products` | Lista os produtos, com busca por nome ou código de barras |
 | POST | `/products` | Cadastra um produto |
 | GET | `/products/by-barcode/{codigo_barras}` | Busca um produto pelo código de barras |
@@ -262,6 +264,7 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
 - **Ambiente de demonstração.** O site público roda em planos gratuitos e recria os dados de exemplo uma vez por dia, por isso é uma demonstração, não um ambiente de produção.
 - **Partida a frio.** Como a API gratuita hiberna e o banco do Neon suspende sem uso, o primeiro acesso depois de um período ocioso pode levar até um minuto.
 - **Uma única instância da API.** Os limites de tentativas (login, troca de senha e alterações da conta de demonstração) são contados na memória do processo, por isso a API roda com 1 processo. Para escalar, a contagem precisaria ir para um armazenamento compartilhado, como o Redis.
+- **Exclusão de fornecedor sem registro.** Quando o admin exclui um fornecedor, a linha sai do banco e não fica guardado quem excluiu nem quando. As movimentações continuam no histórico imutável, mas a exclusão de cadastro não tem trilha de auditoria.
 - **CNPJ apenas numérico.** O cadastro de fornecedor aceita o CNPJ só com 14 dígitos numéricos. O novo formato alfanumérico da Receita (em uso desde 31/07/2026) ainda não é aceito.
 
 ## Como foi desenvolvido

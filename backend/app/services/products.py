@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.models.supplier import Supplier
 from app.schemas.products import normalizar_codigo_barras
 from app.services import alerts as alertas
+from app.services.suppliers import FK_PRODUTO_FORNECEDOR, nome_da_restricao
 from app.services.paginacao import padrao_de_busca, paginar
 from app.services.teto_demo import TetoDoDemoError, conferir_teto  # noqa: F401  (a rota trata o erro)
 
@@ -65,6 +66,7 @@ def _codigo_em_uso(db: Session, codigo_barras: str, ignorar_id: int | None = Non
 
 
 def _salvar(db: Session, produto: Product, codigo_barras: str) -> Product:
+    fornecedor_id = produto.fornecedor_id  # lido antes do rollback, que expira o objeto
     try:
         db.flush()
         # RN-40: mínimo ou dias de alerta podem ter mudado; alertas na mesma transação
@@ -72,9 +74,13 @@ def _salvar(db: Session, produto: Product, codigo_barras: str) -> Product:
         db.commit()
     except IntegrityError as erro:
         db.rollback()
+        restricao = nome_da_restricao(erro)
         # Outro cadastro com o mesmo código entrou entre a busca e o commit (RN-04)
-        if getattr(getattr(erro.orig, "diag", None), "constraint_name", None) == "ix_products_codigo_barras":
+        if restricao == "ix_products_codigo_barras":
             raise CodigoBarrasJaCadastradoError(codigo_barras)
+        # O fornecedor foi excluído entre a conferência e a gravação (RN-24 e RN-59)
+        if restricao == FK_PRODUTO_FORNECEDOR:
+            raise FornecedorInexistenteError(fornecedor_id)
         raise
     except Exception:
         db.rollback()

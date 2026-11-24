@@ -55,7 +55,25 @@ def test_ct24_produto_com_fornecedor_inexistente(client, db, token_operador):
     """CT-24 / RN-24: fornecedor informado precisa existir."""
     resposta = client.post("/products", headers=auth(token_operador), json=dados_refrigerante(fornecedor_id=999999))
     assert resposta.status_code == 422
+    assert resposta.json()["detail"] == "O fornecedor escolhido não existe mais. Escolha outro fornecedor ou deixe sem fornecedor."
     assert db.query(Product).count() == 0
+
+
+def test_ct24_fornecedor_excluido_depois_da_conferencia_vira_422(client, db, token_operador, detergente, monkeypatch):
+    """CT-24 / RN-24 e RN-59: se a conferência não pegar (fornecedor excluído no meio do caminho),
+    a FK do banco recusa e vira o mesmo 422, nunca 500. A corrida de verdade está em test_concorrencia.py."""
+    monkeypatch.setattr(service, "_validar_fornecedor", lambda *args, **kwargs: None)
+    headers = auth(token_operador)
+
+    criar = client.post("/products", headers=headers, json=dados_refrigerante(fornecedor_id=999999))
+    editar = client.patch(f"/products/{detergente.id}", headers=headers, json={"fornecedor_id": 999999})
+    for resposta in (criar, editar):
+        assert resposta.status_code == 422
+        assert resposta.json()["detail"] == "O fornecedor escolhido não existe mais. Escolha outro fornecedor ou deixe sem fornecedor."
+
+    db.expire_all()
+    assert db.query(Product).count() == 1
+    assert db.get(Product, detergente.id).fornecedor_id is None
 
 
 def test_ct26_controla_validade_sem_dias_de_alerta(client, db, token_operador):

@@ -33,7 +33,8 @@ Um controle de estoque em que as regras valem de verdade, não só na tela: saí
 
 - Regras de negócio completas em `docs\regras-negocio.md` (RN-xx) e casos de teste em `docs\casos-de-teste.md`; a interface nunca contradiz essas regras nem promete o que elas não garantem.
 - Dois perfis, admin e operador; o operador não vê a área de usuários nem os ajustes. Não há auto-cadastro. Erro de login sempre genérico.
-- Produtos e fornecedores nunca são apagados; movimentações nunca são editadas nem apagadas. A interface não oferece exclusão nem edição desses registros.
+- Produtos nunca são apagados; movimentações nunca são editadas nem apagadas. A interface não oferece exclusão de produto nem edição ou exclusão de movimentação.
+- Fornecedor sem produtos vinculados pode ser excluído, só pelo admin e depois de confirmar num diálogo (RN-59). Com produtos vinculados, a exclusão é recusada com uma mensagem que diz quantos são.
 - Listas paginadas (padrão 50, máximo 200) com busca em produtos, estoque e fornecedores.
 - **Stack do frontend:** React, TypeScript e Vite. **Decisão confirmada (11/2026): migrar a estilização para Tailwind** (branch `feat/tailwind-ui`). Os tokens do tema continuam com uma fonte única, o `frontend\src\styles\theme.css`; o fluxo (tokens no `theme.css` → `@theme inline` no `tailwind.css` → classes com o nome do token) já está descrito no `CLAUDE.md`, no `DESIGN.md` e na skill `frontend-page`.
 - Estados obrigatórios em toda página que busca dados: carregando, erro (diz o que fazer) e vazio (convida a uma ação). Formulários seguem o padrão da skill `frontend-page` (erro some ao editar, foco no primeiro campo inválido, anúncio na região viva).
@@ -57,7 +58,7 @@ Um controle de estoque em que as regras valem de verdade, não só na tela: saí
 2. **Operação primeiro.** Entrada e saída no celular, com uma mão, no meio do expediente: poucos toques, leitura de código de barras, confirmação clara do saldo resultante.
 3. **Rigor visível em poucos minutos.** O avaliador precisa perceber FEFO, lotes, validade e histórico imutável navegando a demo, sem ler o código.
 4. **Erros que ensinam.** Toda recusa de regra (saldo insuficiente, lote vencido, limite da demo) explica o motivo e o próximo passo.
-5. **Nada se apaga.** A interface reflete que histórico, produtos e fornecedores são permanentes; correções acontecem por ajuste registrado, não por edição.
+5. **O histórico não se apaga.** A interface reflete que movimentações, alertas e produtos são permanentes; fornecedor só se exclui sem produtos (RN-59), e correções acontecem por ajuste registrado, não por edição.
 
 ## Accessibility & Inclusion
 

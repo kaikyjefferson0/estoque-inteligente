@@ -47,12 +47,16 @@ def test_ct22_operador_edita_produto_e_fornecedor(client, db, token_operador, re
     assert fornecedor.nome == "Fornecedor Alterado"
 
 
-def test_ct23_nao_existe_exclusao(client, db, token_admin, token_operador, refrigerante, fornecedor):
-    """CT-23 / RN-23: nem o admin apaga; a rota DELETE não existe."""
+def test_ct23_nao_existe_exclusao_de_produto(client, db, token_admin, token_operador, refrigerante, fornecedor):
+    """CT-23 / RN-23: nem o admin apaga produto; a rota DELETE não existe (405).
+
+    O fornecedor tem exclusão (RN-59): com produto vinculado, o admin recebe 409 e o operador 403.
+    """
     for token in (token_admin, token_operador):
-        headers = auth(token)
-        assert client.delete(f"/products/{refrigerante.id}", headers=headers).status_code == 405
-        assert client.delete(f"/suppliers/{fornecedor.id}", headers=headers).status_code == 405
+        assert client.delete(f"/products/{refrigerante.id}", headers=auth(token)).status_code == 405
+
+    assert client.delete(f"/suppliers/{fornecedor.id}", headers=auth(token_admin)).status_code == 409
+    assert client.delete(f"/suppliers/{fornecedor.id}", headers=auth(token_operador)).status_code == 403
 
     assert db.get(Product, refrigerante.id) is not None
     assert db.get(Supplier, fornecedor.id) is not None
@@ -71,6 +75,8 @@ def test_sem_token_devolve_401(client, refrigerante, fornecedor):
         client.get(f"/suppliers/{fornecedor.id}"),
         client.post("/suppliers", json={"nome": "X"}),
         client.patch(f"/suppliers/{fornecedor.id}", json={"nome": "X"}),
+        client.put(f"/suppliers/{fornecedor.id}", json={"nome": "X", "cnpj": None}),
+        client.delete(f"/suppliers/{fornecedor.id}"),
     ]
     for resposta in tentativas:
         assert resposta.status_code == 401

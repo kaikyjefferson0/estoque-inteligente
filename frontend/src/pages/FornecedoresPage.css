@@ -10,3 +10,24 @@
   text-align: right;
 }
 
+/* Editar e Excluir lado a lado; na tabela a coluna encolhe até o mínimo, então eles não quebram */
+.fornecedores__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--esp-1);
+}
+
+/* Lista empilhada (mesmo corte do .tabela-empilhavel): as ações ganham uma linha própria em todos
+   os itens, com ou sem CNPJ, e começam alinhadas ao texto, como em Usuários (o recuo desconta o
+   padding do botão fantasma) */
+@container (max-width: 48rem) {
+  .tabela-empilhavel .fornecedores__acao {
+    flex-basis: 100%;
+  }
+
+  .fornecedores__acoes {
+    justify-content: flex-start;
+    margin-left: calc(-1 * var(--esp-4));
+  }
+}
+

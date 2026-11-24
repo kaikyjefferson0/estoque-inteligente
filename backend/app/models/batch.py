@@ -24,7 +24,7 @@ class Batch(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    # RN-23: produto nunca é apagado, então RESTRICT
+    # RN-23: produto nunca é apagado (só fornecedor tem exclusão, RN-59), então RESTRICT
     produto_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="RESTRICT", name="fk_batches_produto_id_products"),
     )

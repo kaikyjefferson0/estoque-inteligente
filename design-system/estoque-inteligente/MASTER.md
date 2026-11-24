@@ -223,7 +223,7 @@ O padrão da skill ("Real-Time / Operations Landing": herói, demonstração, ch
 - ❌ **Espaçamento de 2px** ou qualquer valor fora de `--esp-1` a `--esp-7`
 - ❌ **Situação só por cor**: toda faixa vem com o nome da situação em texto
 - ❌ **Rolagem horizontal da página** para caber tabela larga
-- ❌ **Edição ou exclusão em lote** de movimentações, produtos ou fornecedores (nada se apaga; correções por ajuste registrado)
+- ❌ **Edição ou exclusão em lote** de movimentações, produtos ou fornecedores (histórico e produtos não se apagam; fornecedor só sem produtos, RN-59; correções por ajuste registrado)
 - ❌ **Gradientes, CAIXA ALTA, emojis, setas "→" em botões**
 - ❌ **Ícones de outro conjunto**: só Tabler (`@tabler/icons-react`), com `aria-hidden` ao lado de texto
 

@@ -32,6 +32,15 @@ class SupplierUpdate(BaseModel):
         return self
 
 
+class SupplierReplace(BaseModel):
+    """RN-19: PUT, o fornecedor inteiro. As duas chaves são obrigatórias; cnpj null deixa sem CNPJ (RN-06)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    nome: Nome
+    cnpj: CnpjEntrada | None
+
+
 class SupplierOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

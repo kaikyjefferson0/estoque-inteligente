@@ -23,7 +23,7 @@ import './ProdutosPage.css'
 const ATRASO_BUSCA_MS = 300
 const MAX_BUSCA = 120
 
-// RN-23: produtos nunca são apagados, então não há ação de excluir
+// RN-23: produtos nunca são apagados, então não há ação de excluir (só fornecedor tem exclusão, RN-59)
 export function ProdutosPage() {
   useTituloDaPagina('Produtos')
   const [parametros, setParametros] = useSearchParams()

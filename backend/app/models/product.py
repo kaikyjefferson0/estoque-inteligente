@@ -34,7 +34,8 @@ class Product(Base):
     estoque_minimo: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
     controla_validade: Mapped[bool] = mapped_column(Boolean, default=False, server_default=false())
     dias_alerta_validade: Mapped[int | None] = mapped_column(Integer)
-    # RN-24: fornecedor opcional, mas precisa existir; RN-23: nada é apagado, então RESTRICT
+    # RN-24: fornecedor opcional, mas precisa existir. RN-59: RESTRICT, o banco recusa excluir
+    # fornecedor que ainda tem produto (a API transforma a recusa em 409)
     fornecedor_id: Mapped[int | None] = mapped_column(
         ForeignKey("suppliers.id", ondelete="RESTRICT", name="fk_products_fornecedor_id_suppliers"),
         index=True,
