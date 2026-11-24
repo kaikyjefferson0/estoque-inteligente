@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,6 +19,23 @@ from tests import banco
 
 SENHA_ADMIN = "senha-do-admin-123"
 SENHA_OPERADOR = "senha-do-operador-123"
+
+
+PASTA_UNITARIOS = Path(__file__).parent / "unit"
+FIXTURES_DO_BANCO = {"engine", "db"}
+
+
+@pytest.hookimpl(tryfirst=True)  # antes do filtro do -m
+def pytest_collection_modifyitems(items: list[pytest.Item]) -> None:
+    """Marca sozinho: "unitario" em tests/unit; "integracao" em quem usa o banco, direto ou por outra fixture."""
+    for item in items:
+        usa_banco = not FIXTURES_DO_BANCO.isdisjoint(getattr(item, "fixturenames", ()))
+        if PASTA_UNITARIOS in item.path.parents:
+            if usa_banco:
+                raise pytest.UsageError(f"{item.nodeid}: teste de tests/unit não pode usar o banco.")
+            item.add_marker("unitario")
+        elif usa_banco:
+            item.add_marker("integracao")
 
 
 def _url_do_banco_de_teste() -> str:

@@ -52,9 +52,9 @@
 - RN-38: o ajuste também vale para lotes vencidos; contar 0 com o motivo "vencido" é a forma de dar baixa num lote vencido.
 
 ## Alertas
-- RN-13: alerta de estoque baixo quando o saldo é igual ou menor que o mínimo.
-- RN-14: alerta de vencimento próximo quando o lote vence dentro dos dias de antecedência.
-- RN-15: alerta de vencido quando a validade já passou.
+- RN-13: alerta de estoque baixo quando o saldo disponível (RN-41) é igual ou menor que o mínimo. Na lista de estoque, a situação é "sem estoque" quando o saldo disponível é zero, mesmo com mínimo zero; "baixo" de 1 até o mínimo; e "ok" acima do mínimo. Quem está sem estoque também conta como estoque baixo (CT-50). Casos de teste: CT-104 e CT-110.
+- RN-14: alerta de vencimento próximo quando o lote vence dentro dos dias de antecedência: de hoje até hoje + dias de alerta, incluindo os dois. Vale só para produto que controla validade (RN-26). Casos de teste: CT-105 e CT-110.
+- RN-15: alerta de vencido quando a validade já passou, ou seja, é anterior a hoje (o lote que vence hoje ainda não está vencido). Casos de teste: CT-105 e CT-110.
 - RN-16: gerar alertas várias vezes não cria alertas repetidos.
 - RN-39: quando a condição de um alerta deixa de existir, o alerta é marcado como resolvido, com data, e não é apagado. Se a condição voltar, nasce um alerta novo.
 - RN-40: a geração de alertas roda depois de cada entrada, saída ou ajuste e ao cadastrar ou editar um produto, só para esse produto, e também por uma geração completa de todos os produtos.

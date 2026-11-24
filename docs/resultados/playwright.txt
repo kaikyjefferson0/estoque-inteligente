@@ -1,0 +1,74 @@
+Data: 24/11/2026 08:52:41
+Pasta: frontend
+Comando: npm run test:e2e
+Observação: E2E extra com Playwright; o E2E oficial será com Cypress, no próximo PR
+Código de saída: 0
+Tempo total: 156.6 s
+--------------------------------------------------------------------------------
+
+> frontend@0.0.0 test:e2e
+> node e2e/rodar.mjs
+
+[e2e] Recriando o banco estoque_e2e pelas migrations…
+[e2e] Banco recriado pelas migrations; admin e operador criados.
+[e2e] Subindo a API em http://127.0.0.1:8001 e o site em http://localhost:5175…
+[e2e] Rodando estoque.spec.ts no Playwright…
+
+Running 10 tests using 1 worker
+
+(node:2260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:2260) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e\estoque.spec.ts:122:1 › login do admin (4.1s)
+  ✓   2 e2e\estoque.spec.ts:134:1 › cadastro de fornecedor e de dois produtos (com e sem validade) (1.9s)
+  ✓   3 e2e\estoque.spec.ts:191:1 › entrada pelo código de barras (1.7s)
+  ✓   4 e2e\estoque.spec.ts:206:1 › código copiado da lista de Produtos e colado na busca da Entrada (491ms)
+  ✓   5 e2e\estoque.spec.ts:227:1 › saída usando FEFO em dois lotes (718ms)
+  ✓   6 e2e\estoque.spec.ts:248:1 › ajuste com confirmação (634ms)
+  ✓   7 e2e\estoque.spec.ts:280:1 › alerta aparecendo e "Verificar agora" (725ms)
+  ✓   8 e2e\estoque.spec.ts:307:3 › operador › operador sem acesso a Usuários e Ajustes (1.4s)
+  ✓   9 e2e\estoque.spec.ts:339:3 › operador › troca da própria senha (894ms)
+  ✓  10 e2e\estoque.spec.ts:357:1 › cadastro de usuário com e-mail repetido (812ms)
+
+  10 passed (14.7s)
+[e2e] Recriando o banco estoque_e2e pelas migrations, com os dados da demo…
+[e2e] Banco recriado pelas migrations; admin e operador criados, com os dados de exemplo da demo e os casos extremos.
+[e2e] Rodando barra-inferior.spec.ts no Playwright…
+
+Running 6 tests using 1 worker
+
+(node:20544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:20544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 e2e\barra-inferior.spec.ts:55:1 › no celular, a barra substitui o botão de menu do topo (313ms)
+  ✓  2 e2e\barra-inferior.spec.ts:69:1 › navega por Entrada, Saída e Alertas, com a página atual marcada (673ms)
+  ✓  3 e2e\barra-inferior.spec.ts:87:1 › "Mais" abre a gaveta, que leva às outras páginas e fecha ao navegar (557ms)
+  ✓  4 e2e\barra-inferior.spec.ts:111:1 › Esc fecha a gaveta e devolve o foco ao "Mais" (260ms)
+  ✓  5 e2e\barra-inferior.spec.ts:127:1 › a barra não cobre o fim da página nem um controle focado, em 320px (836ms)
+  ✓  6 e2e\barra-inferior.spec.ts:163:1 › no computador, a barra some e fica o menu lateral (250ms)
+
+  6 passed (4.9s)
+[e2e] Rodando responsividade.spec.ts no Playwright…
+
+Running 10 tests using 1 worker
+
+(node:21744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:21744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 320px (13.4s)
+  ✓   2 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 360px (12.5s)
+  ✓   3 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 375px (12.4s)
+  ✓   4 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 390px (12.7s)
+  ✓   5 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 414px (12.7s)
+  ✓   6 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 768px (13.0s)
+  ✓   7 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 1024px (12.4s)
+  ✓   8 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 1280px (12.4s)
+  ✓   9 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 1440px (11.6s)
+  ✓  10 e2e\responsividade.spec.ts:499:3 › telas sem rolagem horizontal nem texto grudado em 1280-zoom-200px (13.3s)
+
+  10 passed (2.1m)
+[e2e] API parado.
+[e2e] Site parado.

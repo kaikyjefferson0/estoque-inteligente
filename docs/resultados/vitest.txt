@@ -1,0 +1,18 @@
+Data: 24/11/2026 08:52:21
+Pasta: frontend
+Comando: npm run test
+Código de saída: 0
+Tempo total: 19.4 s
+--------------------------------------------------------------------------------
+
+> frontend@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.5 C:/Users/PC/estoque-inteligente/frontend
+
+
+ Test Files  12 passed (12)
+      Tests  181 passed (181)
+   Start at  08:52:22
+   Duration  18.49s (environment 45%, tests 38%, import 16%, transform 1%)

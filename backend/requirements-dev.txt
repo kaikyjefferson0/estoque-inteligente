@@ -9,6 +9,10 @@ pluggy==1.7.0
 Pygments==2.21.0
 colorama==0.4.6
 
+# Cobertura: pytest --cov=app --cov-report=term-missing (configuração no .coveragerc)
+pytest-cov==7.1.0
+coverage==7.17.4
+
 # Cliente HTTP do TestClient do Starlette (substitui o httpx, que gera aviso de obsoleto)
 httpx2==2.16.0
 httpcore2==2.16.0

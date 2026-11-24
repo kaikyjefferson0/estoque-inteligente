@@ -234,7 +234,7 @@ Pré-requisitos: Python 3.14, Node.js 24 e PostgreSQL instalados.
 
 7. **Bancos dos testes.** Os testes automatizados nunca usam o banco de desenvolvimento: eles apagam e recriam o banco a cada execução, por isso cada um tem uma trava que recusa rodar se o nome do banco não terminar no sufixo esperado. Os valores de exemplo de todas as variáveis abaixo estão em `backend\.env.example`.
 
-   - **pytest:** precisa de um banco com nome terminado em `_test`, configurado em `TEST_DATABASE_URL` com o usuário dono do banco (as migrations rodam nele). Sem essa variável, ou com outro nome de banco, o pytest para antes de começar.
+   - **pytest:** precisa de um banco com nome terminado em `_test`, configurado em `TEST_DATABASE_URL` com o usuário dono do banco (as migrations rodam nele). Sem essa variável, ou com outro nome de banco, o pytest para no primeiro teste que usa o banco; os unitários (`pytest -m unitario`) rodam sem ela.
    - **`npm run test:e2e`:** precisa do banco `estoque_e2e`, de um usuário da aplicação separado do dono e de três variáveis: `E2E_DATABASE_URL` (o dono), `E2E_APP_DATABASE_URL` (o usuário da aplicação, no mesmo banco) e `APP_DB_ROLE` (o nome desse usuário). O teste sobe a API com o usuário da aplicação, como em produção.
    - **Opcional:** `TEST_APP_DATABASE_URL` (o banco `_test` com o usuário da aplicação) liga os testes de permissão do banco; sem ela, esses testes são pulados.
 

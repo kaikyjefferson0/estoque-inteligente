@@ -1,0 +1,93 @@
+Data: 24/11/2026 08:45:15
+Pasta: backend
+Comando: pytest -m unitario -v
+Observação: Docker desligado; DATABASE_URL e SECRET_KEY falsas (porta 1, sem nenhum banco) e TEST_DATABASE_URL vazia
+Código de saída: 0
+Tempo total: 3.4 s
+--------------------------------------------------------------------------------
+
+======================================= test session starts =======================================
+platform win32 -- Python 3.14.8, pytest-9.1.1, pluggy-1.7.0 -- C:\Users\PC\estoque-inteligente\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\PC\estoque-inteligente\backend
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.15.1, platformdirs-4.13.6, cov-7.1.0
+collecting ... collected 746 items / 672 deselected / 74 selected
+
+tests/unit/test_regras.py::test_conexao_com_o_banco_e_recusada PASSED                        [  1%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[disponivel_0_minimo_0] PASSED      [  2%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[disponivel_0_minimo_5] PASSED      [  4%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[disponivel_1_minimo_0] PASSED      [  5%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[disponivel_1_minimo_5] PASSED      [  6%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[minimo_menos_1] PASSED             [  8%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[igual_ao_minimo] PASSED            [  9%]
+tests/unit/test_regras.py::test_ct104_situacao_do_estoque[minimo_mais_1] PASSED              [ 10%]
+tests/unit/test_regras.py::test_ct104_negativo_e_recusado[disponivel_negativo] PASSED        [ 12%]
+tests/unit/test_regras.py::test_ct104_negativo_e_recusado[minimo_negativo] PASSED            [ 13%]
+tests/unit/test_regras.py::test_ct105_dias_para_vencer[venceu_ontem] PASSED                  [ 14%]
+tests/unit/test_regras.py::test_ct105_dias_para_vencer[vence_hoje] PASSED                    [ 16%]
+tests/unit/test_regras.py::test_ct105_dias_para_vencer[vence_amanha] PASSED                  [ 17%]
+tests/unit/test_regras.py::test_ct105_dias_para_vencer[sem_validade] PASSED                  [ 18%]
+tests/unit/test_regras.py::test_ct105_dias_para_vencer_conta_o_29_de_fevereiro PASSED        [ 20%]
+tests/unit/test_regras.py::test_ct105_lote_disponivel_para_saida[venceu_ontem] PASSED        [ 21%]
+tests/unit/test_regras.py::test_ct105_lote_disponivel_para_saida[vence_hoje] PASSED          [ 22%]
+tests/unit/test_regras.py::test_ct105_lote_disponivel_para_saida[vence_amanha] PASSED        [ 24%]
+tests/unit/test_regras.py::test_ct105_lote_disponivel_para_saida[sem_validade] PASSED        [ 25%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[venceu_ontem] PASSED                  [ 27%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[vence_hoje] PASSED                    [ 28%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[vence_amanha] PASSED                  [ 29%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[hoje_mais_dias_alerta_menos_1] PASSED [ 31%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[hoje_mais_dias_alerta] PASSED         [ 32%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[hoje_mais_dias_alerta_mais_1] PASSED  [ 33%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[alerta_de_1_dia_no_limite] PASSED     [ 35%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[alerta_de_1_dia_passou_do_limite] PASSED [ 36%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[alerta_de_3650_dias_no_limite] PASSED [ 37%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[alerta_de_3650_dias_passou_do_limite] PASSED [ 39%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[quantidade_0_vencido] PASSED          [ 40%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[quantidade_0_vence_hoje] PASSED       [ 41%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[sem_validade] PASSED                  [ 43%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[sem_validade_produto_sem_controle] PASSED [ 44%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[vence_hoje_produto_sem_controle] PASSED [ 45%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[venceu_ontem_produto_sem_controle] PASSED [ 47%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[sem_controle_mas_com_dias] PASSED     [ 48%]
+tests/unit/test_regras.py::test_ct105_situacao_do_lote[com_controle_mas_sem_dias] PASSED     [ 50%]
+tests/unit/test_regras.py::test_ct105_quantidade_negativa_e_recusada PASSED                  [ 51%]
+tests/unit/test_regras.py::test_ct106_ordem_fefo[lista_vazia] PASSED                         [ 52%]
+tests/unit/test_regras.py::test_ct106_ordem_fefo[um_lote] PASSED                             [ 54%]
+tests/unit/test_regras.py::test_ct106_ordem_fefo[um_dia_de_diferenca] PASSED                 [ 55%]
+tests/unit/test_regras.py::test_ct106_ordem_fefo[mesma_validade_desempata_pelo_id] PASSED    [ 56%]
+tests/unit/test_regras.py::test_ct106_ordem_fefo[sem_validade_por_ultimo] PASSED             [ 58%]
+tests/unit/test_regras.py::test_ct106_ordem_fefo[dois_sem_validade_pelo_id] PASSED           [ 59%]
+tests/unit/test_regras.py::test_ct107_cnpj_aceito[14_digitos] PASSED                         [ 60%]
+tests/unit/test_regras.py::test_ct107_cnpj_aceito[14_digitos_com_pontuacao] PASSED           [ 62%]
+tests/unit/test_regras.py::test_ct107_cnpj_aceito[14_digitos_com_espacos] PASSED             [ 63%]
+tests/unit/test_regras.py::test_ct107_cnpj_aceito[nao_informado] PASSED                      [ 64%]
+tests/unit/test_regras.py::test_ct107_cnpj_aceito[vazio] PASSED                              [ 66%]
+tests/unit/test_regras.py::test_ct107_cnpj_aceito[so_espacos] PASSED                         [ 67%]
+tests/unit/test_regras.py::test_ct107_cnpj_recusado[13_digitos] PASSED                       [ 68%]
+tests/unit/test_regras.py::test_ct107_cnpj_recusado[15_digitos] PASSED                       [ 70%]
+tests/unit/test_regras.py::test_ct107_cnpj_recusado[13_digitos_e_letra] PASSED               [ 71%]
+tests/unit/test_regras.py::test_ct107_cnpj_recusado[so_pontuacao] PASSED                     [ 72%]
+tests/unit/test_regras.py::test_ct107_cnpj_recusado[14_digitos_nao_ascii] PASSED             [ 74%]
+tests/unit/test_regras.py::test_ct108_dias_de_alerta_aceitos[1] PASSED                       [ 75%]
+tests/unit/test_regras.py::test_ct108_dias_de_alerta_aceitos[3650] PASSED                    [ 77%]
+tests/unit/test_regras.py::test_ct108_dias_de_alerta_recusados[-1] PASSED                    [ 78%]
+tests/unit/test_regras.py::test_ct108_dias_de_alerta_recusados[0] PASSED                     [ 79%]
+tests/unit/test_regras.py::test_ct108_dias_de_alerta_recusados[3651] PASSED                  [ 81%]
+tests/unit/test_regras.py::test_ct108_produto_que_controla_validade_exige_os_dias PASSED     [ 82%]
+tests/unit/test_regras.py::test_ct108_produto_sem_controle_nao_tem_dias PASSED               [ 83%]
+tests/unit/test_regras.py::test_ct109_codigo_de_barras_sem_espacos[sem_espaco] PASSED        [ 85%]
+tests/unit/test_regras.py::test_ct109_codigo_de_barras_sem_espacos[espacos] PASSED           [ 86%]
+tests/unit/test_regras.py::test_ct109_codigo_de_barras_sem_espacos[tabulacao_e_quebra_de_linha] PASSED [ 87%]
+tests/unit/test_regras.py::test_ct109_codigo_de_barras_sem_espacos[espaco_inseparavel] PASSED [ 89%]
+tests/unit/test_regras.py::test_ct109_codigo_de_barras_sem_espacos[so_espacos] PASSED        [ 90%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_aceito[1_caractere] PASSED           [ 91%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_aceito[49_caracteres] PASSED         [ 93%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_aceito[50_caracteres] PASSED         [ 94%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_aceito[50_caracteres_mais_espacos] PASSED [ 95%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_recusado[vazio] PASSED               [ 97%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_recusado[so_espacos] PASSED          [ 98%]
+tests/unit/test_regras.py::test_ct109_tamanho_do_codigo_recusado[51_caracteres] PASSED       [100%]
+
+=============================== 74 passed, 672 deselected in 0.27s ================================
