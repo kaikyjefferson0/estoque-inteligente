@@ -30,7 +30,7 @@ Entre com a conta de demonstração (perfil operador):
 
 Na tela de login, o botão "Entrar como demonstração" entra direto, sem digitar nada.
 
-> O primeiro acesso pode levar até um minuto: no plano gratuito do Render, a API "dorme" quando fica ociosa e precisa acordar. As telas mostram um estado de carregando enquanto isso. Os dados de demonstração são recriados do zero uma vez por dia.
+> O primeiro acesso pode levar até um minuto: no plano gratuito do Render, a API "dorme" quando fica ociosa e precisa acordar. As telas mostram um estado de carregando enquanto isso. Os dados cadastrados no site ficam salvos.
 
 ## Capturas de tela
 
@@ -148,7 +148,7 @@ Todas as rotas exigem login com token JWT (no cabeçalho `Authorization: Bearer`
 
 **Partida a frio.** No plano gratuito, a API hiberna quando fica ociosa, e o Neon também suspende o banco sem uso. O frontend trata a primeira resposta lenta com tolerância e estado de carregando, e há um teste específico para esse comportamento.
 
-**Modo de demonstração.** Com `DEMO_MODE` ligado, a API recria todo o banco com dados de exemplo pelas próprias regras (FEFO, lotes, alertas e histórico) uma vez por dia, e a conta de demonstração tem a troca de senha bloqueada. É o que mantém o site público sempre com dados coerentes e sem acúmulo.
+**Modo de demonstração.** Com `DEMO_MODE` ligado, a API recria todo o banco com dados de exemplo pelas próprias regras (FEFO, lotes, alertas e histórico) uma vez por dia. O site público roda com ele desligado, então os dados cadastrados ficam salvos; a conta de demonstração continua com limite de alterações seguidas e com a troca de senha bloqueada.
 
 **Código de barras sem espaços, em três camadas.** Um código copiado da tela ou de uma etiqueta pode vir com espaços ("3037 3543"), e ele precisa valer igual a "30373543". O site tira os espaços antes de enviar, a API tira de novo antes de validar (ao cadastrar, editar, buscar e registrar entrada ou saída) e o banco tem uma *CHECK constraint* que recusa código com espaço, mesmo num INSERT feito fora da API. A migration que criou essa regra limpou antes os códigos já gravados, e para sem alterar nada se a limpeza deixasse dois produtos com o mesmo código.
 
@@ -310,7 +310,7 @@ Os seletores são sempre `data-cy` (`cy.dataCy('btn-salvar')`), que não quebram
 
 ## Limitações conhecidas
 
-- **Ambiente de demonstração.** O site público roda em planos gratuitos e recria os dados de exemplo uma vez por dia, por isso é uma demonstração, não um ambiente de produção.
+- **Ambiente de demonstração.** O site público roda em planos gratuitos, por isso é uma demonstração, não um ambiente de produção.
 - **Partida a frio.** Como a API gratuita hiberna e o banco do Neon suspende sem uso, o primeiro acesso depois de um período ocioso pode levar até um minuto.
 - **Uma única instância da API.** Os limites de tentativas (login, troca de senha e alterações da conta de demonstração) são contados na memória do processo, por isso a API roda com 1 processo. Para escalar, a contagem precisaria ir para um armazenamento compartilhado, como o Redis.
 - **Exclusão de fornecedor sem registro.** Quando o admin exclui um fornecedor, a linha sai do banco e não fica guardado quem excluiu nem quando. As movimentações continuam no histórico imutável, mas a exclusão de cadastro não tem trilha de auditoria.

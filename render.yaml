@@ -37,8 +37,9 @@ services:
         value: production
       - key: TRUST_PROXY_HEADERS
         value: "true"
+      # Recriação diária desligada: os dados cadastrados no site ficam salvos
       - key: DEMO_MODE
-        value: "true"
+        value: "false"
       # Endereço público do site, preenchido no painel (ex.: https://estoque-site-4qap.onrender.com).
       # Não sai do nome do serviço: quando o nome já é de outra conta, o Render acrescenta um
       # sufixo (-4qap), e um valor escrito aqui pelo nome liberaria o site de outra pessoa.

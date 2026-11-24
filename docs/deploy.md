@@ -10,7 +10,7 @@ Este guia coloca o Estoque Inteligente no ar: a API e o site no [Render](https:/
 | `estoque-api` | Render: web service Python (free, Virginia) | A API FastAPI. Ao subir, roda `alembic upgrade head`, depois `python -m app.scripts.sincronizar_permissoes` e por fim o `uvicorn` com 1 processo. Se um desses passos falhar, os seguintes não rodam. O Render confere se ela está viva em `/health`. |
 | `estoque-site` | Render: static site | O site React. O Render roda `npm ci` e `npm run build` e publica a pasta `dist`. Static site não tem plano nem região: é sempre gratuito e servido por uma CDN. |
 
-O sistema roda em **modo de demonstração** (`DEMO_MODE=true`): a cada subida da API, se a última recriação foi há mais de 24 horas, **o banco inteiro é apagado e recriado** com os dados de exemplo (RN-54). Por isso esse banco é só da demonstração: não guarde nada de verdade nele.
+O site publicado roda com `DEMO_MODE=false`: os dados cadastrados ficam salvos. Com `DEMO_MODE=true`, a cada subida da API, se a última recriação foi há mais de 24 horas, **o banco inteiro é apagado e recriado** com os dados de exemplo (RN-54).
 
 ## Antes de começar
 
