@@ -1,0 +1,112 @@
+Data: 24/11/2026 08:48:42
+Pasta: backend
+Comando: pytest --cov=app --cov-report=term-missing
+Código de saída: 0
+Tempo total: 102.4 s
+--------------------------------------------------------------------------------
+
+======================================= test session starts =======================================
+platform win32 -- Python 3.14.8, pytest-9.1.1, pluggy-1.7.0
+rootdir: C:\Users\PC\estoque-inteligente\backend
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.15.1, platformdirs-4.13.6, cov-7.1.0
+collected 746 items
+
+tests\test_alerts.py .........................                                               [  3%]
+tests\test_auth.py ..............                                                            [  5%]
+tests\test_cadastros.py ....                                                                 [  5%]
+tests\test_concorrencia.py ...........                                                       [  7%]
+tests\test_config.py .......                                                                 [  8%]
+tests\test_cors.py .....                                                                     [  8%]
+tests\test_create_admin.py .                                                                 [  8%]
+tests\test_dashboard.py .........                                                            [ 10%]
+tests\test_demo.py ............................                                              [ 13%]
+tests\test_erro_sql_sem_valores.py .......                                                   [ 14%]
+tests\test_health.py .                                                                       [ 15%]
+tests\test_limites_numericos.py ............................................................ [ 23%]
+.........................                                                                    [ 26%]
+tests\test_migracao_codigo_barras.py ...........                                             [ 27%]
+tests\test_migracao_dias_alerta.py ..........                                                [ 29%]
+tests\test_migracao_preco.py .....                                                           [ 29%]
+tests\test_paginacao.py .....................                                                [ 32%]
+tests\test_partida_a_frio.py .....                                                           [ 33%]
+tests\test_permissoes_banco.py ....                                                          [ 33%]
+tests\test_preco.py ..................................................                       [ 40%]
+tests\test_products.py ....................                                                  [ 43%]
+tests\test_regras_sql.py .....................................................               [ 50%]
+tests\test_seguranca_http.py .........                                                       [ 51%]
+tests\test_senhas.py ....................                                                    [ 54%]
+tests\test_sincronizar_permissoes.py .....................                                   [ 57%]
+tests\test_stock.py ......................................................                   [ 64%]
+tests\test_suppliers.py .......................                                              [ 67%]
+tests\test_validacao_entrada.py ............................................................ [ 75%]
+............................................................................................ [ 87%]
+.................                                                                            [ 90%]
+tests\unit\test_regras.py .................................................................. [ 98%]
+........                                                                                     [100%]
+
+========================================= tests coverage ==========================================
+_________________________ coverage: platform win32, python 3.14.8-final-0 _________________________
+
+Name                                    Stmts   Miss  Cover   Missing
+---------------------------------------------------------------------
+app\__init__.py                             0      0   100%
+app\core\__init__.py                        0      0   100%
+app\core\clock.py                           7      0   100%
+app\core\config.py                         83      1    99%   141
+app\core\database.py                       17      0   100%
+app\core\deps.py                           23      0   100%
+app\core\erros_validacao.py                 9      0   100%
+app\core\limiter.py                        50      1    98%   62
+app\core\migracoes.py                      25      0   100%
+app\core\permissoes.py                     84      5    94%   60, 62, 77, 111, 161
+app\core\security.py                       27      0   100%
+app\core\tamanho_corpo.py                  36      2    94%   19-20
+app\main.py                                50      0   100%
+app\models\__init__.py                      8      0   100%
+app\models\alert.py                        14      0   100%
+app\models\batch.py                        12      0   100%
+app\models\demo_reset.py                    8      0   100%
+app\models\product.py                      19      0   100%
+app\models\stock_movement.py               22      0   100%
+app\models\supplier.py                     11      0   100%
+app\models\user.py                         16      0   100%
+app\routers\__init__.py                     0      0   100%
+app\routers\alerts.py                      18      0   100%
+app\routers\auth.py                        35      0   100%
+app\routers\dashboard.py                   11      0   100%
+app\routers\products.py                    52      0   100%
+app\routers\stock.py                       62      2    97%   79, 113
+app\routers\suppliers.py                   60      0   100%
+app\routers\users.py                       42      0   100%
+app\schemas\__init__.py                     0      0   100%
+app\schemas\alerts.py                       6      0   100%
+app\schemas\auth.py                        13      0   100%
+app\schemas\comum.py                       18      0   100%
+app\schemas\dashboard.py                    4      0   100%
+app\schemas\paginacao.py                   12      0   100%
+app\schemas\products.py                    68      0   100%
+app\schemas\stock.py                       21      0   100%
+app\schemas\suppliers.py                   19      0   100%
+app\schemas\users.py                       31      1    97%   46
+app\scripts\__init__.py                     0      0   100%
+app\scripts\create_admin.py                34     19    44%   15-16, 20-21, 26-41, 45
+app\scripts\reset_demo.py                  21      3    86%   31-32, 36
+app\scripts\sincronizar_permissoes.py      34      8    76%   28-30, 37-38, 41-42, 51
+app\services\__init__.py                    0      0   100%
+app\services\alerts.py                     75      3    96%   133-135
+app\services\auth.py                       33      0   100%
+app\services\condicoes.py                  24      0   100%
+app\services\dashboard.py                  19      0   100%
+app\services\demo.py                      138      3    98%   94-95, 133
+app\services\paginacao.py                  15      0   100%
+app\services\products.py                  103      4    96%   90-93
+app\services\regras.py                     33      0   100%
+app\services\stock.py                     178      1    99%   294
+app\services\suppliers.py                 102      2    98%   75, 170
+app\services\teto_demo.py                  11      0   100%
+app\services\users.py                      70      7    90%   40, 50-53, 82, 98, 100
+---------------------------------------------------------------------
+TOTAL                                    1883     62    97%
+================================= 746 passed in 99.43s (0:01:39) ==================================

@@ -154,6 +154,20 @@
 | CT-100 | Aplicar a migration do teto dos dias de alerta num banco com produtos até 3650 dias, desfazer e aplicar de novo; aplicar com um produto acima do teto; depois, gravar 3651 direto no banco (fora da API), num INSERT e num UPDATE. Regra: [RN-26](regras-negocio.md) | No primeiro caso, a CHECK é criada e removida sem mudar nenhum produto; no segundo, a migration para com a lista dos produtos acima do teto, sem corrigir nada; a gravação direta é recusada pela CHECK ck_products_dias_alerta_validade_maximo | Dias alterados pela migration, CHECK criada com dado fora da faixa, ou o banco aceitando 3651 |
 | CT-103 | Provocar um erro de SQL com um valor conhecido entre os parâmetros, com o engine da API, e conferir os das migrations, da recriação da demonstração e da sincronização de permissões. Regra: [RN-66](regras-negocio.md) | O texto do erro (o que vai para o log) tem o comando e o motivo, mas não os valores; a resposta da API também não | Valor do parâmetro no texto do erro ou na resposta |
 
+## Regras sem banco (testes unitários)
+
+Rodam com `pytest -m unitario` (dentro de `backend`), sem banco ligado (`DATABASE_URL` e `SECRET_KEY` só precisam estar preenchidas e podem ser falsas). O CT-110 é de integração e usa os mesmos valores-limite.
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-104 | Situação do estoque com disponível 0 (mínimo 0 e 5), 1 (mínimo 0 e 5) e, com mínimo 5, disponível 4, 5 e 6; disponível -1 e mínimo -1. Regras: [RN-13 e RN-41](regras-negocio.md) | 0 é sem estoque, mesmo com mínimo 0; 1 com mínimo 0 é ok; 1, 4 e 5 com mínimo 5 são baixo; 6 é ok; negativo é recusado | Disponível igual ao mínimo como ok, mínimo + 1 como baixo ou saldo negativo aceito |
+| CT-105 | Lote que venceu ontem, vence hoje, amanhã, em hoje + dias de alerta - 1, + 0 e + 1 (30 dias; e no limite com 1 e 3650 dias), com quantidade 0 e -1, sem validade e em produto que não controla validade; e os dias para vencer, inclusive passando pelo 29 de fevereiro. Regras: [RN-14, RN-15, RN-36 e RN-42](regras-negocio.md) | Ontem é vencido e não sai; hoje é a vencer e ainda sai; hoje + dias de alerta é a vencer; um dia depois é ok; quantidade 0 e sem validade são ok; sem controle de validade nunca é a vencer; quantidade negativa é recusada | Lote que vence hoje tratado como vencido, limite deslocado em um dia ou lote zerado com alerta |
+| CT-106 | Ordem de saída de lotes com um dia de diferença, com a mesma validade, sem validade e lista vazia. Regra: [RN-10](regras-negocio.md) | A menor validade sai primeiro; o empate é decidido pelo id; sem validade fica por último | Lote que vence depois sair antes |
+| CT-107 | CNPJ com 13, 14 e 15 dígitos, com pontuação, com letra, só pontuação, vazio e só espaços. Regras: [RN-06 e RN-25](regras-negocio.md) | 14 dígitos (com ou sem pontuação) viram só os números; vazio conta como não informado; o resto é recusado | CNPJ com 13 ou 15 dígitos aceito |
+| CT-108 | Dias de alerta -1, 0, 1, 3650 e 3651 em produto que controla validade, e vazio; em produto que não controla: vazio, 0 e 1. Regra: [RN-26](regras-negocio.md) | 1 e 3650 são aceitos; -1, 0, 3651 e vazio são recusados; sem controle, só vazio é aceito | Valor fora de 1 a 3650 aceito |
+| CT-109 | Código de barras com espaço, tabulação, quebra de linha e espaço inseparável; com 0, 1, 49, 50 e 51 caracteres, e com 50 mais espaços. Regra: [RN-04](regras-negocio.md) | Os espaços saem antes de contar; de 1 a 50 caracteres é aceito; vazio e 51 são recusados | Espaço guardado no código ou 51 caracteres aceitos |
+| CT-110 | Calcular a situação do estoque, a do lote, o lote disponível e o saldo disponível no banco (SQL) e em Python, com os mesmos valores do CT-104 e do CT-105 que o banco aceita, e com produto sem lotes. Regra: [RN-44](regras-negocio.md) | O SQL e o Python dão o mesmo resultado em todos os valores | As duas versões da regra discordam em algum limite |
+
 ## Listas paginadas
 
 | ID | Teste | Resultado esperado | Resultado não esperado |

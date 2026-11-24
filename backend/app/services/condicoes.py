@@ -4,6 +4,9 @@ São expressões SQL (SQLAlchemy), para servirem tanto à consulta de um produto
 quanto às consultas agregadas de todos os produtos (lista e dashboard). `dia` é o "hoje"
 em Brasília (app.core.clock.hoje), passado por quem chama para todas as condições
 de uma mesma consulta usarem o mesmo dia.
+
+As situações existem também em Python puro em app.services.regras (de onde vêm os nomes delas).
+As duas versões precisam dar o mesmo resultado: o CT-110 compara as duas. Ao mudar uma, mude a outra.
 """
 
 from datetime import date
@@ -13,14 +16,14 @@ from sqlalchemy.sql.elements import ColumnElement
 
 from app.models.batch import Batch
 from app.models.product import Product
-
-SITUACAO_OK = "ok"
-SITUACAO_BAIXO = "baixo"
-SITUACAO_SEM_ESTOQUE = "sem_estoque"
-
-LOTE_OK = "ok"
-LOTE_A_VENCER = "a_vencer"
-LOTE_VENCIDO = "vencido"
+from app.services.regras import (
+    LOTE_A_VENCER,
+    LOTE_OK,
+    LOTE_VENCIDO,
+    SITUACAO_BAIXO,
+    SITUACAO_OK,
+    SITUACAO_SEM_ESTOQUE,
+)
 
 
 def lote_disponivel(dia: date) -> ColumnElement[bool]:
