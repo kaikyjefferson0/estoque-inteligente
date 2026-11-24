@@ -89,6 +89,24 @@ const TELAS: Tela[] = [
     },
   },
   { nome: 'fornecedores', abrir: (p) => irPara(p, '/fornecedores') },
+  {
+    nome: 'fornecedores-excluir',
+    abrir: async (p) => {
+      await irPara(p, '/fornecedores')
+      await p.getByRole('button', { name: `Excluir ${FORNECEDOR_LONGO}` }).filter({ visible: true }).click()
+      await expect(p.getByRole('alertdialog')).toBeVisible()
+    },
+  },
+  {
+    // RN-59: o fornecedor longo tem produtos, então a exclusão é sempre recusada (409) e nada é apagado
+    nome: 'fornecedores-erro-exclusao',
+    abrir: async (p) => {
+      await irPara(p, '/fornecedores')
+      await p.getByRole('button', { name: `Excluir ${FORNECEDOR_LONGO}` }).filter({ visible: true }).click()
+      await p.getByRole('alertdialog').getByRole('button', { name: 'Excluir fornecedor' }).click()
+      await expect(p.getByRole('alert')).toContainText('não pode ser excluído')
+    },
+  },
   { nome: 'fornecedor-novo', abrir: (p) => irPara(p, '/fornecedores/novo') },
   {
     nome: 'fornecedor-editar',

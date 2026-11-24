@@ -46,16 +46,12 @@ function FormularioFornecedor({ inicial }: { inicial?: Fornecedor }) {
     setErroGeral(null)
     if (!mostrar(form, validar(nome, cnpj))) return
 
-    // Envia só os números; vazio vira null (sem CNPJ)
-    const valores = { nome: nome.trim(), cnpj: somenteDigitos(cnpj) || null }
-    // Na edição, envia só o que mudou
-    const corpo = inicial
-      ? Object.fromEntries(Object.entries(valores).filter(([campo, valor]) => inicial[campo as CampoFornecedor] !== valor))
-      : valores
+    // Envia só os números; vazio vira null (sem CNPJ). RN-19: a edição usa o PUT, sempre com o fornecedor completo
+    const corpo = { nome: nome.trim(), cnpj: somenteDigitos(cnpj) || null }
 
     setEnviando(true)
     try {
-      if (inicial) await api<Fornecedor>(`/suppliers/${inicial.id}`, { method: 'PATCH', body: corpo })
+      if (inicial) await api<Fornecedor>(`/suppliers/${inicial.id}`, { method: 'PUT', body: corpo })
       else await api<Fornecedor>('/suppliers', { body: corpo })
       navigate('/fornecedores', { state: { mensagem: inicial ? 'Alterações salvas' : 'Fornecedor cadastrado' } })
     } catch (erro) {

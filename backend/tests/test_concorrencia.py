@@ -1,9 +1,13 @@
 """CT-62 a CT-64: movimentações simultâneas no mesmo produto, gravando de verdade.
+CT-86 e CT-24: exclusão de fornecedor ao mesmo tempo que um produto é ligado a ele (RN-59).
+CT-87: edição ou segunda exclusão de um fornecedor que está sendo excluído.
 
 Cada requisição roda numa thread, com seu próprio TestClient e sua própria sessão
 (conexão separada). Para a disputa acontecer sempre, e não só quando o tempo ajuda,
 o teste segura a trava consultiva do produto (a primeira que toda movimentação pega),
-espera até as requisições estarem paradas nela e só então solta.
+espera até as requisições estarem paradas nela e só então solta. Na exclusão de
+fornecedor, o teste segura a linha do fornecedor com uma transação aberta (um produto
+ligado a ele, ou o próprio DELETE) e só faz o commit quando a requisição está esperando.
 
 O histórico não aceita DELETE (RN-12), então no fim do módulo o banco _test é recriado.
 """
@@ -22,10 +26,13 @@ from app.core.database import get_db
 from app.core.security import create_access_token
 from app.main import app
 from app.models.batch import Batch
+from app.models.product import Product
 from app.models.stock_movement import StockMovement
+from app.models.supplier import Supplier
 from app.services import alerts as alertas
 from app.services import stock as service
 from app.services.products import criar_produto
+from app.services.suppliers import criar_fornecedor
 from app.services.users import criar_usuario
 from tests.conftest import recriar_banco
 
@@ -203,3 +210,130 @@ def test_ct64_entrada_e_saida_simultaneas_deixam_saldo_correto(engine, sessoes, 
     assert len(lotes) == 1
     assert lotes[0].quantidade == 10 + 5 - 8
     assert sorted(m.tipo for m in movimentacoes) == ["entrada", "entrada", "saida"]
+
+
+# --- Exclusão de fornecedor x produto ligado a ele (RN-59) ---
+
+
+def _requisicoes_esperando_uma_linha(engine) -> int:
+    """Conexões deste banco paradas numa trava de linha (a espera aparece como transactionid ou tuple)."""
+    with engine.connect() as conexao:
+        return conexao.scalar(
+            text(
+                "SELECT count(*) FROM pg_locks l JOIN pg_stat_activity a ON a.pid = l.pid"
+                " WHERE NOT l.granted AND l.locktype IN ('transactionid', 'tuple')"
+                " AND a.datname = current_database()"
+            )
+        )
+
+
+def requisicao_contra_transacao_aberta(engine, token: str, segura: Session, metodo: str, caminho: str, dados: dict | None = None):
+    """Envia a requisição numa thread, espera ela parar na linha que `segura` trava e só então faz o commit."""
+    resposta: list = [None]
+
+    def enviar() -> None:
+        try:
+            resposta[0] = TestClient(app).request(metodo, caminho, headers={"Authorization": f"Bearer {token}"}, json=dados)
+        except Exception as erro:  # aparece na asserção, em vez de sumir na thread
+            resposta[0] = erro
+
+    thread = Thread(target=enviar, daemon=True)
+    thread.start()
+    limite = time.monotonic() + ESPERA_MAXIMA
+    while _requisicoes_esperando_uma_linha(engine) < 1:
+        assert time.monotonic() < limite, "A requisição não chegou a esperar a linha do fornecedor."
+        assert thread.is_alive(), f"Requisição terminou antes de esperar a linha: {resposta[0]}"
+        time.sleep(0.02)
+    segura.commit()
+
+    thread.join(ESPERA_MAXIMA)
+    assert not thread.is_alive(), "Requisição presa (possível deadlock)."
+    return resposta[0]
+
+
+def novo_fornecedor(sessoes, nome: str) -> Supplier:
+    with sessoes() as sessao:
+        return criar_fornecedor(sessao, nome=nome)
+
+
+def test_ct86_produto_ligado_durante_a_exclusao_vira_409(engine, sessoes, token):
+    """CT-86 / RN-59: a contagem não vê o produto ainda sem commit; a FK do banco recusa o DELETE e vira 409."""
+    fornecedor = novo_fornecedor(sessoes, "Fornecedor da Corrida 86")
+
+    with sessoes() as segura:
+        produto = Product(nome="Ligado no meio", codigo_barras="7891000008603", estoque_minimo=1, fornecedor_id=fornecedor.id)
+        segura.add(produto)
+        segura.flush()  # a FK trava a linha do fornecedor (FOR KEY SHARE) até o commit
+        resposta = requisicao_contra_transacao_aberta(engine, token, segura, "DELETE", f"/suppliers/{fornecedor.id}")
+
+    assert not isinstance(resposta, Exception), resposta
+    assert resposta.status_code == 409, resposta.text
+    assert resposta.json()["detail"] == "Este fornecedor tem 1 produto(s) vinculado(s) e não pode ser excluído."
+    with sessoes() as sessao:
+        assert sessao.get(Supplier, fornecedor.id) is not None
+        assert sessao.get(Product, produto.id).fornecedor_id == fornecedor.id
+
+
+@pytest.mark.parametrize("operacao", ["cadastro", "edicao"])
+def test_ct24_fornecedor_excluido_durante_a_gravacao_do_produto_vira_422(engine, sessoes, token, operacao):
+    """CT-24 / RN-24 e RN-59: a conferência ainda vê o fornecedor; a FK recusa a gravação e vira 422, nunca 500."""
+    fornecedor = novo_fornecedor(sessoes, f"Fornecedor da Corrida 24 ({operacao})")
+    if operacao == "cadastro":
+        metodo, caminho = "POST", "/products"
+        dados = {"nome": "Produto da corrida", "codigo_barras": "7891000002401", "estoque_minimo": 1, "fornecedor_id": fornecedor.id}
+    else:
+        produto = novo_produto(sessoes, "7891000002402")
+        metodo, caminho, dados = "PATCH", f"/products/{produto.id}", {"fornecedor_id": fornecedor.id}
+
+    with sessoes() as segura:
+        segura.delete(segura.get(Supplier, fornecedor.id))
+        segura.flush()  # DELETE sem commit: a linha fica travada até o commit
+        resposta = requisicao_contra_transacao_aberta(engine, token, segura, metodo, caminho, dados)
+
+    assert not isinstance(resposta, Exception), resposta
+    assert resposta.status_code == 422, resposta.text
+    assert resposta.json()["detail"] == "O fornecedor escolhido não existe mais. Escolha outro fornecedor ou deixe sem fornecedor."
+    with sessoes() as sessao:
+        assert sessao.get(Supplier, fornecedor.id) is None
+        if operacao == "cadastro":
+            assert sessao.scalar(select(Product).where(Product.codigo_barras == "7891000002401")) is None
+        else:
+            assert sessao.get(Product, produto.id).fornecedor_id is None
+
+
+@pytest.mark.parametrize(
+    ("metodo", "dados"),
+    [("PUT", {"nome": "Nome novo", "cnpj": None}), ("PATCH", {"nome": "Nome novo"}), ("DELETE", None)],
+)
+def test_ct87_fornecedor_excluido_durante_a_edicao_ou_outra_exclusao_vira_404(engine, sessoes, token, metodo, dados):
+    """CT-87 / RN-19 e RN-59: a edição (ou uma segunda exclusão) espera a exclusão em andamento e responde 404,
+    nunca 500 nem um 204 que não apagou nada."""
+    fornecedor = novo_fornecedor(sessoes, f"Fornecedor da Corrida 87 ({metodo})")
+
+    with sessoes() as segura:
+        segura.delete(segura.get(Supplier, fornecedor.id))
+        segura.flush()  # DELETE sem commit: a linha fica travada até o commit
+        resposta = requisicao_contra_transacao_aberta(engine, token, segura, metodo, f"/suppliers/{fornecedor.id}", dados)
+
+    assert not isinstance(resposta, Exception), resposta
+    assert resposta.status_code == 404, resposta.text
+    assert resposta.json()["detail"] == "Fornecedor não encontrado. Ele pode ter sido removido; atualize a página."
+    with sessoes() as sessao:
+        assert sessao.get(Supplier, fornecedor.id) is None
+
+
+def test_editar_fornecedor_nao_espera_o_cadastro_de_produto(engine, sessoes, token):
+    """RN-19: a trava da edição (FOR NO KEY UPDATE) não conflita com a da FK de um produto sendo gravado
+    (FOR KEY SHARE): editar o fornecedor não fica preso esperando o cadastro do produto terminar."""
+    fornecedor = novo_fornecedor(sessoes, "Fornecedor em uso")
+
+    with sessoes() as segura:
+        segura.add(Product(nome="Gravando", codigo_barras="7891000008701", estoque_minimo=1, fornecedor_id=fornecedor.id))
+        segura.flush()  # FOR KEY SHARE na linha do fornecedor, sem commit
+        resposta = TestClient(app).put(
+            f"/suppliers/{fornecedor.id}", headers={"Authorization": f"Bearer {token}"}, json={"nome": "Renomeado", "cnpj": None}
+        )
+        segura.commit()
+
+    assert resposta.status_code == 200, resposta.text
+    assert resposta.json()["nome"] == "Renomeado"

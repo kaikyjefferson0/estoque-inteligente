@@ -88,10 +88,21 @@
 |---|---|---|---|
 | CT-21 | Operador cadastra produto e fornecedor | Produto e fornecedor salvos | Operador bloqueado ao cadastrar |
 | CT-22 | Operador edita produto ou fornecedor | Alteração salva | Operador bloqueado ao editar |
-| CT-23 | Tentar apagar produto ou fornecedor | A ação não existe e o registro continua salvo | Produto ou fornecedor é apagado |
-| CT-24 | Cadastrar produto com fornecedor inexistente | Sistema recusa | Produto salvo com fornecedor que não existe |
+| CT-23 | Tentar apagar produto (admin ou operador). Regra: [RN-23](regras-negocio.md) | A ação não existe (405) e o produto continua salvo | Produto é apagado |
+| CT-24 | Cadastrar ou editar produto com fornecedor inexistente, inclusive quando o fornecedor é excluído entre a conferência e a gravação (o banco recusa pela FK). Regras: [RN-24 e RN-59](regras-negocio.md) | Sistema recusa (422) com a mensagem de fornecedor inexistente | Produto salvo com fornecedor que não existe, ou erro 500 |
 | CT-25 | Cadastrar fornecedor com CNPJ repetido ou inválido | Sistema recusa e avisa | Fornecedor salvo com CNPJ duplicado ou inválido |
 | CT-26 | Cadastrar produto que controla validade sem dias de alerta | Sistema recusa | Produto salvo sem dias de alerta |
+
+## Fornecedores: exclusão e substituição
+
+| ID | Teste | Resultado esperado | Resultado não esperado |
+|---|---|---|---|
+| CT-85 | Admin exclui um fornecedor sem produtos, pela API e pelo botão "Excluir" da lista, depois de confirmar no diálogo. Regra: [RN-59](regras-negocio.md) | Responde 204; o fornecedor some da lista e o GET dele devolve 404; na tela aparece "Fornecedor excluído" | Fornecedor continua salvo, ou é apagado sem a confirmação |
+| CT-86 | Excluir um fornecedor com produtos vinculados, e também quando um produto é ligado a ele depois da conferência (o banco recusa pela FK). Regra: [RN-59](regras-negocio.md) | Responde 409 "Este fornecedor tem N produto(s) vinculado(s) e não pode ser excluído." com o número certo; o fornecedor e os produtos continuam iguais; na tela, a mensagem aparece num aviso e a lista continua visível | Fornecedor apagado, produto sem fornecedor, erro 500 ou tela quebrada |
+| CT-87 | Excluir (DELETE) ou substituir (PUT) um fornecedor que não existe. Regras: [RN-59 e RN-19](regras-negocio.md) | Responde 404 "Fornecedor não encontrado. Ele pode ter sido removido; atualize a página." (a mesma mensagem do GET e do PATCH) | Responde 204 ou 200, ou cria um fornecedor |
+| CT-88 | Operador tenta excluir um fornecedor, com e sem produtos; na tela, o operador abre a lista de fornecedores. Regra: [RN-59](regras-negocio.md) | Responde 403 e o fornecedor continua salvo; o botão "Excluir" não aparece para o operador (só para o admin) | Fornecedor apagado ou botão visível para o operador |
+| CT-89 | Substituir um fornecedor pelo PUT (admin e operador) com nome e CNPJ, com `cnpj: null`, sem a chave `cnpj` ou `nome`, e com CNPJ inválido; e salvar a edição pela tela, que usa o PUT. Regras: [RN-19, RN-06 e RN-25](regras-negocio.md) | Com o corpo completo, responde 200 e grava os dois campos (com `cnpj: null`, fica sem CNPJ); chave faltando ou CNPJ inválido, 422 sem alterar nada; a tela envia PUT com o fornecedor completo (CNPJ vazio vai como `null`) e a lista mostra o nome novo | Fornecedor alterado em parte, campo ausente aceito, CNPJ inválido gravado, ou a tela usando PATCH |
+| CT-90 | Substituir um fornecedor pelo PUT com o CNPJ de outro fornecedor (com ou sem pontuação). Regras: [RN-19 e RN-25](regras-negocio.md) | Responde 409 "Este CNPJ já está cadastrado em outro fornecedor. Confira o número." e o fornecedor continua como estava | CNPJ duplicado gravado ou nome alterado mesmo com o erro |
 
 ## Leitura por código e situação dos lotes
 

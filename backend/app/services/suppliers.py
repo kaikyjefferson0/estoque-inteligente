@@ -1,9 +1,10 @@
 import re
 
-from sqlalchemy import or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.models.product import Product
 from app.models.supplier import Supplier
 from app.services.paginacao import padrao_de_busca, paginar
 from app.services.teto_demo import TetoDoDemoError, conferir_teto  # noqa: F401  (a rota trata o erro)
@@ -22,6 +23,22 @@ class CnpjJaCadastradoError(Exception):
 
 class FornecedorNaoEncontradoError(Exception):
     pass
+
+
+class FornecedorComProdutosError(Exception):
+    """RN-59: fornecedor com produtos vinculados não pode ser excluído."""
+
+    def __init__(self, quantidade: int):
+        self.quantidade = quantidade
+        super().__init__(f"Este fornecedor tem {quantidade} produto(s) vinculado(s) e não pode ser excluído.")
+
+
+# FK RESTRICT de products.fornecedor_id (RN-59): o banco recusa apagar fornecedor com produto
+FK_PRODUTO_FORNECEDOR = "fk_products_fornecedor_id_suppliers"
+
+
+def nome_da_restricao(erro: IntegrityError) -> str | None:
+    return getattr(getattr(erro.orig, "diag", None), "constraint_name", None)
 
 
 def normalizar_cnpj(cnpj: str | None) -> str | None:
@@ -53,7 +70,7 @@ def _salvar(db: Session, fornecedor: Supplier, cnpj: str | None) -> Supplier:
     except IntegrityError as erro:
         db.rollback()
         # Outro cadastro com o mesmo CNPJ entrou entre a busca e o commit
-        if getattr(getattr(erro.orig, "diag", None), "constraint_name", None) == "uq_suppliers_cnpj":
+        if nome_da_restricao(erro) == "uq_suppliers_cnpj":
             raise CnpjJaCadastradoError(cnpj)
         raise
     db.refresh(fornecedor)
@@ -86,16 +103,23 @@ def listar_fornecedores(db: Session, limite: int, deslocamento: int, busca: str 
     return pagina.com_itens([linha[0] for linha in pagina.linhas])
 
 
-def obter_fornecedor(db: Session, fornecedor_id: int) -> Supplier:
-    fornecedor = db.get(Supplier, fornecedor_id)
+def obter_fornecedor(db: Session, fornecedor_id: int, travar: bool = False) -> Supplier:
+    # FOR NO KEY UPDATE (a trava de um UPDATE comum): espera uma exclusão em andamento, mas não
+    # conflita com o FOR KEY SHARE que a FK pega quando um produto é gravado com este fornecedor
+    trava = {"key_share": True} if travar else None
+    fornecedor = db.get(Supplier, fornecedor_id, with_for_update=trava, populate_existing=travar)
     if fornecedor is None:
         raise FornecedorNaoEncontradoError(fornecedor_id)
     return fornecedor
 
 
 def atualizar_fornecedor(db: Session, fornecedor_id: int, dados: dict) -> Supplier:
-    """Altera nome e/ou CNPJ. `dados` só traz os campos enviados."""
-    fornecedor = obter_fornecedor(db, fornecedor_id)
+    """Altera nome e/ou CNPJ. `dados` só traz os campos enviados.
+
+    Trava a linha: se o fornecedor for excluído ao mesmo tempo (RN-59), a edição espera e
+    responde 404, em vez de tentar um UPDATE numa linha que sumiu.
+    """
+    fornecedor = obter_fornecedor(db, fornecedor_id, travar=True)
 
     if "cnpj" in dados:
         cnpj = normalizar_cnpj(dados["cnpj"])
@@ -106,3 +130,41 @@ def atualizar_fornecedor(db: Session, fornecedor_id: int, dados: dict) -> Suppli
         fornecedor.nome = dados["nome"].strip()
 
     return _salvar(db, fornecedor, fornecedor.cnpj)
+
+
+def substituir_fornecedor(db: Session, fornecedor_id: int, nome: str, cnpj: str | None) -> Supplier:
+    """RN-19: PUT, o fornecedor inteiro; `cnpj` None deixa sem CNPJ (RN-06). Mesmas validações do PATCH."""
+    return atualizar_fornecedor(db, fornecedor_id, {"nome": nome, "cnpj": cnpj})
+
+
+def _contar_produtos(db: Session, fornecedor_id: int) -> int:
+    return db.scalar(select(func.count()).select_from(Product).where(Product.fornecedor_id == fornecedor_id))
+
+
+def excluir_fornecedor(db: Session, fornecedor_id: int) -> None:
+    """RN-59: só exclui fornecedor sem produtos vinculados. A permissão (só admin) fica na rota.
+
+    RN-25: o CNPJ fica livre para outro fornecedor depois da exclusão.
+
+    Sem trava antes da contagem, de propósito: um produto ligado no meio do caminho é recusado
+    pela FK do banco, e essa recusa vira o mesmo 409.
+    """
+    obter_fornecedor(db, fornecedor_id)
+    quantidade = _contar_produtos(db, fornecedor_id)
+    if quantidade:
+        raise FornecedorComProdutosError(quantidade)
+
+    try:
+        apagadas = db.execute(delete(Supplier).where(Supplier.id == fornecedor_id)).rowcount
+        if apagadas == 0:
+            # Outra exclusão do mesmo fornecedor terminou primeiro
+            db.rollback()
+            raise FornecedorNaoEncontradoError(fornecedor_id)
+        db.commit()
+    except IntegrityError as erro:
+        db.rollback()
+        # Um produto foi ligado ao fornecedor entre a contagem e o DELETE: a FK recusa.
+        # Raro: se esse produto já trocou de fornecedor, a nova contagem dá 0 e a mensagem diz 1.
+        if nome_da_restricao(erro) == FK_PRODUTO_FORNECEDOR:
+            raise FornecedorComProdutosError(max(_contar_produtos(db, fornecedor_id), 1))
+        raise
