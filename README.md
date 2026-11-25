@@ -34,23 +34,23 @@ Na tela de login, o botão "Entrar como demonstração" entra direto, sem digita
 
 ## Capturas de tela
 
-| Painel, com a régua de vencimentos | Estoque, com a situação de cada produto |
+| Painel, com os vencimentos dos próximos 21 dias | Estoque, com saldo, mínimo e situação |
 |---|---|
-| ![Painel com os números de estoque baixo, a vencer e vencidos, a régua dos próximos 21 dias com os dias de vencimento circulados e as últimas movimentações](docs/imagens/painel.webp) | ![Lista de estoque com busca, filtros Todos, Estoque baixo e Sem estoque, e saldo, mínimo e situação de cada produto](docs/imagens/estoque.webp) |
+| ![Painel com 4 produtos em estoque baixo (1 sem estoque), 4 lotes a vencer e nenhum vencido, a régua dos próximos 21 dias com hoje em placa preta e 4 dias de vencimento circulados, e as últimas movimentações](docs/imagens/painel.webp) | ![Estoque com os filtros Todos, Estoque baixo e Sem estoque, a busca por nome ou código de barras e 12 produtos com saldo disponível, mínimo e situação: em dia, estoque baixo ou sem estoque](docs/imagens/estoque.webp) |
 
-| Detalhe do produto, com lotes e histórico | Entrada pelo código de barras |
+| Detalhe do produto, com preço, lotes e histórico | Entrada, com o código de barras lido |
 |---|---|
-| ![Detalhe do Leite integral 1 L com o cadastro, o saldo disponível e físico, dois lotes com a validade de cada um e o histórico de movimentações](docs/imagens/produto-detalhe.webp) | ![Tela de entrada com o código de barras lido, o produto encontrado, o saldo disponível e os campos de quantidade e validade](docs/imagens/entrada.webp) |
+| ![Detalhe do Leite integral 1 L com o cadastro (código de barras, fornecedor, estoque mínimo, preço e validade), saldo disponível e físico de 58, dois lotes, um que vence em 5 dias e outro dentro da validade, e o histórico com uma saída e duas entradas](docs/imagens/produto-detalhe.webp) | ![Entrada com o código de barras lido, o Leite integral 1 L encontrado com 58 disponíveis, a quantidade 30 preenchida, o campo de validade ainda vazio e o botão Registrar entrada](docs/imagens/entrada.webp) |
 
-| Alertas de vencimento e estoque baixo | Usuários (só admin) |
+| Alertas ativos, com filtro por tipo | Usuários, com perfil e situação (só admin) |
 |---|---|
-| ![Lista de alertas ativos com filtros por tipo: sem estoque, vencimento próximo com a validade do lote e estoque baixo](docs/imagens/alertas.webp) | ![Lista de usuários com perfil, situação e as ações de editar e definir nova senha](docs/imagens/usuarios.webp) |
+| ![Alertas com os filtros Todos, Vencido, Vencimento próximo e Estoque baixo, a opção Mostrar resolvidos e 8 alertas ativos: 1 sem estoque, 4 de vencimento próximo com a validade do lote e 3 de estoque baixo](docs/imagens/alertas.webp) | ![Usuários com duas contas de exemplo ativas, um administrador e um operador, o botão Cadastrar usuário e as ações Editar e Definir nova senha](docs/imagens/usuarios.webp) |
 
 No celular (390 px), com a folha do mês e a barra inferior:
 
-| Painel, com a régua virada folha do mês | Alertas, com a barra inferior |
+| Painel, com os vencimentos em três semanas | Alertas, com os filtros em grade |
 |---|---|
-| ![Painel no celular com a régua de vencimentos em três semanas de sete dias e a barra inferior com Painel, Entrada, Saída, Alertas e Mais](docs/imagens/painel-celular.webp) | ![Alertas no celular com os filtros em grade de dois por dois e a barra inferior com Alertas marcado](docs/imagens/alertas-celular.webp) |
+| ![Painel no celular com os números de estoque baixo, a vencer e vencidos, os vencimentos em três semanas de sete dias com 4 dias circulados, as últimas movimentações e a barra inferior com Painel marcado](docs/imagens/painel-celular.webp) | ![Alertas no celular com os filtros em grade de dois por dois, 8 alertas ativos e a barra inferior com Alertas marcado e o número 8](docs/imagens/alertas-celular.webp) |
 
 ## Destaques
 
