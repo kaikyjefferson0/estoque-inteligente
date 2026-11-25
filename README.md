@@ -36,21 +36,25 @@ Na tela de login, o botão "Entrar como demonstração" entra direto, sem digita
 
 | Painel, com os vencimentos dos próximos 21 dias | Estoque, com saldo, mínimo e situação |
 |---|---|
-| ![Painel com 4 produtos em estoque baixo (1 sem estoque), 4 lotes a vencer e nenhum vencido, a régua dos próximos 21 dias com hoje em placa preta e 4 dias de vencimento circulados, e as últimas movimentações](docs/imagens/painel.webp) | ![Estoque com os filtros Todos, Estoque baixo e Sem estoque, a busca por nome ou código de barras e 12 produtos com saldo disponível, mínimo e situação: em dia, estoque baixo ou sem estoque](docs/imagens/estoque.webp) |
+| ![Painel com 4 produtos em estoque baixo (1 sem estoque), 4 lotes a vencer e 3 vencidos, o aviso de 3 lotes vencidos com o link Ver vencidos, a régua dos próximos 21 dias com hoje em placa preta e 4 dias de vencimento circulados, e as últimas movimentações](docs/imagens/painel.webp) | ![Estoque com os filtros Todos, Estoque baixo e Sem estoque, a busca por nome ou código de barras e 12 produtos com saldo disponível, mínimo e situação; o saldo físico aparece em três produtos que têm unidades vencidas](docs/imagens/estoque.webp) |
 
-| Detalhe do produto, com preço, lotes e histórico | Entrada, com o código de barras lido |
+| Detalhe do produto, com lotes e histórico | Entrada, com o código de barras lido |
 |---|---|
-| ![Detalhe do Leite integral 1 L com o cadastro (código de barras, fornecedor, estoque mínimo, preço e validade), saldo disponível e físico de 58, dois lotes, um que vence em 5 dias e outro dentro da validade, e o histórico com uma saída e duas entradas](docs/imagens/produto-detalhe.webp) | ![Entrada com o código de barras lido, o Leite integral 1 L encontrado com 58 disponíveis, a quantidade 30 preenchida, o campo de validade ainda vazio e o botão Registrar entrada](docs/imagens/entrada.webp) |
+| ![Detalhe do Leite integral 1 L com o cadastro, saldo disponível de 58 e físico de 78, o aviso de 20 unidades em lotes vencidos, três lotes (um vencido, um que vence em 3 dias e um dentro da validade) e o histórico com três entradas e uma saída](docs/imagens/produto-detalhe.webp) | ![Entrada com o código de barras lido, o Leite integral 1 L encontrado com 58 disponíveis e 78 no físico, o aviso de 20 unidades em lotes vencidos, a quantidade 30 preenchida, o campo de validade ainda vazio e o botão Registrar entrada](docs/imagens/entrada.webp) |
 
 | Alertas ativos, com filtro por tipo | Usuários, com perfil e situação (só admin) |
 |---|---|
-| ![Alertas com os filtros Todos, Vencido, Vencimento próximo e Estoque baixo, a opção Mostrar resolvidos e 8 alertas ativos: 1 sem estoque, 4 de vencimento próximo com a validade do lote e 3 de estoque baixo](docs/imagens/alertas.webp) | ![Usuários com duas contas de exemplo ativas, um administrador e um operador, o botão Cadastrar usuário e as ações Editar e Definir nova senha](docs/imagens/usuarios.webp) |
+| ![Alertas com os filtros Todos, Vencido, Vencimento próximo e Estoque baixo, a opção Mostrar resolvidos e 11 alertas ativos: 3 de lote vencido e 4 de vencimento próximo, com a validade do lote, 1 sem estoque e 3 de estoque baixo](docs/imagens/alertas.webp) | ![Usuários com duas contas de exemplo ativas, um administrador e um operador, o botão Cadastrar usuário e as ações Editar e Definir nova senha](docs/imagens/usuarios.webp) |
 
 No celular (390 px), com a folha do mês e a barra inferior:
 
 | Painel, com os vencimentos em três semanas | Alertas, com os filtros em grade |
 |---|---|
-| ![Painel no celular com os números de estoque baixo, a vencer e vencidos, os vencimentos em três semanas de sete dias com 4 dias circulados, as últimas movimentações e a barra inferior com Painel marcado](docs/imagens/painel-celular.webp) | ![Alertas no celular com os filtros em grade de dois por dois, 8 alertas ativos e a barra inferior com Alertas marcado e o número 8](docs/imagens/alertas-celular.webp) |
+| ![Painel no celular com 4 produtos em estoque baixo, 4 lotes a vencer e 3 vencidos, os vencimentos em três semanas de sete dias com 4 dias circulados, as últimas movimentações e a barra inferior com Painel marcado](docs/imagens/painel-celular.webp) | ![Alertas no celular com os filtros em grade de dois por dois, 11 alertas ativos (os 3 primeiros de lote vencido) e a barra inferior com Alertas marcado e o número 11](docs/imagens/alertas-celular.webp) |
+
+Documentação da API (Swagger), disponível só no ambiente local:
+
+![Swagger do Estoque Inteligente, versão 0.1.0, com o botão Authorize e as 29 rotas recolhidas em oito grupos: auth (autenticação), users (usuários), suppliers (fornecedores), products (produtos), stock (estoque), alerts (alertas), dashboard (painel) e default, com a rota de saúde; o cadeado marca as rotas que exigem login](docs/imagens/swagger.webp)
 
 ## Destaques
 
